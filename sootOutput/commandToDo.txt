@@ -1,0 +1,1 @@
+jarsigner -keystore testkey.jks -storepass testtest app-debug.apk key0
