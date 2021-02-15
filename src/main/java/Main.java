@@ -28,34 +28,23 @@ public class Main {
 
         //SootAnalyzer.analyze(args);
 
-        HashMap<String, String> testHM = new HashMap<String, String>();
-        testHM.put("1", "2");
-        testHM.put("2", "3");
-
-        String path = "tests_folders/materialistic-master";
+        String path = "tests_folders/LambdaApp";
         Analyzer test = new Analyzer();
-
+        String tracePath = "tests_ressources/trace_test_1.txt";
         HMUManager manager = new HMUManager();
-
-
 
         test.analyze(manager, path);
 
-        //System.out.print(manager.getBreakpoints());
-
-        analyze(manager);
-
-
-
-
+        System.out.print(manager.getBreakpoints());
+        analyze(manager, tracePath);
     }
 
-    public static void analyze(HMUManager manager) {
+    public static void analyze(HMUManager manager, String tracePath) {
         BufferedReader reader;
         int traceNumberLine=1;
         try {
             reader = new BufferedReader(new FileReader(
-                    "tests_ressources/trace_test_materialistic_1.txt"));
+                    tracePath));
             String line = reader.readLine();
             while (line != null) {
                 //System.out.println(line);
