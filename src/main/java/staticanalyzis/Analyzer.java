@@ -48,7 +48,7 @@ public class Analyzer {
                 if (m.find()) {
                     String key=name+":"+lineNumber;
                     String variableName=m.group(0).split("=")[0].replaceAll("\\s","");
-                    manager.addImplementation(key, new HMUImplementation(new CodeLocation(path, name, lineNumber), "ArrayMap", variableName));
+                    manager.addImplementation(key, new HMUImplementation(new CodeLocation(path, name, lineNumber), "SimpleArrayMap", variableName));
                 }
             }
         }

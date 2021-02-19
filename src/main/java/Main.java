@@ -14,32 +14,38 @@ import java.util.HashMap;
 
 public class Main {
 
+
+
     public static void main(String[] args) throws IOException {
 
-        //-android-jars path/to/android-platforms -process-dir your.apk
+        HMUManager manager;
+        //manager = classicAnalyzer();
+        String apkPath = "tests_apks/app-debug.apk";
+        manager = sootAnalyzer(apkPath);
         /*
-        String[] newArgs = new String[4];
-        newArgs[0] = "-android-jars";
-        newArgs[1] = "android-platforms";
-        newArgs[2] = "-process-dir";
-        newArgs[3] = "tests_apks/app-debug.apk";
-        */
-        //AndroidInstrument.analyze(newArgs);
-
-        //SootAnalyzer.analyze(args);
-
-        String path = "tests_folders/LambdaApp";
-        Analyzer test = new Analyzer();
         String tracePath = "tests_ressources/trace_test_1.txt";
-        HMUManager manager = new HMUManager();
-
-        test.analyze(manager, path);
-
-        System.out.print(manager.getBreakpoints());
-        analyze(manager, tracePath);
+        analyzeTrace(manager, tracePath);
+         */
     }
 
-    public static void analyze(HMUManager manager, String tracePath) {
+    public static HMUManager classicAnalyzer() throws IOException {
+        HMUManager manager = new HMUManager();
+        String path = "tests_folders/LambdaApp";
+        Analyzer test = new Analyzer();
+
+        test.analyze(manager, path);
+        System.out.print(manager.getBreakpoints());
+        return manager;
+    }
+
+    public static HMUManager sootAnalyzer(String apkPath) {
+        HMUManager manager = new HMUManager();
+        SootAnalyzer test = new SootAnalyzer(apkPath);
+        test.analyze(manager);
+        return manager;
+    }
+
+    public static void analyzeTrace(HMUManager manager, String tracePath) {
         BufferedReader reader;
         int traceNumberLine=1;
         try {

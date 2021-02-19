@@ -1,11 +1,16 @@
 package staticanalyzis;
 
+import actions.hmu.HMUAddition;
+import actions.hmu.HMUDeletion;
+import actions.hmu.HMUImplementation;
 import soot.*;
 import soot.jimple.JimpleBody;
 import soot.jimple.internal.JIfStmt;
 import soot.options.Options;
 import soot.toolkits.graph.UnitGraph;
 import soot.util.Chain;
+import utils.CodeLocation;
+import utils.HMUManager;
 
 import java.io.File;
 import java.io.OutputStream;
@@ -14,40 +19,106 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SootAnalyzer {
 
+    private String apkPath;
+
+    public SootAnalyzer(String apkPath) {
+        this.apkPath = apkPath;
+    }
+
     public static String sourceDirectory = System.getProperty("user.dir") + File.separator + "tests_folders" + File.separator + "LambdaApp";
 
-    public static void setupSoot() {
+    private void checkHMUInst(String line, String path, String name, int lineNumber, HMUManager manager) {
+        String regex = "(?<=new)(.*)(?=HashMap)";
+        Pattern pat = Pattern.compile(regex);
+        Matcher m = pat.matcher(line);
+        if (m.find()) {
+            System.out.println("New HashMap !! : " + line);
+            String key=name+":"+lineNumber;
+            String variableName=m.group(0).split("=")[0].replaceAll("\\s","");
+            manager.addImplementation(key, new HMUImplementation(new CodeLocation(path, name, lineNumber), "HashMap", variableName));
+        }
+        else {
+            regex = "(?<=new)(.*)(?=ArrayMap)";
+            pat = Pattern.compile(regex);
+            m = pat.matcher(line);
+            if (m.find()) {
+                System.out.println("New ArrayMap !! : " + line);
+                String key=name+":"+lineNumber;
+                String variableName=m.group(0).split("=")[0].replaceAll("\\s","");
+                manager.addImplementation(key, new HMUImplementation(new CodeLocation(path, name, lineNumber), "ArrayMap", variableName));
+            }
+            else {
+                regex = "(?<=new)(.*)(?=SimpleArrayMap)";
+                pat = Pattern.compile(regex);
+                m = pat.matcher(line);
+                if (m.find()) {
+                    String key=name+":"+lineNumber;
+                    String variableName=m.group(0).split("=")[0].replaceAll("\\s","");
+                    manager.addImplementation(key, new HMUImplementation(new CodeLocation(path, name, lineNumber), "SimpleArrayMap", variableName));
+                }
+            }
+        }
+    }
+
+    //Limité par les expressions régulières et analyse statique
+
+    public void checkHMUAdd(String line, String path, String name, int lineNumber, HMUManager manager) {
+        String regex = "(?<=(HashMap|ArrayMap|SingleArrayMap))(.*)(?=put\\()";
+        Pattern pat = Pattern.compile(regex);
+        Matcher m = pat.matcher(line);
+        if (m.find()) {
+            System.out.println("Addition !! : " + line);
+            String key=name+":"+lineNumber;
+            String variableName=m.group(0).split("\\.")[0];
+            manager.addAddition(key, new HMUAddition(new CodeLocation(path, name, lineNumber), variableName));
+        }
+    }
+
+    public void checkHMUDel(String line, String path, String name, int lineNumber, HMUManager manager) {
+        String regex = "(?<=(HashMap|ArrayMap|SingleArrayMap))(.*)(?=remove\\()";
+        Pattern pat = Pattern.compile(regex);
+        Matcher m = pat.matcher(line);
+        if (m.find()) {
+            String key=name+":"+lineNumber;
+            String variableName=m.group(0).split("\\.")[0];
+            manager.addDeletion(key, new HMUDeletion(new CodeLocation(path, name, lineNumber), variableName));
+        }
+    }
+
+    private void checkHMUClean(String line, String path, String name, int lineNumber, HMUManager manager) {
+        String regex = "(?<=(HashMap|ArrayMap|SingleArrayMap))(.*)(?=clear\\()";
+        Pattern pat = Pattern.compile(regex);
+        Matcher m = pat.matcher(line);
+        if (m.find()) {
+            String key=name+":"+lineNumber;
+            String variableName=m.group(0).split("\\.")[0];
+            manager.addDeletion(key, new HMUDeletion(new CodeLocation(path, name, lineNumber), variableName));
+        }
+    }
+
+
+    public void setupSoot() {
         //Hack to prevent soot to print on System.out
         PrintStream originalStream = System.out;
-        /*
-        System.setOut(new PrintStream(new OutputStream() {
-            public void write(int b) {
-                // NO-OP
-            }
-        }));
-        */
-        String apk = "tests_apks/app-debug.apk";
+
+        String apk = this.apkPath;
         G.reset();
         Options.v().set_verbose(false);
         //Path to android-sdk-platforms
         Options.v().set_android_jars("android-platforms");
-        //Options.v().set_soot_classpath("/home/geoffrey/These/decompiler/android-platforms/android-14/android.jar");
         //prefer Android APK files
         Options.v().set_src_prec(Options.src_prec_apk);
         // Allow phantom references
         Options.v().set_allow_phantom_refs(true);
         //Set path to APK
         Options.v().set_process_dir(Collections.singletonList(apk));
-        //Options.v().set_process_dir(Collections.singletonList("/home/geoffrey/These/LotOfAntiPatternsApplication/app/src/main/java"));
         Options.v().set_whole_program(true);
         Options.v().set_output_format(Options.output_format_grimple);
-        //Options.v().set_output_dir("/home/geoffrey/These/decompiler/out");
-        //Get directly the home directory and work on it
-        //Options.v().set_output_dir(System.getProperty("user.home")+ File.separator + "/These/decompiler/out");
-        //Options.v().set_soot_classpath();
 
         PhaseOptions.v().setPhaseOption("gop", "enabled:true");
         System.setOut(originalStream);
@@ -63,7 +134,7 @@ public class SootAnalyzer {
         Scene.v().loadNecessaryClasses();
     }
 
-    public static void analyze(String[] args) {
+    public void analyze(HMUManager manager) {
         setupSoot();
         String pack = "com.core.lambdaapp";
         String buildConfigClass = pack.concat(".BuildConfig");
@@ -86,15 +157,18 @@ public class SootAnalyzer {
 
                     for (Iterator<SootMethod> iterMethod = methods.iterator(); iterMethod.hasNext(); ) {
                         final SootMethod sm = iterMethod.next();
-                        System.out.println("Methode : " + sm.getName() + " " + sm.getJavaSourceStartLineNumber());
-                        /*
-                        Body body = sm.getActiveBody();
+                        System.out.println("Methode : " + sm.getName());
+                        Body body = sm.retrieveActiveBody();
                         UnitPatchingChain chain = body.getUnits();
-                        for(Iterator<Unit> iter = chain.snapshotIterator(); iter.hasNext();) {
+                        for (Iterator<Unit> iter = chain.snapshotIterator(); iter.hasNext(); ) {
                             final Unit u = iter.next();
-                            System.out.println(u.toString());
+                            //System.out.println(u.toString());
+                            String line = u.toString();
+                            checkHMUInst(line, "test", "test", 0, manager);
+                            checkHMUAdd(line, "test", "test", 0, manager);
+                            checkHMUDel(line, "test", "test", 0, manager);
+                            checkHMUClean(line, "test", "test", 0, manager);
                         }
-                         */
                     }
                 }
 
