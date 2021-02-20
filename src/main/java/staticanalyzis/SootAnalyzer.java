@@ -4,7 +4,9 @@ import actions.hmu.HMUAddition;
 import actions.hmu.HMUDeletion;
 import actions.hmu.HMUImplementation;
 import soot.*;
+import soot.jimple.Jimple;
 import soot.jimple.JimpleBody;
+import soot.jimple.StringConstant;
 import soot.jimple.internal.JIfStmt;
 import soot.options.Options;
 import soot.toolkits.graph.UnitGraph;
@@ -65,9 +67,23 @@ public class SootAnalyzer {
         }
     }
 
+    private static Local addTmpRef(Body body)
+    {
+        Local tmpRef = Jimple.v().newLocal("tmpRef", RefType.v("java.io.PrintStream"));
+        body.getLocals().add(tmpRef);
+        return tmpRef;
+    }
+
+    private static Local addTmpString(Body body)
+    {
+        Local tmpString = Jimple.v().newLocal("tmpString", RefType.v("java.lang.String"));
+        body.getLocals().add(tmpString);
+        return tmpString;
+    }
+
     //Limité par les expressions régulières et analyse statique
 
-    public void checkHMUAdd(String line, String path, String name, int lineNumber, HMUManager manager) {
+    public void checkHMUAdd(String line, String path, String name, int lineNumber, HMUManager manager, Body b, Unit u, UnitPatchingChain units) {
         String regex = "(?<=(HashMap|ArrayMap|SingleArrayMap))(.*)(?=put\\()";
         Pattern pat = Pattern.compile(regex);
         Matcher m = pat.matcher(line);
@@ -76,6 +92,35 @@ public class SootAnalyzer {
             String key=name+":"+lineNumber;
             String variableName=m.group(0).split("\\.")[0];
             manager.addAddition(key, new HMUAddition(new CodeLocation(path, name, lineNumber), variableName));
+            //Add Print
+            Local refPrint = addTmpRef(b);
+            Local refStringBuilder = addTmpRef(b);
+            Local tmpString = addTmpString(b);
+
+
+
+
+            // insert "tmpRef.println(tmpString);"
+            SootMethod toCall = Scene.v().getSootClass("java.io.PrintStream").getMethod("void println(java.lang.String)");
+            units.insertAfter(Jimple.v().newInvokeStmt(
+                    Jimple.v().newVirtualInvokeExpr(refPrint, toCall.makeRef(), tmpString)), u);
+
+            // insert "tmpLong = 'HELLO';"
+            units.insertAfter(Jimple.v().newAssignStmt(tmpString,
+                    StringConstant.v("ADDITION")), u);
+
+            // insert "refPrint = java.lang.System.out;"
+            units.insertAfter(Jimple.v().newAssignStmt(
+                    refPrint, Jimple.v().newStaticFieldRef(
+                            Scene.v().getField("<java.lang.System: java.io.PrintStream out>").makeRef())), u);
+            // insert "refStringBuilder =
+            //units.insertAfter(Jimple.v().newAssignStmt(
+            //        refStringBuilder, Jimple.v().newStaticFieldRef(
+            //                Scene.v().getField("new java.lang.StringBuilder").makeRef())), u);
+
+
+            //check that we did not mess up the Jimple
+            b.validate();
         }
     }
 
@@ -165,14 +210,13 @@ public class SootAnalyzer {
                             //System.out.println(u.toString());
                             String line = u.toString();
                             checkHMUInst(line, "test", "test", 0, manager);
-                            checkHMUAdd(line, "test", "test", 0, manager);
+                            checkHMUAdd(line, "test", "test", 0, manager, body, u, body.getUnits());
                             checkHMUDel(line, "test", "test", 0, manager);
                             checkHMUClean(line, "test", "test", 0, manager);
                         }
+                        System.out.println(body.toString());
                     }
                 }
-
-            //System.out.println("")
         }
 
     }
