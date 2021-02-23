@@ -4,9 +4,7 @@ import actions.hmu.HMUAddition;
 import actions.hmu.HMUDeletion;
 import actions.hmu.HMUImplementation;
 import soot.*;
-import soot.jimple.Jimple;
-import soot.jimple.JimpleBody;
-import soot.jimple.StringConstant;
+import soot.jimple.*;
 import soot.jimple.internal.JIfStmt;
 import soot.options.Options;
 import soot.toolkits.graph.UnitGraph;
@@ -17,10 +15,7 @@ import utils.HMUManager;
 import java.io.File;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -67,18 +62,11 @@ public class SootAnalyzer {
         }
     }
 
-    private static Local addTmpRef(Body body)
+    private static Local addTmpRef(Body body, String name, Type type)
     {
-        Local tmpRef = Jimple.v().newLocal("tmpRef", RefType.v("java.io.PrintStream"));
+        Local tmpRef = Jimple.v().newLocal(name, type);
         body.getLocals().add(tmpRef);
         return tmpRef;
-    }
-
-    private static Local addTmpString(Body body)
-    {
-        Local tmpString = Jimple.v().newLocal("tmpString", RefType.v("java.lang.String"));
-        body.getLocals().add(tmpString);
-        return tmpString;
     }
 
     //Limité par les expressions régulières et analyse statique
@@ -89,35 +77,77 @@ public class SootAnalyzer {
         Matcher m = pat.matcher(line);
         if (m.find()) {
             System.out.println("Addition !! : " + line);
+            String structureLocalName = line.replace("virtualinvoke ", "").split("\\.")[0];
+
             String key=name+":"+lineNumber;
             String variableName=m.group(0).split("\\.")[0];
             manager.addAddition(key, new HMUAddition(new CodeLocation(path, name, lineNumber), variableName));
             //Add Print
-            Local refPrint = addTmpRef(b);
-            Local refStringBuilder = addTmpRef(b);
-            Local tmpString = addTmpString(b);
+            Local refPrint = addTmpRef(b, "refPrint", RefType.v("java.io.PrintStream"));
+            Local refBuilder = addTmpRef(b, "refBuilder", RefType.v("java.lang.StringBuilder"));
+            Local refIdentity = addTmpRef(b, "refIdentity", IntType.v());
+            Local tmpString = addTmpRef(b, "tmpString", RefType.v("java.lang.String"));
 
-
-
-
-            // insert "tmpRef.println(tmpString);"
-            SootMethod toCall = Scene.v().getSootClass("java.io.PrintStream").getMethod("void println(java.lang.String)");
-            units.insertAfter(Jimple.v().newInvokeStmt(
-                    Jimple.v().newVirtualInvokeExpr(refPrint, toCall.makeRef(), tmpString)), u);
-
-            // insert "tmpLong = 'HELLO';"
-            units.insertAfter(Jimple.v().newAssignStmt(tmpString,
-                    StringConstant.v("ADDITION")), u);
+            List<Unit> generatedUnits = new ArrayList<>();
 
             // insert "refPrint = java.lang.System.out;"
-            units.insertAfter(Jimple.v().newAssignStmt(
+            AssignStmt printStmt = Jimple.v().newAssignStmt(
                     refPrint, Jimple.v().newStaticFieldRef(
-                            Scene.v().getField("<java.lang.System: java.io.PrintStream out>").makeRef())), u);
-            // insert "refStringBuilder =
-            //units.insertAfter(Jimple.v().newAssignStmt(
-            //        refStringBuilder, Jimple.v().newStaticFieldRef(
-            //                Scene.v().getField("new java.lang.StringBuilder").makeRef())), u);
+                            Scene.v().getField("<java.lang.System: java.io.PrintStream out>").makeRef()));
+            generatedUnits.add(printStmt);
 
+            // insert "tmpLong = 'HELLO';"
+            AssignStmt stringStmt = Jimple.v().newAssignStmt(tmpString,
+                    StringConstant.v("StructuresManager.java:34:add:"));
+            generatedUnits.add(stringStmt);
+
+            // insert tmpRef = new java.lang.StringBuilder;
+            NewExpr newString = Jimple.v().newNewExpr(RefType.v("java.lang.StringBuilder"));
+            AssignStmt builderStmt = Jimple.v().newAssignStmt(refBuilder, newString);
+            generatedUnits.add(builderStmt);
+
+            // special invoke init
+
+            InvokeStmt initBuilder = Jimple.v().newInvokeStmt(Jimple.v().newSpecialInvokeExpr(refBuilder,
+                    Scene.v().getSootClass("java.lang.StringBuilder").getMethod("void <init>()").makeRef()));
+            generatedUnits.add(initBuilder);
+
+            //Virtual call Append
+            SootMethod appendMethod1 = Scene.v().getSootClass("java.lang.StringBuilder").getMethod("java.lang.StringBuilder append(java.lang.String)");
+            InvokeStmt invokeAppend1 = Jimple.v().newInvokeStmt(
+                    Jimple.v().newVirtualInvokeExpr(refPrint, appendMethod1.makeRef(), tmpString));
+            generatedUnits.add(invokeAppend1);
+
+            //Get Identity
+
+            Local structureLocal = null;
+            Iterator<Local> localIterator = b.getLocals().iterator();
+            while (localIterator.hasNext()) {
+                Local elt = localIterator.next();
+                if (elt.getName().equals(structureLocalName)) {
+                    structureLocal = elt;
+                }
+            }
+
+            SootMethod identifyMethod = Scene.v().getSootClass("java.lang.System").getMethod("int identityHashCode(java.lang.Object)");
+            AssignStmt structureIdentity = Jimple.v().newAssignStmt(refIdentity,
+                    Jimple.v().newStaticInvokeExpr(identifyMethod.makeRef(), structureLocal)
+            );
+            generatedUnits.add(structureIdentity);
+
+            //Append identity
+            SootMethod appendMethod2 = Scene.v().getSootClass("java.lang.StringBuilder").getMethod("java.lang.StringBuilder append(int)");
+            InvokeStmt invokeAppend2 = Jimple.v().newInvokeStmt(
+                    Jimple.v().newVirtualInvokeExpr(refPrint, appendMethod2.makeRef(), refIdentity));
+            generatedUnits.add(invokeAppend2);
+
+            // insert "tmpRef.println(tmpString);"
+            SootMethod printMethod = Scene.v().getSootClass("java.io.PrintStream").getMethod("void println(java.lang.String)");
+            InvokeStmt invokePrint = Jimple.v().newInvokeStmt(
+                    Jimple.v().newVirtualInvokeExpr(refPrint, printMethod.makeRef(), tmpString));
+            generatedUnits.add(invokePrint);
+
+            units.insertAfter(generatedUnits, u);
 
             //check that we did not mess up the Jimple
             b.validate();
