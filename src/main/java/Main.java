@@ -20,8 +20,9 @@ public class Main {
 
         HMUManager manager;
         //manager = classicAnalyzer();
+        String platformPath = "android-platforms";
         String apkPath = "tests_apks/app-debug.apk";
-        manager = sootAnalyzer(apkPath);
+        manager = sootAnalyzer(platformPath, apkPath);
         /*
         String tracePath = "tests_ressources/trace_test_1.txt";
         analyzeTrace(manager, tracePath);
@@ -38,9 +39,9 @@ public class Main {
         return manager;
     }
 
-    public static HMUManager sootAnalyzer(String apkPath) {
+    public static HMUManager sootAnalyzer(String platformPath, String apkPath) {
         HMUManager manager = new HMUManager();
-        SootAnalyzer test = new SootAnalyzer(apkPath);
+        SootAnalyzer test = new SootAnalyzer(platformPath, apkPath);
         test.analyze(manager);
         return manager;
     }

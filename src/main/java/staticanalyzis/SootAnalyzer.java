@@ -21,9 +21,10 @@ import java.util.regex.Pattern;
 
 public class SootAnalyzer {
 
-    private String apkPath;
+    private String apkPath, platformPath;
 
-    public SootAnalyzer(String apkPath) {
+    public SootAnalyzer(String platformPath, String apkPath) {
+        this.platformPath = platformPath;
         this.apkPath = apkPath;
     }
 
@@ -34,7 +35,7 @@ public class SootAnalyzer {
         Pattern pat = Pattern.compile(regex);
         Matcher m = pat.matcher(line);
         if (m.find()) {
-            System.out.println("New HashMap !! : " + line);
+            //System.out.println("New HashMap !! : " + line);
             String key=name+":"+lineNumber;
             String variableName=m.group(0).split("=")[0].replaceAll("\\s","");
             manager.addImplementation(key, new HMUImplementation(new CodeLocation(path, name, lineNumber), "HashMap", variableName));
@@ -44,7 +45,7 @@ public class SootAnalyzer {
             pat = Pattern.compile(regex);
             m = pat.matcher(line);
             if (m.find()) {
-                System.out.println("New ArrayMap !! : " + line);
+                //System.out.println("New ArrayMap !! : " + line);
                 String key=name+":"+lineNumber;
                 String variableName=m.group(0).split("=")[0].replaceAll("\\s","");
                 manager.addImplementation(key, new HMUImplementation(new CodeLocation(path, name, lineNumber), "ArrayMap", variableName));
@@ -77,7 +78,7 @@ public class SootAnalyzer {
         Matcher m = pat.matcher(line);
         if (m.find()) {
             System.out.println("Addition !! : " + line);
-            String structureLocalName = line.replace("virtualinvoke ", "").split("\\.")[0];
+            String structureLocalName = line.substring(line.indexOf("virtualinvoke")).replace("virtualinvoke ", "").trim().split("\\.")[0];
 
             String key=name+":"+lineNumber;
             String variableName=m.group(0).split("\\.")[0];
@@ -96,9 +97,10 @@ public class SootAnalyzer {
                             Scene.v().getField("<java.lang.System: java.io.PrintStream out>").makeRef()));
             generatedUnits.add(printStmt);
 
+
             // insert "tmpLong = 'HELLO';"
             AssignStmt stringStmt = Jimple.v().newAssignStmt(tmpString,
-                    StringConstant.v("StructuresManager.java:34:add:"));
+                    StringConstant.v(b.getClass().getName()+".java:-1:add:"));
             generatedUnits.add(stringStmt);
 
             // insert tmpRef = new java.lang.StringBuilder;
@@ -115,11 +117,10 @@ public class SootAnalyzer {
             //Virtual call Append
             SootMethod appendMethod1 = Scene.v().getSootClass("java.lang.StringBuilder").getMethod("java.lang.StringBuilder append(java.lang.String)");
             InvokeStmt invokeAppend1 = Jimple.v().newInvokeStmt(
-                    Jimple.v().newVirtualInvokeExpr(refPrint, appendMethod1.makeRef(), tmpString));
+                    Jimple.v().newVirtualInvokeExpr(refBuilder, appendMethod1.makeRef(), tmpString));
             generatedUnits.add(invokeAppend1);
 
             //Get Identity
-
             Local structureLocal = null;
             Iterator<Local> localIterator = b.getLocals().iterator();
             while (localIterator.hasNext()) {
@@ -138,8 +139,16 @@ public class SootAnalyzer {
             //Append identity
             SootMethod appendMethod2 = Scene.v().getSootClass("java.lang.StringBuilder").getMethod("java.lang.StringBuilder append(int)");
             InvokeStmt invokeAppend2 = Jimple.v().newInvokeStmt(
-                    Jimple.v().newVirtualInvokeExpr(refPrint, appendMethod2.makeRef(), refIdentity));
+                    Jimple.v().newVirtualInvokeExpr(refBuilder, appendMethod2.makeRef(), refIdentity));
             generatedUnits.add(invokeAppend2);
+
+            //Builder to String
+
+            SootMethod toStringMethod = Scene.v().getSootClass("java.lang.StringBuilder").getMethod("java.lang.String toString()");
+            AssignStmt builderString = Jimple.v().newAssignStmt(tmpString,
+                    Jimple.v().newVirtualInvokeExpr(refBuilder, toStringMethod.makeRef())
+            );
+            generatedUnits.add(builderString);
 
             // insert "tmpRef.println(tmpString);"
             SootMethod printMethod = Scene.v().getSootClass("java.io.PrintStream").getMethod("void println(java.lang.String)");
@@ -178,35 +187,37 @@ public class SootAnalyzer {
 
 
     public void setupSoot() {
+
         //Hack to prevent soot to print on System.out
         PrintStream originalStream = System.out;
-
-        String apk = this.apkPath;
-        G.reset();
-        Options.v().set_verbose(false);
-        //Path to android-sdk-platforms
-        Options.v().set_android_jars("android-platforms");
-        //prefer Android APK files
-        Options.v().set_src_prec(Options.src_prec_apk);
-        // Allow phantom references
         Options.v().set_allow_phantom_refs(true);
-        //Set path to APK
-        Options.v().set_process_dir(Collections.singletonList(apk));
         Options.v().set_whole_program(true);
-        Options.v().set_output_format(Options.output_format_grimple);
-
-        PhaseOptions.v().setPhaseOption("gop", "enabled:true");
-        System.setOut(originalStream);
+        Options.v().set_prepend_classpath(true);
+        Options.v().set_validate(true);
+        Options.v().set_src_prec(Options.src_prec_apk);
+        Options.v().set_output_format(Options.output_format_dex);
+        Options.v().set_android_jars(this.platformPath);
+        Options.v().set_process_dir(Collections.singletonList(this.apkPath));
+        Options.v().set_include_all(true);
+        Options.v().set_process_multiple_dex(true);
+        Options.v().set_output_dir("tests");
+        Scene.v().addBasicClass("java.io.PrintStream",SootClass.SIGNATURES);
+        Scene.v().addBasicClass("java.lang.System",SootClass.SIGNATURES);
 
         List<String> excludeList = new LinkedList<String>();
+        /*
+        excludeList.add("com.google.android.");
         excludeList.add("java.");
         excludeList.add("sun.misc.");
         excludeList.add("android.");
         excludeList.add("org.apache.");
         excludeList.add("soot.");
         excludeList.add("javax.servlet.");
+        excludeList.add("androidx.");
         Options.v().set_exclude(excludeList);
+         */
         Scene.v().loadNecessaryClasses();
+        System.setOut(originalStream);
     }
 
     public void analyze(HMUManager manager) {
@@ -214,40 +225,28 @@ public class SootAnalyzer {
         String pack = "com.core.lambdaapp";
         String buildConfigClass = pack.concat(".BuildConfig");
         String rClass = pack.concat(".R");
-        //Get all classes
-        Chain classes = Scene.v().getClasses();
-        for(Iterator<SootClass> iterClass = classes.iterator(); iterClass.hasNext();) {
 
+        PackManager.v().getPack("jtp").add(new Transform("jtp.myInstrumenter", new BodyTransformer() {
+            @Override
+            protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
 
-            final SootClass sc = iterClass.next();
-
-                String rsubClassStart = rClass + "$";
-                String name = sc.getName();
-                String packs =  pack.concat(".");
-                if(name.equals(rClass) || name.startsWith(rsubClassStart) || name.equals(buildConfigClass) || name.matches(".*[$][123456789]+$")) {
-                    //sootClass.setLibraryClass();
-                }else if(name.startsWith(packs)){
-                    System.out.println("Classe : " + sc.getName());
-                    List methods = sc.getMethods();
-
-                    for (Iterator<SootMethod> iterMethod = methods.iterator(); iterMethod.hasNext(); ) {
-                        final SootMethod sm = iterMethod.next();
-                        System.out.println("Methode : " + sm.getName());
-                        Body body = sm.retrieveActiveBody();
-                        UnitPatchingChain chain = body.getUnits();
-                        for (Iterator<Unit> iter = chain.snapshotIterator(); iter.hasNext(); ) {
-                            final Unit u = iter.next();
-                            //System.out.println(u.toString());
-                            String line = u.toString();
-                            checkHMUInst(line, "test", "test", 0, manager);
-                            checkHMUAdd(line, "test", "test", 0, manager, body, u, body.getUnits());
-                            checkHMUDel(line, "test", "test", 0, manager);
-                            checkHMUClean(line, "test", "test", 0, manager);
-                        }
-                        System.out.println(body.toString());
-                    }
+                UnitPatchingChain chain = body.getUnits();
+                for (Iterator<Unit> iter = chain.snapshotIterator(); iter.hasNext(); ) {
+                    final Unit u = iter.next();
+                    //System.out.println(u.toString());
+                    String line = u.toString();
+                    checkHMUInst(line, "test", "test", 0, manager);
+                    checkHMUAdd(line, "test", "test", 0, manager, body, u, body.getUnits());
+                    checkHMUDel(line, "test", "test", 0, manager);
+                    checkHMUClean(line, "test", "test", 0, manager);
                 }
-        }
+            }
+        }));
+
+        // Run Soot packs (note that our transformer pack is added to the phase "jtp")
+        PackManager.v().runPacks();
+        // Write the result of packs in outputPath
+        PackManager.v().writeOutput();
 
     }
 }
