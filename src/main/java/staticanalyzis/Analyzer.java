@@ -1,6 +1,7 @@
 package staticanalyzis;
 
 import actions.hmu.HMUAddition;
+import actions.hmu.HMUClean;
 import actions.hmu.HMUDeletion;
 import actions.hmu.HMUImplementation;
 import utils.CodeLocation;
@@ -85,7 +86,7 @@ public class Analyzer {
         if (m.find()) {
             String key=name+":"+lineNumber;
             String variableName=m.group(0).split("\\.")[0];
-            manager.addDeletion(key, new HMUDeletion(new CodeLocation(path, name, lineNumber), variableName));
+            manager.addClean(key, new HMUClean(new CodeLocation(path, name, lineNumber), variableName));
         }
     }
 

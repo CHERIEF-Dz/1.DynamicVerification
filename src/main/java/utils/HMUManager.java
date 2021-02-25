@@ -37,10 +37,12 @@ public class HMUManager {
         String tags = "";
         for (Map.Entry<String, HMUImplementation> implementationStructureEntry : this.implementations.entrySet()) {
             HashMap.Entry<String, HMUImplementation> pair = (HashMap.Entry) implementationStructureEntry;
+            System.out.println("Key : " + pair.getKey());
             tags+=pair.getValue().generateBreakPoint()+"\n";
         }
         for (Map.Entry<String, HMUAddition> additionStructureEntry : this.additions.entrySet()) {
             HashMap.Entry<String, HMUAddition> pair = (HashMap.Entry) additionStructureEntry;
+            System.out.println("Key : " + pair.getKey());
             tags+=pair.getValue().generateBreakPoint()+"\n";
         }
         return tags;

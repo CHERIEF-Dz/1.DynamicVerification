@@ -23,7 +23,7 @@ public class HMUClean extends ConcreteAction {
         String tag = "<line-breakpoint enabled=\"true\" suspend=\"NONE\" type=\"java-line\">\n" +
                 "   <url>file://$PROJECT_DIR$"+this.location.getPath()+"</url>\n" +
                 "   <line>"+(this.location.getLine()-1)+"</line>\n" +
-                "   <log-expression expression=\"&quot;"+key+":add:&quot; + System.identityHashCode("+this.variableName+")\" language=\"JAVA\" />\n" +
+                "   <log-expression expression=\"&quot;"+key+":clean:&quot; + System.identityHashCode("+this.variableName+")\" language=\"JAVA\" />\n" +
                 "   <properties />\n" +
                 "   <option name=\"timeStamp\" value=\"8\" />\n" +
                 "</line-breakpoint>";
