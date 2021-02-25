@@ -18,7 +18,7 @@ public class HMUAddition extends ConcreteAction {
     public void execute(Structure linkedStructure) {
         //System.out.println("Test[Add] : " + this.location.toString());
         linkedStructure.addElement();
-        if (linkedStructure.hasCodeSmell() && !alreadyWarned) {
+        if (linkedStructure.hasCodeSmell() && !alreadyWarned && this.location.getLine() != 0) {
             System.out.println("Due to the addition at " + this.location.toString());
             alreadyWarned=true;
         }

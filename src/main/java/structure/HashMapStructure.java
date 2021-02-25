@@ -21,7 +21,7 @@ public class HashMapStructure extends MapStructure {
     public void checkStructure() {
         super.checkStructure();
         if (this.actualSize < LittleHashMapThreshold) {
-            System.out.println("HashMap " + this.id +  " defined at " + this.structureImplementation.toString() + " has HMU code smell (Too few elements).");
+            System.out.println("HashMap defined " + this.structureImplementation.toString() + " has HMU code smell (Too few elements).");
             this.foundCodeSmell();
         }
     }

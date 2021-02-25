@@ -37,12 +37,11 @@ public class SootAnalyzer {
         Matcher m = pat.matcher(line);
         if (m.find()) {
             //System.out.println("New HashMap !! : " + line);
+            System.out.println("Implementation  HM !! " + line);
             String key=generateKey(name);
             String variableName=m.group(0).split("=")[0].replaceAll("\\s","");
             manager.addImplementation(key, new HMUImplementation(new CodeLocation(path, name, lineNumber), "HashMap", variableName));
             if (isInstrumenting) {
-                System.out.println("Implementation !!");
-                System.out.println(b.toString());
                 buildInstrumentation(this.getStructureInstanceLocalName(line), units, u, b, "impl:");
             }
         }
@@ -53,12 +52,11 @@ public class SootAnalyzer {
             m = pat.matcher(line);
             if (m.find()) {
                 //System.out.println("New ArrayMap !! : " + line);
+                System.out.println("Implementation AM !!");
                 String key=generateKey(name);
                 String variableName=m.group(0).split("=")[0].replaceAll("\\s","");
                 manager.addImplementation(key, new HMUImplementation(new CodeLocation(path, name, lineNumber), "ArrayMap", variableName));
                 if (isInstrumenting) {
-                    System.out.println("Implementation !!");
-
                     buildInstrumentation(this.getStructureInstanceLocalName(line), units, u, b, "impl:");
                 }
             }
@@ -68,12 +66,11 @@ public class SootAnalyzer {
                 pat = Pattern.compile(regex);
                 m = pat.matcher(line);
                 if (m.find()) {
+                    System.out.println("Implementation SAM !!");
                     String key=generateKey(name);
                     String variableName=m.group(0).split("=")[0].replaceAll("\\s","");
                     manager.addImplementation(key, new HMUImplementation(new CodeLocation(path, name, lineNumber), "SimpleArrayMap", variableName));
                     if (isInstrumenting) {
-                        System.out.println("Implementation !!");
-
                         buildInstrumentation(this.getStructureInstanceLocalName(line), units, u, b, "impl:");
                     }
                 }
@@ -184,7 +181,6 @@ public class SootAnalyzer {
             String key=generateKey(name);
             String variableName=m.group(0).split("\\.")[0];
             manager.addAddition(key, new HMUAddition(new CodeLocation(path, name, lineNumber), variableName));
-            System.out.println("Add Addition !");
             if (isInstrumenting) {
                 buildInstrumentation(this.getStructureCallerLocalName(line), units, u, b, "add:");
             }
@@ -272,7 +268,7 @@ public class SootAnalyzer {
             protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
 
                 if (body.getMethod().getDeclaringClass().getName().startsWith(pack)) {
-                    System.out.println("classe : " + body.getMethod().getDeclaringClass());
+                    //System.out.println("classe : " + body.getMethod().getDeclaringClass());
                     UnitPatchingChain chain = body.getUnits();
                     for (Iterator<Unit> iter = chain.snapshotIterator(); iter.hasNext(); ) {
                         final Unit u = iter.next();

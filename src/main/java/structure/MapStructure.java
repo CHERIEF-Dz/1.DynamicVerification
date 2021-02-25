@@ -39,4 +39,8 @@ public class MapStructure implements Structure {
     public void checkStructure() {
         //
     }
+
+    public int  getSize() {return this.actualSize;}
+
+    public String getId() {return this.id;}
 }

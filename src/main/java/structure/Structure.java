@@ -6,6 +6,7 @@ public interface Structure {
     void foundCodeSmell();
     boolean hasCodeSmell();
     void checkStructure();
-
+    int  getSize();
     void cleanElements();
+    String getId();
 }

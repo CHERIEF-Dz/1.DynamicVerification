@@ -18,6 +18,11 @@ public class CodeLocation {
     public String getPath() {return this.path;}
 
     public String toString() {
-        return "line " + line + " in " + fileName + " at " + path;
+        if (line != 0) {
+            return "at line " + line + " in " + fileName + " at " + path;
+        }
+        else {
+            return "in " + fileName + " at " + path;
+        }
     }
 }

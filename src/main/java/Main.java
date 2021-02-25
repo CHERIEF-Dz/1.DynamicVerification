@@ -33,13 +33,9 @@ public class Main {
         }
         else if (choice == 2) {
             manager = sootAnalyzer(platformPath, apkPath, false);
-            System.out.println(manager.getBreakpoints());
             String tracePath = "tests_ressources/soot_trace_test.txt";
             sootanalyzeTrace(manager, tracePath);
         }
-
-
-
         /*
         String tracePath = "tests_ressources/trace_test_1.txt";
         analyzeTrace(manager, tracePath);
@@ -52,7 +48,6 @@ public class Main {
         Analyzer test = new Analyzer();
 
         test.analyze(manager, path);
-        System.out.print(manager.getBreakpoints());
         return manager;
     }
 
@@ -75,19 +70,20 @@ public class Main {
                 if (line.contains("dynver")) {
                     String[] result = line.substring(line.indexOf("dynver")).split(":");
                     if (result.length == 5) {
-                        System.out.println("[TOCHECK]" + traceNumberLine + " " + line);
+                        //System.out.println("[TOCHECK]" + traceNumberLine + " " + line);
                         String fileName = result[1];
                         String lineNumber = result[2];
                         String id = result[4];
                         String key = fileName + ":" + lineNumber;
-                        System.out.println("Key : " + key);
+                        //System.out.println("Key : " + key);
                         if ("impl".equals(result[3])) {
                             manager.executeImplementation(key, id);
-                        } else if ("add".equals(result[2])) {
+                        } else if ("add".equals(result[3])) {
+                            //System.out.println("Addition line !");
                             manager.executeAddition(key, id);
-                        } else if ("del".equals(result[2])) {
+                        } else if ("del".equals(result[3])) {
                             manager.executeDeletion(key, id);
-                        } else if ("cln".equals(result[2])) {
+                        } else if ("cln".equals(result[3])) {
                             manager.executeDeletion(key, id);
                         }
                     }

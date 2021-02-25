@@ -17,7 +17,7 @@ public class ArrayMapStructure extends MapStructure {
         super.addElement();
         if (!this.codeSmellFound) {
             if (this.actualSize > bigArrayMapTreshold) {
-                System.out.println("ArrayMap defined at " + this.structureImplementation.toString() + " has HMU code smell (Too much elements).");
+                System.out.println("ArrayMap defined " + this.structureImplementation.toString() + " has HMU code smell (Too much elements).");
                 this.foundCodeSmell();
             }
         }
