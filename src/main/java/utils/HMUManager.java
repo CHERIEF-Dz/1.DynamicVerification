@@ -5,6 +5,7 @@ import actions.hmu.HMUClean;
 import actions.hmu.HMUDeletion;
 import actions.hmu.HMUImplementation;
 import structure.Structure;
+import structure.hmu.MapStructure;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,14 +15,14 @@ public class HMUManager {
     private HashMap<String, HMUAddition> additions; // Key = CodeLocation
     private HashMap<String, HMUDeletion> deletions; // Key = CodeLocation
     private HashMap<String, HMUClean> cleans; // Key = CodeLocation
-    private HashMap<String, Structure> structures; // Key = unique id
+    private HashMap<String, MapStructure> structures; // Key = unique id
 
     public HMUManager() {
         this.implementations = new HashMap<String, HMUImplementation>();
         this.additions = new HashMap<String, HMUAddition>();
         this.deletions = new HashMap<String, HMUDeletion>();
         this.cleans = new HashMap<String, HMUClean>();
-        this.structures = new HashMap<String, Structure>();
+        this.structures = new HashMap<String, MapStructure>();
     }
 
     public void addImplementation(String key, HMUImplementation implementation) {
@@ -72,8 +73,8 @@ public class HMUManager {
     }
 
     public void checkStructures() {
-        for (java.util.Map.Entry<String, Structure> stringStructureEntry : this.structures.entrySet()) {
-            HashMap.Entry<String, Structure> pair = (HashMap.Entry) stringStructureEntry;
+        for (java.util.Map.Entry<String, MapStructure> stringStructureEntry : this.structures.entrySet()) {
+            HashMap.Entry<String, MapStructure> pair = (HashMap.Entry) stringStructureEntry;
             pair.getValue().checkStructure();
         }
     }

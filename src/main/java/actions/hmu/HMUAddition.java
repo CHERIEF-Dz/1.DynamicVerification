@@ -2,6 +2,7 @@ package actions.hmu;
 
 import actions.ConcreteAction;
 import structure.Structure;
+import structure.hmu.MapStructure;
 import utils.CodeLocation;
 
 public class HMUAddition extends ConcreteAction {
@@ -15,7 +16,7 @@ public class HMUAddition extends ConcreteAction {
         this.variableName=variableName;
     }
 
-    public void execute(Structure linkedStructure) {
+    public void execute(MapStructure linkedStructure) {
         //System.out.println("Test[Add] : " + this.location.toString());
         linkedStructure.addElement();
         if (linkedStructure.hasCodeSmell() && !alreadyWarned && this.location.getLine() != 0) {

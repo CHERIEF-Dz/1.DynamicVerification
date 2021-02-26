@@ -1,5 +1,6 @@
-package structure;
+package structure.hmu;
 
+import structure.Structure;
 import utils.CodeLocation;
 
 public class MapStructure implements Structure {

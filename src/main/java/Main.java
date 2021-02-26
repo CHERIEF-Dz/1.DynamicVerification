@@ -4,7 +4,9 @@ import instrumentation.AndroidInstrument;
 import staticanalyzis.Analyzer;
 import staticanalyzis.SootAnalyzer;
 import utils.CodeLocation;
+import utils.DWManager;
 import utils.HMUManager;
+import utils.Manager;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -23,17 +25,17 @@ public class Main {
         int choice = S.nextInt();
         System.out.println("Choix : " + choice);
 
-        HMUManager manager;
+        Manager manager;
         //manager = classicAnalyzer();
         String platformPath = "android-platforms";
-        String apkPath = "tests_apks/app-debug.apk";
+        String apkPath = "tests_apks/app-debug_2.apk";
 
         if (choice == 1) {
             manager = sootAnalyzer(platformPath, apkPath, true);
         }
         else if (choice == 2) {
             manager = sootAnalyzer(platformPath, apkPath, false);
-            String tracePath = "tests_ressources/soot_trace_test.txt";
+            String tracePath = "tests_ressources/soot_trace_test_2.txt";
             sootanalyzeTrace(manager, tracePath);
         }
         /*
@@ -51,14 +53,14 @@ public class Main {
         return manager;
     }
 
-    public static HMUManager sootAnalyzer(String platformPath, String apkPath, boolean isInstrumenting) {
-        HMUManager manager = new HMUManager();
+    public static Manager sootAnalyzer(String platformPath, String apkPath, boolean isInstrumenting) {
+        Manager manager = new Manager();
         SootAnalyzer test = new SootAnalyzer(platformPath, apkPath);
         test.analyze(manager, isInstrumenting);
         return manager;
     }
 
-    public static void sootanalyzeTrace(HMUManager manager, String tracePath) {
+    public static void sootanalyzeTrace(Manager manager, String tracePath) {
         BufferedReader reader;
         int traceNumberLine=1;
         try {
@@ -76,15 +78,21 @@ public class Main {
                         String id = result[4];
                         String key = fileName + ":" + lineNumber;
                         //System.out.println("Key : " + key);
-                        if ("impl".equals(result[3])) {
-                            manager.executeImplementation(key, id);
-                        } else if ("add".equals(result[3])) {
+                        //HMU
+                        HMUManager managerHMU = manager.managerHMU;
+                        if ("hmuimpl".equals(result[3])) {
+                            managerHMU.executeImplementation(key, id);
+                        } else if ("hmuadd".equals(result[3])) {
                             //System.out.println("Addition line !");
-                            manager.executeAddition(key, id);
-                        } else if ("del".equals(result[3])) {
-                            manager.executeDeletion(key, id);
-                        } else if ("cln".equals(result[3])) {
-                            manager.executeDeletion(key, id);
+                            managerHMU.executeAddition(key, id);
+                        } else if ("hmudel".equals(result[3])) {
+                            managerHMU.executeDeletion(key, id);
+                        } else if ("hmucln".equals(result[3])) {
+                            managerHMU.executeClean(key, id);
+                        } else if ("dwacq".equals(result[3])) {
+                            manager.managerDW.executeAcquire(key, id);
+                        } else if ("dwrel".equals(result[3])) {
+                            manager.managerDW.executeRelease(key, id);
                         }
                     }
                 }

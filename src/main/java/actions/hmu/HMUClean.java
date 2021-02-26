@@ -2,6 +2,7 @@ package actions.hmu;
 
 import actions.ConcreteAction;
 import structure.Structure;
+import structure.hmu.MapStructure;
 import utils.CodeLocation;
 
 public class HMUClean extends ConcreteAction {
@@ -13,7 +14,7 @@ public class HMUClean extends ConcreteAction {
         this.variableName=variableName;
     }
 
-    public void execute(Structure linkedStructure) {
+    public void execute(MapStructure linkedStructure) {
         linkedStructure.cleanElements();
     }
 

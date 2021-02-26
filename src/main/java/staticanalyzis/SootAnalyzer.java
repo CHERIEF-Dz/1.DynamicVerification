@@ -1,5 +1,8 @@
 package staticanalyzis;
 
+import actions.dw.DWAcquire;
+import actions.dw.DWImplementation;
+import actions.dw.DWRelease;
 import actions.hmu.HMUAddition;
 import actions.hmu.HMUClean;
 import actions.hmu.HMUDeletion;
@@ -8,7 +11,9 @@ import soot.*;
 import soot.jimple.*;
 import soot.options.Options;
 import utils.CodeLocation;
+import utils.DWManager;
 import utils.HMUManager;
+import utils.Manager;
 
 import java.io.File;
 import java.io.PrintStream;
@@ -30,6 +35,52 @@ public class SootAnalyzer {
 
     public static String sourceDirectory = System.getProperty("user.dir") + File.separator + "tests_folders" + File.separator + "LambdaApp";
 
+    private void checkDWInst(String line, String path, String name, int lineNumber, DWManager manager, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting) {
+        String regex = "(?<=(PowerManager))(.*)(?=newWakeLock\\()";
+        Pattern pat = Pattern.compile(regex);
+        Matcher m = pat.matcher(line);
+        if (m.find()) {
+            //System.out.println("New HashMap !! : " + line);
+            System.out.println("Implementation  DW !! " + line);
+            String key=generateKey(name);
+            String variableName=m.group(0).split("=")[0].replaceAll("\\s","");
+            manager.addImplementation(key, new DWImplementation(new CodeLocation(path, name, lineNumber), variableName));
+            if (isInstrumenting) {
+                buildInstrumentation(this.getStructureCallerLocalName(line), units, u, b, "dwimpl:");
+            }
+        }
+    }
+
+    private void checkDWAcquire(String line, String path, String name, int lineNumber, DWManager manager, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting) {
+        String regex = "(?<=(WakeLock))(.*)(?=acquire\\()";
+        Pattern pat = Pattern.compile(regex);
+        Matcher m = pat.matcher(line);
+        if (m.find()) {
+            String key=generateKey(name);
+            String variableName=m.group(0).split("\\.")[0];
+            manager.addAcquire(key, new DWAcquire(new CodeLocation(path, name, lineNumber), variableName));
+
+            if (isInstrumenting) {
+                buildInstrumentation(this.getStructureCallerLocalName(line), units, u, b, "dwacq:");
+            }
+        }
+    }
+
+    private void checkDWRelease(String line, String path, String name, int lineNumber, DWManager manager, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting) {
+        String regex = "(?<=(WakeLock))(.*)(?=release\\()";
+        Pattern pat = Pattern.compile(regex);
+        Matcher m = pat.matcher(line);
+        if (m.find()) {
+            String key=generateKey(name);
+            String variableName=m.group(0).split("\\.")[0];
+            manager.addRelease(key, new DWRelease(new CodeLocation(path, name, lineNumber), variableName));
+
+            if (isInstrumenting) {
+                buildInstrumentation(this.getStructureCallerLocalName(line), units, u, b, "dwrel:");
+            }
+        }
+    }
+
     private void checkHMUInst(String line, String path, String name, int lineNumber, HMUManager manager, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting) {
         //String regex = "(?<=new)(.*)(?=HashMap)";
         String regex = "(?<=(HashMap))(.*)(?=void <init>\\()";
@@ -37,12 +88,11 @@ public class SootAnalyzer {
         Matcher m = pat.matcher(line);
         if (m.find()) {
             //System.out.println("New HashMap !! : " + line);
-            System.out.println("Implementation  HM !! " + line);
             String key=generateKey(name);
             String variableName=m.group(0).split("=")[0].replaceAll("\\s","");
             manager.addImplementation(key, new HMUImplementation(new CodeLocation(path, name, lineNumber), "HashMap", variableName));
             if (isInstrumenting) {
-                buildInstrumentation(this.getStructureInstanceLocalName(line), units, u, b, "impl:");
+                buildInstrumentation(this.getStructureInstanceLocalName(line), units, u, b, "hmuimpl:");
             }
         }
         else {
@@ -52,12 +102,11 @@ public class SootAnalyzer {
             m = pat.matcher(line);
             if (m.find()) {
                 //System.out.println("New ArrayMap !! : " + line);
-                System.out.println("Implementation AM !!");
                 String key=generateKey(name);
                 String variableName=m.group(0).split("=")[0].replaceAll("\\s","");
                 manager.addImplementation(key, new HMUImplementation(new CodeLocation(path, name, lineNumber), "ArrayMap", variableName));
                 if (isInstrumenting) {
-                    buildInstrumentation(this.getStructureInstanceLocalName(line), units, u, b, "impl:");
+                    buildInstrumentation(this.getStructureInstanceLocalName(line), units, u, b, "hmuimpl:");
                 }
             }
             else {
@@ -66,12 +115,11 @@ public class SootAnalyzer {
                 pat = Pattern.compile(regex);
                 m = pat.matcher(line);
                 if (m.find()) {
-                    System.out.println("Implementation SAM !!");
                     String key=generateKey(name);
                     String variableName=m.group(0).split("=")[0].replaceAll("\\s","");
                     manager.addImplementation(key, new HMUImplementation(new CodeLocation(path, name, lineNumber), "SimpleArrayMap", variableName));
                     if (isInstrumenting) {
-                        buildInstrumentation(this.getStructureInstanceLocalName(line), units, u, b, "impl:");
+                        buildInstrumentation(this.getStructureInstanceLocalName(line), units, u, b, "hmuimpl:");
                     }
                 }
             }
@@ -182,7 +230,7 @@ public class SootAnalyzer {
             String variableName=m.group(0).split("\\.")[0];
             manager.addAddition(key, new HMUAddition(new CodeLocation(path, name, lineNumber), variableName));
             if (isInstrumenting) {
-                buildInstrumentation(this.getStructureCallerLocalName(line), units, u, b, "add:");
+                buildInstrumentation(this.getStructureCallerLocalName(line), units, u, b, "hmuadd:");
             }
         }
     }
@@ -204,7 +252,7 @@ public class SootAnalyzer {
             manager.addDeletion(key, new HMUDeletion(new CodeLocation(path, name, lineNumber), variableName));
 
             if (isInstrumenting) {
-                buildInstrumentation(this.getStructureCallerLocalName(line), units, u, b, "del:");
+                buildInstrumentation(this.getStructureCallerLocalName(line), units, u, b, "hmudel:");
             }
         }
     }
@@ -219,9 +267,8 @@ public class SootAnalyzer {
             manager.addClean(key, new HMUClean(new CodeLocation(path, name, lineNumber), variableName));
 
             if (isInstrumenting) {
-                buildInstrumentation(this.getStructureCallerLocalName(line), units, u, b, "clean:");
+                buildInstrumentation(this.getStructureCallerLocalName(line), units, u, b, "hmucln:");
             }
-            System.out.println(b.toString());
         }
     }
 
@@ -259,7 +306,7 @@ public class SootAnalyzer {
         System.setOut(originalStream);
     }
 
-    public void analyze(HMUManager manager, boolean isInstrumenting) {
+    public void analyze(Manager manager, boolean isInstrumenting) {
         setupSoot();
         String pack = "com.core.lambdaapp";
 
@@ -274,10 +321,14 @@ public class SootAnalyzer {
                         final Unit u = iter.next();
                         String line = u.toString();
                         String name = body.getMethod().getDeclaringClass().getName()+".java";
-                        checkHMUInst(line, "test", name, 0, manager, body, u, body.getUnits(), isInstrumenting);
-                        checkHMUAdd(line, "test", name, 0, manager, body, u, body.getUnits(), isInstrumenting);
-                        checkHMUDel(line, "test", name, 0, manager, body, u, body.getUnits(), isInstrumenting);
-                        checkHMUClean(line, "test", name, 0, manager, body, u, body.getUnits(), isInstrumenting);
+                        checkHMUInst(line, "test", name, 0, manager.managerHMU, body, u, body.getUnits(), isInstrumenting);
+                        checkHMUAdd(line, "test", name, 0, manager.managerHMU, body, u, body.getUnits(), isInstrumenting);
+                        checkHMUDel(line, "test", name, 0, manager.managerHMU, body, u, body.getUnits(), isInstrumenting);
+                        checkHMUClean(line, "test", name, 0, manager.managerHMU, body, u, body.getUnits(), isInstrumenting);
+                        //checkDWInst(line, "test", name, 0, manager.managerDW, body, u, body.getUnits(), isInstrumenting);
+                        checkDWAcquire(line, "test", name, 0, manager.managerDW, body, u, body.getUnits(), isInstrumenting);
+                        checkDWRelease(line, "test", name, 0, manager.managerDW, body, u, body.getUnits(), isInstrumenting);
+
                     }
                 }
             }

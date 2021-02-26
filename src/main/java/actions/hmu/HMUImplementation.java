@@ -1,9 +1,10 @@
 package actions.hmu;
 
 import actions.ConcreteAction;
-import structure.ArrayMapStructure;
-import structure.HashMapStructure;
-import structure.SimpleArrayMapStructure;
+import structure.hmu.ArrayMapStructure;
+import structure.hmu.HashMapStructure;
+import structure.hmu.MapStructure;
+import structure.hmu.SimpleArrayMapStructure;
 import structure.Structure;
 import utils.CodeLocation;
 
@@ -18,9 +19,9 @@ public class HMUImplementation extends ConcreteAction {
         this.variableName = variableName;
     }
 
-    public Structure execute(String id) {
+    public MapStructure execute(String id) {
         //System.out.println("Test[Impl] : " + this.location.toString());
-        Structure toReturn = null;
+        MapStructure toReturn = null;
         if ("HashMap".equals(type)) {
             toReturn = new HashMapStructure(this.location, id);
         } else if ("ArrayMap".equals(type)) {
