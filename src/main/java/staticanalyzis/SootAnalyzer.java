@@ -61,6 +61,7 @@ public class SootAnalyzer {
             manager.addAcquire(key, new DWAcquire(new CodeLocation(path, name, lineNumber), variableName));
 
             if (isInstrumenting) {
+                //System.out.println(b.toString());
                 buildInstrumentation(this.getStructureCallerLocalName(line), units, u, b, "dwacq:");
             }
         }

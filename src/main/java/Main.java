@@ -22,6 +22,9 @@ public class Main {
     public static void main(String[] args) throws IOException {
 
         Scanner S = new Scanner(System.in);
+        System.out.println("Faites votre choix :");
+        System.out.println("1 : Instrumentation");
+        System.out.println("2 : Analyse");
         int choice = S.nextInt();
         System.out.println("Choix : " + choice);
 
