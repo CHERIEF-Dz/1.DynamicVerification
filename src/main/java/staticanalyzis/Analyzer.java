@@ -24,14 +24,14 @@ public class Analyzer {
 
     }
 
-    private void checkHMUInst(String line, String path, String name, int lineNumber, HMUManager manager) {
+    private void checkHMUInst(String line, String path, String name, String methodName, int lineNumber, HMUManager manager) {
         String regex = "[^\\s]+[\\s]+\\=[\\s]+new[\\s]+HashMap<[^>]*>\\(\\);";
         Pattern pat = Pattern.compile(regex);
         Matcher m = pat.matcher(line);
         if (m.find()) {
             String key=name+":"+lineNumber;
             String variableName=m.group(0).split("=")[0].replaceAll("\\s","");
-            manager.addImplementation(key, new HMUImplementation(new CodeLocation(path, name, lineNumber), "HashMap", variableName));
+            manager.addImplementation(key, new HMUImplementation(new CodeLocation(path, name, methodName, lineNumber), "HashMap", variableName));
         }
         else {
             regex = "[^\\s]+[\\s]+\\=[\\s]+new[\\s]+ArrayMap<[^>]*>\\(\\);";
@@ -40,7 +40,7 @@ public class Analyzer {
             if (m.find()) {
                 String key=name+":"+lineNumber;
                 String variableName=m.group(0).split("=")[0].replaceAll("\\s","");
-                manager.addImplementation(key, new HMUImplementation(new CodeLocation(path, name, lineNumber), "ArrayMap", variableName));
+                manager.addImplementation(key, new HMUImplementation(new CodeLocation(path, name, methodName, lineNumber), "ArrayMap", variableName));
             }
             else {
                 regex = "[^\\s]+[\\s]+\\=[\\s]+new[\\s]+SimpleArrayMap<[^>]*>\\(\\);";
@@ -49,7 +49,7 @@ public class Analyzer {
                 if (m.find()) {
                     String key=name+":"+lineNumber;
                     String variableName=m.group(0).split("=")[0].replaceAll("\\s","");
-                    manager.addImplementation(key, new HMUImplementation(new CodeLocation(path, name, lineNumber), "SimpleArrayMap", variableName));
+                    manager.addImplementation(key, new HMUImplementation(new CodeLocation(path, name, methodName, lineNumber), "SimpleArrayMap", variableName));
                 }
             }
         }
@@ -57,36 +57,36 @@ public class Analyzer {
 
     //Limité par les expressions régulières et analyse statique
 
-    public void checkHMUAdd(String line, String path, String name, int lineNumber, HMUManager manager) {
+    public void checkHMUAdd(String line, String path, String name, String methodName, int lineNumber, HMUManager manager) {
         String regex = "[^\\.\\s]+\\.put\\([^;]+;";
         Pattern pat = Pattern.compile(regex);
         Matcher m = pat.matcher(line);
         if (m.find()) {
             String key=name+":"+lineNumber;
             String variableName=m.group(0).split("\\.")[0];
-            manager.addAddition(key, new HMUAddition(new CodeLocation(path, name, lineNumber), variableName));
+            manager.addAddition(key, new HMUAddition(new CodeLocation(path, name, methodName, lineNumber), variableName));
         }
     }
 
-    public void checkHMUDel(String line, String path, String name, int lineNumber, HMUManager manager) {
+    public void checkHMUDel(String line, String path, String name, String methodName, int lineNumber, HMUManager manager) {
         String regex = "[^\\.\\s]+\\.remove\\([^;]+;";
         Pattern pat = Pattern.compile(regex);
         Matcher m = pat.matcher(line);
         if (m.find()) {
             String key=name+":"+lineNumber;
             String variableName=m.group(0).split("\\.")[0];
-            manager.addDeletion(key, new HMUDeletion(new CodeLocation(path, name, lineNumber), variableName));
+            manager.addDeletion(key, new HMUDeletion(new CodeLocation(path, name, methodName, lineNumber), variableName));
         }
     }
 
-    private void checkHMUClean(String line, String path, String name, int lineNumber, HMUManager manager) {
+    private void checkHMUClean(String line, String path, String name, String methodName, int lineNumber, HMUManager manager) {
         String regex = "[^\\.\\s]+\\.clear\\([^;]+;";
         Pattern pat = Pattern.compile(regex);
         Matcher m = pat.matcher(line);
         if (m.find()) {
             String key=name+":"+lineNumber;
             String variableName=m.group(0).split("\\.")[0];
-            manager.addClean(key, new HMUClean(new CodeLocation(path, name, lineNumber), variableName));
+            manager.addClean(key, new HMUClean(new CodeLocation(path, name, methodName, lineNumber), variableName));
         }
     }
 
@@ -100,6 +100,7 @@ public class Analyzer {
                 listFilesForFolder(fileEntry, manager, originalPath);
             } else {
                 String fileName = fileEntry.getName();
+                String methodName = "";
                 if (this.isJavaFile(fileName)) {
                     String path = fileEntry.getPath();
                     path = path.replace(originalPath.replace("/", "\\"), "").replace("\\", "/");
@@ -109,10 +110,10 @@ public class Analyzer {
                     int lineNumber = 1;
                     for (String line : lines) {
                         //Instanciation
-                        checkHMUInst(line, path, fileName, lineNumber, manager);
-                        checkHMUAdd(line, path, fileName, lineNumber, manager);
-                        checkHMUDel(line, path, fileName, lineNumber, manager);
-                        checkHMUClean(line, path, fileName, lineNumber, manager);
+                        checkHMUInst(line, path, fileName, methodName, lineNumber, manager);
+                        checkHMUAdd(line, path, fileName, methodName, lineNumber, manager);
+                        checkHMUDel(line, path, fileName, methodName, lineNumber, manager);
+                        checkHMUClean(line, path, fileName, methodName, lineNumber, manager);
                         lineNumber++;
                     }
                 }
