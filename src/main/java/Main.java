@@ -1,17 +1,13 @@
-import actions.hmu.HMUAddition;
-import actions.hmu.HMUImplementation;
-import instrumentation.AndroidInstrument;
 import staticanalyzis.Analyzer;
 import staticanalyzis.SootAnalyzer;
-import utils.CodeLocation;
-import utils.DWManager;
 import utils.HMUManager;
-import utils.Manager;
+import utils.ManagerGroup;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Scanner;
 
 
@@ -28,18 +24,18 @@ public class Main {
         int choice = S.nextInt();
         System.out.println("Choix : " + choice);
 
-        Manager manager;
+        ManagerGroup managerGroup;
         //manager = classicAnalyzer();
         String platformPath = "android-platforms";
         String apkPath = "tests_apks/app-debug_2.apk";
 
         if (choice == 1) {
-            manager = sootAnalyzer(platformPath, apkPath, true);
+            managerGroup = sootAnalyzer(platformPath, apkPath, true);
         }
         else if (choice == 2) {
-            manager = sootAnalyzer(platformPath, apkPath, false);
-            String tracePath = "tests_ressources/soot_trace_test_2.txt";
-            sootanalyzeTrace(manager, tracePath);
+            managerGroup = sootAnalyzer(platformPath, apkPath, false);
+            String tracePath = "tests_ressources/lambda.txt";
+            sootanalyzeTrace(managerGroup, tracePath);
         }
         /*
         String tracePath = "tests_ressources/trace_test_1.txt";
@@ -56,16 +52,18 @@ public class Main {
         return manager;
     }
 
-    public static Manager sootAnalyzer(String platformPath, String apkPath, boolean isInstrumenting) {
-        Manager manager = new Manager();
+    public static ManagerGroup sootAnalyzer(String platformPath, String apkPath, boolean isInstrumenting) {
+        ManagerGroup managerGroup = new ManagerGroup();
         SootAnalyzer test = new SootAnalyzer(platformPath, apkPath);
-        test.analyze(manager, isInstrumenting);
-        return manager;
+        test.analyze(managerGroup, isInstrumenting);
+        return managerGroup;
     }
 
-    public static void sootanalyzeTrace(Manager manager, String tracePath) {
+    public static void sootanalyzeTrace(ManagerGroup managerGroup, String tracePath) {
         BufferedReader reader;
         int traceNumberLine=1;
+        String timeStamp1 = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
+        System.out.println("Début analyse : " + timeStamp1);
         try {
             reader = new BufferedReader(new FileReader(
                     tracePath));
@@ -82,8 +80,9 @@ public class Main {
                         String key = fileName + ":" + lineNumber;
                         //System.out.println("Key : " + key);
                         //HMU
-                        HMUManager managerHMU = manager.managerHMU;
+                        HMUManager managerHMU = managerGroup.managerHMU;
                         if ("hmuimpl".equals(result[3])) {
+                            System.out.println("Line : " + line);
                             managerHMU.executeImplementation(key, id);
                         } else if ("hmuadd".equals(result[3])) {
                             //System.out.println("Addition line !");
@@ -93,9 +92,9 @@ public class Main {
                         } else if ("hmucln".equals(result[3])) {
                             managerHMU.executeClean(key, id);
                         } else if ("dwacq".equals(result[3])) {
-                            manager.managerDW.executeAcquire(key, id);
+                            managerGroup.managerDW.executeAcquire(key, id);
                         } else if ("dwrel".equals(result[3])) {
-                            manager.managerDW.executeRelease(key, id);
+                            managerGroup.managerDW.executeRelease(key, id);
                         }
                     }
                 }
@@ -109,7 +108,9 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        manager.checkStructures();
+        managerGroup.checkStructures();
+        String timeStamp2 = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
+        System.out.println("Fin analyse : " + timeStamp2);
     }
 
     public static void analyzeTrace(HMUManager manager, String tracePath) {

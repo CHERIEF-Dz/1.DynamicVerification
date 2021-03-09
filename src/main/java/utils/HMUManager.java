@@ -10,7 +10,7 @@ import structure.hmu.MapStructure;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HMUManager {
+public class HMUManager implements Manager{
     private HashMap<String, HMUImplementation> implementations; // Key = CodeLocation
     private HashMap<String, HMUAddition> additions; // Key = CodeLocation
     private HashMap<String, HMUDeletion> deletions; // Key = CodeLocation
@@ -57,6 +57,12 @@ public class HMUManager {
     }
 
     public void executeImplementation(String key, String id) {
+        System.out.println("Implementation : " + key);
+        System.out.println("Structures : ");
+        for (java.util.Map.Entry<String, MapStructure> stringStructureEntry : this.structures.entrySet()) {
+            HashMap.Entry<String, MapStructure> pair = (HashMap.Entry) stringStructureEntry;
+            System.out.println(pair.getKey() + " " + pair.getValue().getId());
+        }
         this.structures.put(id, this.implementations.get(key).execute(id));
     }
 
@@ -77,5 +83,10 @@ public class HMUManager {
             HashMap.Entry<String, MapStructure> pair = (HashMap.Entry) stringStructureEntry;
             pair.getValue().checkStructure();
         }
+    }
+
+    @Override
+    public void generateCSV() {
+        //Todo
     }
 }

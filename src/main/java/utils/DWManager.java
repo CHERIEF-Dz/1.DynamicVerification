@@ -6,9 +6,12 @@ import actions.dw.DWRelease;
 import structure.dw.WakeLockStructure;
 import structure.hmu.MapStructure;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 
-public class DWManager {
+public class DWManager implements Manager {
     private HashMap<String, DWImplementation> implementations;
     private HashMap<String, DWAcquire> acquires;
     private HashMap<String, DWRelease> releases;
@@ -50,5 +53,28 @@ public class DWManager {
             HashMap.Entry<String, WakeLockStructure> pair = (HashMap.Entry) stringStructureEntry;
             pair.getValue().checkStructure();
         }
+    }
+
+    public void generateCSV() {
+        File csvOutputFile = new File("test.csv");
+        try (PrintWriter writer = new PrintWriter(csvOutputFile)) {
+            writer.write("apk, package, file, method\n");
+            for (java.util.Map.Entry<String, WakeLockStructure> stringStructureEntry : this.structures.entrySet()) {
+                HashMap.Entry<String, WakeLockStructure> pair = (HashMap.Entry) stringStructureEntry;
+                if (pair.getValue().hasCodeSmell()) {
+                    String fileName = pair.getValue().getLocation().getFileName();
+                    String methodName = pair.getValue().getLocation().getMethodName();
+                    writer.write("apk,package,"+fileName+","+methodName+"\n");
+                }
+            }
+        } catch (FileNotFoundException e) {
+            // Do something
+        }
+    }
+
+    @Override
+    public String getBreakpoints() {
+        //Todo
+        return null;
     }
 }

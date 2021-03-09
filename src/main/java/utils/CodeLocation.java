@@ -19,6 +19,8 @@ public class CodeLocation {
 
     public String getPath() {return this.path;}
 
+    public String getMethodName() {return this.methodName;}
+
     public String toString() {
         if (line != 0) {
             return "at line " + line + " in class " + fileName + " and method " + methodName + " at " + path;

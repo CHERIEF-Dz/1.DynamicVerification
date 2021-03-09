@@ -13,7 +13,7 @@ import soot.options.Options;
 import utils.CodeLocation;
 import utils.DWManager;
 import utils.HMUManager;
-import utils.Manager;
+import utils.ManagerGroup;
 
 import java.io.File;
 import java.io.PrintStream;
@@ -307,7 +307,7 @@ public class SootAnalyzer {
         System.setOut(originalStream);
     }
 
-    public void analyze(Manager manager, boolean isInstrumenting) {
+    public void analyze(ManagerGroup managerGroup, boolean isInstrumenting) {
         setupSoot();
         String pack = "com.core.lambdaapp";
 
@@ -323,13 +323,13 @@ public class SootAnalyzer {
                         String line = u.toString();
                         String name = body.getMethod().getDeclaringClass().getName()+".java";
                         String methodName = body.getMethod().getName();
-                        checkHMUInst(line, "test", name, methodName,0, manager.managerHMU, body, u, body.getUnits(), isInstrumenting);
-                        checkHMUAdd(line, "test", name, methodName,0, manager.managerHMU, body, u, body.getUnits(), isInstrumenting);
-                        checkHMUDel(line, "test", name, methodName, 0, manager.managerHMU, body, u, body.getUnits(), isInstrumenting);
-                        checkHMUClean(line, "test", name, methodName, 0, manager.managerHMU, body, u, body.getUnits(), isInstrumenting);
+                        checkHMUInst(line, "test", name, methodName,0, managerGroup.managerHMU, body, u, body.getUnits(), isInstrumenting);
+                        checkHMUAdd(line, "test", name, methodName,0, managerGroup.managerHMU, body, u, body.getUnits(), isInstrumenting);
+                        checkHMUDel(line, "test", name, methodName, 0, managerGroup.managerHMU, body, u, body.getUnits(), isInstrumenting);
+                        checkHMUClean(line, "test", name, methodName, 0, managerGroup.managerHMU, body, u, body.getUnits(), isInstrumenting);
                         //checkDWInst(line, "test", name, 0, manager.managerDW, body, u, body.getUnits(), isInstrumenting);
-                        checkDWAcquire(line, "test", name, methodName, 0, manager.managerDW, body, u, body.getUnits(), isInstrumenting);
-                        checkDWRelease(line, "test", name, methodName, 0, manager.managerDW, body, u, body.getUnits(), isInstrumenting);
+                        checkDWAcquire(line, "test", name, methodName, 0, managerGroup.managerDW, body, u, body.getUnits(), isInstrumenting);
+                        checkDWRelease(line, "test", name, methodName, 0, managerGroup.managerDW, body, u, body.getUnits(), isInstrumenting);
 
                     }
                 }

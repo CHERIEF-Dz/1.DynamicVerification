@@ -45,4 +45,8 @@ public class WakeLockStructure implements Structure {
     public String getId() {
         return this.id;
     }
+
+    public CodeLocation getLocation() {
+        return this.structureImplementation;
+    }
 }
