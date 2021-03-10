@@ -1,7 +1,6 @@
 package manager;
 
 import actions.dw.DWAcquire;
-import actions.dw.DWImplementation;
 import actions.dw.DWRelease;
 import structure.dw.WakeLockStructure;
 
@@ -11,20 +10,14 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 
 public class DWManager implements Manager {
-    private HashMap<String, DWImplementation> implementations;
     private HashMap<String, DWAcquire> acquires;
     private HashMap<String, DWRelease> releases;
     private HashMap<String, WakeLockStructure> structures;
 
     public DWManager() {
-        this.implementations = new HashMap<String, DWImplementation>();
         this.acquires = new HashMap<String, DWAcquire>();
         this.releases = new HashMap<String, DWRelease>();
         this.structures = new HashMap<String, WakeLockStructure>();
-    }
-
-    public void addImplementation(String key, DWImplementation implementation) {
-        this.implementations.put(key, implementation);
     }
 
     public void addAcquire(String key, DWAcquire acquire) {
@@ -33,10 +26,6 @@ public class DWManager implements Manager {
 
     public void addRelease(String key, DWRelease release) {
         this.releases.put(key, release);
-    }
-
-    public void executeImplementation(String key, String id) {
-        this.structures.put(id, this.implementations.get(key).execute(id));
     }
 
     public void executeAcquire(String key, String id) {

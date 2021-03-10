@@ -1,278 +1,22 @@
 package staticanalyzis;
 
-import actions.dw.DWAcquire;
-import actions.dw.DWImplementation;
-import actions.dw.DWRelease;
-import actions.hmu.HMUAddition;
-import actions.hmu.HMUClean;
-import actions.hmu.HMUDeletion;
-import actions.hmu.HMUImplementation;
-import soot.*;
-import soot.jimple.*;
-import soot.options.Options;
-import utils.CodeLocation;
-import manager.DWManager;
-import manager.HMUManager;
 import manager.ManagerGroup;
+import soot.*;
+import soot.options.Options;
 
-import java.io.File;
 import java.io.PrintStream;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map;
 
 public class SootAnalyzer {
 
     private String apkPath, platformPath;
-    private int keyCpt;
-    static String prefix = "dynver:";
 
     public SootAnalyzer(String platformPath, String apkPath) {
         this.platformPath = platformPath;
         this.apkPath = apkPath;
-        this.keyCpt=0;
     }
-
-    public static String sourceDirectory = System.getProperty("user.dir") + File.separator + "tests_folders" + File.separator + "LambdaApp";
-
-    private void checkDWInst(String line, String path, String name, String methodName, int lineNumber, DWManager manager, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting) {
-        String regex = "(?<=(PowerManager))(.*)(?=newWakeLock\\()";
-        Pattern pat = Pattern.compile(regex);
-        Matcher m = pat.matcher(line);
-        if (m.find()) {
-            //System.out.println("New HashMap !! : " + line);
-            System.out.println("Implementation  DW !! " + line);
-            String key=generateKey(name);
-            String variableName=m.group(0).split("=")[0].replaceAll("\\s","");
-            manager.addImplementation(key, new DWImplementation(new CodeLocation(path, name, methodName, lineNumber), variableName));
-            if (isInstrumenting) {
-                buildInstrumentation(this.getStructureCallerLocalName(line), units, u, b, "dwimpl:");
-            }
-        }
-    }
-
-    private void checkDWAcquire(String line, String path, String name, String methodName, int lineNumber, DWManager manager, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting) {
-        String regex = "(?<=(WakeLock))(.*)(?=acquire\\()";
-        Pattern pat = Pattern.compile(regex);
-        Matcher m = pat.matcher(line);
-        if (m.find()) {
-            String key=generateKey(name);
-            String variableName=m.group(0).split("\\.")[0];
-            manager.addAcquire(key, new DWAcquire(new CodeLocation(path, name, methodName, lineNumber), variableName));
-
-            if (isInstrumenting) {
-                //System.out.println(b.toString());
-                buildInstrumentation(this.getStructureCallerLocalName(line), units, u, b, "dwacq:");
-            }
-        }
-    }
-
-    private void checkDWRelease(String line, String path, String name, String methodName, int lineNumber, DWManager manager, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting) {
-        String regex = "(?<=(WakeLock))(.*)(?=release\\()";
-        Pattern pat = Pattern.compile(regex);
-        Matcher m = pat.matcher(line);
-        if (m.find()) {
-            String key=generateKey(name);
-            String variableName=m.group(0).split("\\.")[0];
-            manager.addRelease(key, new DWRelease(new CodeLocation(path, name, methodName, lineNumber), variableName));
-
-            if (isInstrumenting) {
-                buildInstrumentation(this.getStructureCallerLocalName(line), units, u, b, "dwrel:");
-            }
-        }
-    }
-
-    private void checkHMUInst(String line, String path, String name, String methodName, int lineNumber, HMUManager manager, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting) {
-        //String regex = "(?<=new)(.*)(?=HashMap)";
-        String regex = "(?<=(HashMap))(.*)(?=void <init>\\()";
-        Pattern pat = Pattern.compile(regex);
-        Matcher m = pat.matcher(line);
-        if (m.find()) {
-            //System.out.println("New HashMap !! : " + line);
-            String key=generateKey(name);
-            String variableName=m.group(0).split("=")[0].replaceAll("\\s","");
-            manager.addImplementation(key, new HMUImplementation(new CodeLocation(path, name, methodName, lineNumber), "HashMap", variableName));
-            if (isInstrumenting) {
-                buildInstrumentation(this.getStructureInstanceLocalName(line), units, u, b, "hmuimpl:");
-            }
-        }
-        else {
-            //regex = "(?<=new)(.*)(?=ArrayMap)";
-            regex = "(?<=(ArrayMap))(.*)(?=void <init>\\()";
-            pat = Pattern.compile(regex);
-            m = pat.matcher(line);
-            if (m.find()) {
-                //System.out.println("New ArrayMap !! : " + line);
-                String key=generateKey(name);
-                String variableName=m.group(0).split("=")[0].replaceAll("\\s","");
-                manager.addImplementation(key, new HMUImplementation(new CodeLocation(path, name, methodName, lineNumber), "ArrayMap", variableName));
-                if (isInstrumenting) {
-                    buildInstrumentation(this.getStructureInstanceLocalName(line), units, u, b, "hmuimpl:");
-                }
-            }
-            else {
-                //regex = "(?<=new)(.*)(?=SimpleArrayMap)";
-                regex = "(?<=(SingleArrayMap))(.*)(?=void <init>\\()";
-                pat = Pattern.compile(regex);
-                m = pat.matcher(line);
-                if (m.find()) {
-                    String key=generateKey(name);
-                    String variableName=m.group(0).split("=")[0].replaceAll("\\s","");
-                    manager.addImplementation(key, new HMUImplementation(new CodeLocation(path, name, methodName, lineNumber), "SimpleArrayMap", variableName));
-                    if (isInstrumenting) {
-                        buildInstrumentation(this.getStructureInstanceLocalName(line), units, u, b, "hmuimpl:");
-                    }
-                }
-            }
-
-        }
-    }
-
-    private static Local addTmpRef(Body body, String name, Type type)
-    {
-        Local tmpRef = Jimple.v().newLocal(name, type);
-        body.getLocals().add(tmpRef);
-        return tmpRef;
-    }
-
-    //Limité par les expressions régulières et analyse statique
-
-    private void buildInstrumentation(String structureLocalName, UnitPatchingChain units, Unit u, Body b, String suffix) {
-        //Add Print
-        Local refPrint = addTmpRef(b, "refPrint", RefType.v("java.io.PrintStream"));
-        Local refBuilder = addTmpRef(b, "refBuilder", RefType.v("java.lang.StringBuilder"));
-        Local refIdentity = addTmpRef(b, "refIdentity", IntType.v());
-        Local tmpString = addTmpRef(b, "tmpString", RefType.v("java.lang.String"));
-
-        List<Unit> generatedUnits = new ArrayList<>();
-
-        // insert "refPrint = java.lang.System.out;"
-        AssignStmt printStmt = Jimple.v().newAssignStmt(
-                refPrint, Jimple.v().newStaticFieldRef(
-                        Scene.v().getField("<java.lang.System: java.io.PrintStream out>").makeRef()));
-        generatedUnits.add(printStmt);
-
-        // insert "tmpLong = 'HELLO';"
-        AssignStmt stringStmt = Jimple.v().newAssignStmt(tmpString,
-                StringConstant.v(this.prefix+b.getMethod().getDeclaringClass().getName() + ".java:"+this.keyCpt+":"+suffix));
-        generatedUnits.add(stringStmt);
-
-        // insert tmpRef = new java.lang.StringBuilder;
-        NewExpr newString = Jimple.v().newNewExpr(RefType.v("java.lang.StringBuilder"));
-        AssignStmt builderStmt = Jimple.v().newAssignStmt(refBuilder, newString);
-        generatedUnits.add(builderStmt);
-
-        // special invoke init
-        InvokeStmt initBuilder = Jimple.v().newInvokeStmt(Jimple.v().newSpecialInvokeExpr(refBuilder,
-                Scene.v().getSootClass("java.lang.StringBuilder").getMethod("void <init>()").makeRef()));
-        generatedUnits.add(initBuilder);
-
-        //Virtual call Append
-        SootMethod appendMethod1 = Scene.v().getSootClass("java.lang.StringBuilder").getMethod("java.lang.StringBuilder append(java.lang.String)");
-        InvokeStmt invokeAppend1 = Jimple.v().newInvokeStmt(
-                Jimple.v().newVirtualInvokeExpr(refBuilder, appendMethod1.makeRef(), tmpString));
-        generatedUnits.add(invokeAppend1);
-
-        //Get Identity
-        Local structureLocal = null;
-        Iterator<Local> localIterator = b.getLocals().iterator();
-        while (localIterator.hasNext()) {
-            Local elt = localIterator.next();
-            if (elt.getName().equals(structureLocalName)) {
-                structureLocal = elt;
-            }
-        }
-
-        SootMethod identifyMethod = Scene.v().getSootClass("java.lang.System").getMethod("int identityHashCode(java.lang.Object)");
-        AssignStmt structureIdentity = Jimple.v().newAssignStmt(refIdentity,
-                Jimple.v().newStaticInvokeExpr(identifyMethod.makeRef(), structureLocal)
-        );
-        generatedUnits.add(structureIdentity);
-
-        //Append identity
-        SootMethod appendMethod2 = Scene.v().getSootClass("java.lang.StringBuilder").getMethod("java.lang.StringBuilder append(int)");
-        InvokeStmt invokeAppend2 = Jimple.v().newInvokeStmt(
-                Jimple.v().newVirtualInvokeExpr(refBuilder, appendMethod2.makeRef(), refIdentity));
-        generatedUnits.add(invokeAppend2);
-
-        //Builder to String
-        SootMethod toStringMethod = Scene.v().getSootClass("java.lang.StringBuilder").getMethod("java.lang.String toString()");
-        AssignStmt builderString = Jimple.v().newAssignStmt(tmpString,
-                Jimple.v().newVirtualInvokeExpr(refBuilder, toStringMethod.makeRef())
-        );
-        generatedUnits.add(builderString);
-
-        // insert "tmpRef.println(tmpString);"
-        SootMethod printMethod = Scene.v().getSootClass("java.io.PrintStream").getMethod("void println(java.lang.String)");
-        InvokeStmt invokePrint = Jimple.v().newInvokeStmt(
-                Jimple.v().newVirtualInvokeExpr(refPrint, printMethod.makeRef(), tmpString));
-        generatedUnits.add(invokePrint);
-
-        units.insertAfter(generatedUnits, u);
-
-        //check that we did not mess up the Jimple
-        b.validate();
-    }
-
-    private String getStructureInstanceLocalName(String line) {
-        return line.substring(line.indexOf("specialinvoke")).replace("specialinvoke ", "").trim().split("\\.")[0];
-    }
-
-    private String getStructureCallerLocalName(String line) {
-        return line.substring(line.indexOf("virtualinvoke")).replace("virtualinvoke ", "").trim().split("\\.")[0];
-    }
-
-    public void checkHMUAdd(String line, String path, String name, String methodName, int lineNumber, HMUManager manager, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting) {
-        String regex = "(?<=(HashMap|ArrayMap|SingleArrayMap))(.*)(?=put\\()";
-        Pattern pat = Pattern.compile(regex);
-        Matcher m = pat.matcher(line);
-        if (m.find()) {
-            String key=generateKey(name);
-            String variableName=m.group(0).split("\\.")[0];
-            manager.addAddition(key, new HMUAddition(new CodeLocation(path, name, methodName, lineNumber), variableName));
-            if (isInstrumenting) {
-                buildInstrumentation(this.getStructureCallerLocalName(line), units, u, b, "hmuadd:");
-            }
-        }
-    }
-
-    private String generateKey(String name) {
-        this.keyCpt++;
-        return name + ":" + this.keyCpt;
-    }
-
-    public void checkHMUDel(String line, String path, String name, String methodName, int lineNumber, HMUManager manager, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting) {
-        String regex = "(?<=(HashMap|ArrayMap|SingleArrayMap))(.*)(?=remove\\()";
-        Pattern pat = Pattern.compile(regex);
-        Matcher m = pat.matcher(line);
-        if (m.find()) {
-
-            String key=generateKey(name);
-            String variableName=m.group(0).split("\\.")[0];
-
-            manager.addDeletion(key, new HMUDeletion(new CodeLocation(path, name, methodName, lineNumber), variableName));
-
-            if (isInstrumenting) {
-                buildInstrumentation(this.getStructureCallerLocalName(line), units, u, b, "hmudel:");
-            }
-        }
-    }
-
-    private void checkHMUClean(String line, String path, String name, String methodName, int lineNumber, HMUManager manager, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting) {
-        String regex = "(?<=(HashMap|ArrayMap|SingleArrayMap))(.*)(?=clear\\()";
-        Pattern pat = Pattern.compile(regex);
-        Matcher m = pat.matcher(line);
-        if (m.find()) {
-            String key=generateKey(name);
-            String variableName=m.group(0).split("\\.")[0];
-            manager.addClean(key, new HMUClean(new CodeLocation(path, name, methodName, lineNumber), variableName));
-
-            if (isInstrumenting) {
-                buildInstrumentation(this.getStructureCallerLocalName(line), units, u, b, "hmucln:");
-            }
-        }
-    }
-
 
     public void setupSoot() {
         //Hack to prevent soot to print on System.out
@@ -290,19 +34,6 @@ public class SootAnalyzer {
         Options.v().set_output_dir("tests");
         Scene.v().addBasicClass("java.io.PrintStream",SootClass.SIGNATURES);
         Scene.v().addBasicClass("java.lang.System",SootClass.SIGNATURES);
-
-        List<String> excludeList = new LinkedList<String>();
-        /*
-        excludeList.add("com.google.android.");
-        excludeList.add("java.");
-        excludeList.add("sun.misc.");
-        excludeList.add("android.");
-        excludeList.add("org.apache.");
-        excludeList.add("soot.");
-        excludeList.add("javax.servlet.");
-        excludeList.add("androidx.");
-        Options.v().set_exclude(excludeList);
-         */
         Scene.v().loadNecessaryClasses();
         System.setOut(originalStream);
     }
@@ -323,20 +54,12 @@ public class SootAnalyzer {
                         String line = u.toString();
                         String name = body.getMethod().getDeclaringClass().getName()+".java";
                         String methodName = body.getMethod().getName();
-                        checkHMUInst(line, "test", name, methodName,0, managerGroup.managerHMU, body, u, body.getUnits(), isInstrumenting);
-                        checkHMUAdd(line, "test", name, methodName,0, managerGroup.managerHMU, body, u, body.getUnits(), isInstrumenting);
-                        checkHMUDel(line, "test", name, methodName, 0, managerGroup.managerHMU, body, u, body.getUnits(), isInstrumenting);
-                        checkHMUClean(line, "test", name, methodName, 0, managerGroup.managerHMU, body, u, body.getUnits(), isInstrumenting);
-                        //checkDWInst(line, "test", name, 0, manager.managerDW, body, u, body.getUnits(), isInstrumenting);
-                        checkDWAcquire(line, "test", name, methodName, 0, managerGroup.managerDW, body, u, body.getUnits(), isInstrumenting);
-                        checkDWRelease(line, "test", name, methodName, 0, managerGroup.managerDW, body, u, body.getUnits(), isInstrumenting);
-
+                        DWAnalyzer.checkEverything(line, "test", name, methodName, 0, managerGroup, body, u, body.getUnits(), isInstrumenting);
+                        HMUAnalyzer.checkEverything(line, "test", name, methodName, 0, managerGroup, body, u, body.getUnits(), isInstrumenting);
                     }
                 }
             }
         }));
-
-
             // Run Soot packs (note that our transformer pack is added to the phase "jtp")
             PackManager.v().runPacks();
         if (isInstrumenting) {
