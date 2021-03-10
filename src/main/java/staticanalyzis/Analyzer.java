@@ -5,13 +5,12 @@ import actions.hmu.HMUClean;
 import actions.hmu.HMUDeletion;
 import actions.hmu.HMUImplementation;
 import utils.CodeLocation;
-import utils.HMUManager;
+import manager.HMUManager;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

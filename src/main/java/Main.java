@@ -1,7 +1,7 @@
 import staticanalyzis.Analyzer;
 import staticanalyzis.SootAnalyzer;
-import utils.HMUManager;
-import utils.ManagerGroup;
+import manager.HMUManager;
+import manager.ManagerGroup;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

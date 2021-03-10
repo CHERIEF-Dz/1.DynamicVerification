@@ -1,12 +1,14 @@
-package utils;
+package manager;
 
 import actions.hmu.HMUAddition;
 import actions.hmu.HMUClean;
 import actions.hmu.HMUDeletion;
 import actions.hmu.HMUImplementation;
-import structure.Structure;
 import structure.hmu.MapStructure;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -87,6 +89,19 @@ public class HMUManager implements Manager{
 
     @Override
     public void generateCSV() {
-        //Todo
+        File csvOutputFile = new File("test_HMU.csv");
+        try (PrintWriter writer = new PrintWriter(csvOutputFile)) {
+            writer.write("apk, package, file, method\n");
+            for (java.util.Map.Entry<String, MapStructure> stringStructureEntry : this.structures.entrySet()) {
+                HashMap.Entry<String, MapStructure> pair = (HashMap.Entry) stringStructureEntry;
+                if (pair.getValue().hasCodeSmell()) {
+                    String fileName = pair.getValue().getLocation().getFileName();
+                    String methodName = pair.getValue().getLocation().getMethodName();
+                    writer.write("apk,package,"+fileName+","+methodName+"\n");
+                }
+            }
+        } catch (FileNotFoundException e) {
+            // Do something
+        }
     }
 }

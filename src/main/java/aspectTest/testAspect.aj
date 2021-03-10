@@ -1,9 +1,5 @@
 package aspectTest;
 
-import fj.data.vector.V;
-import staticanalyzis.Analyzer;
-import utils.HMUManager;
-
 import java.util.HashMap;
 
 public aspect testAspect {

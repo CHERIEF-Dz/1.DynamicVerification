@@ -11,9 +11,9 @@ import soot.*;
 import soot.jimple.*;
 import soot.options.Options;
 import utils.CodeLocation;
-import utils.DWManager;
-import utils.HMUManager;
-import utils.ManagerGroup;
+import manager.DWManager;
+import manager.HMUManager;
+import manager.ManagerGroup;
 
 import java.io.File;
 import java.io.PrintStream;

@@ -1,10 +1,9 @@
-package utils;
+package manager;
 
 import actions.dw.DWAcquire;
 import actions.dw.DWImplementation;
 import actions.dw.DWRelease;
 import structure.dw.WakeLockStructure;
-import structure.hmu.MapStructure;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -56,7 +55,7 @@ public class DWManager implements Manager {
     }
 
     public void generateCSV() {
-        File csvOutputFile = new File("test.csv");
+        File csvOutputFile = new File("test_DW.csv");
         try (PrintWriter writer = new PrintWriter(csvOutputFile)) {
             writer.write("apk, package, file, method\n");
             for (java.util.Map.Entry<String, WakeLockStructure> stringStructureEntry : this.structures.entrySet()) {

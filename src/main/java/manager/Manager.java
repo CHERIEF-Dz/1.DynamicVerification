@@ -1,4 +1,4 @@
-package utils;
+package manager;
 
 public interface Manager {
     void checkStructures();
