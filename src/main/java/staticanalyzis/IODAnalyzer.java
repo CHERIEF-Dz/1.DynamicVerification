@@ -9,6 +9,7 @@ import manager.IODManager;
 import manager.ManagerGroup;
 import soot.*;
 import soot.jimple.*;
+import soot.validation.ValidationException;
 import utils.CodeLocation;
 
 import java.util.ArrayList;
@@ -102,11 +103,35 @@ public class IODAnalyzer extends CodeSmellAnalyzer {
 
         generatedUnits = buildEndingPrint(generatedUnits, refPrint, refBuilder, tmpString);
 
-        //units.insertAfter(generatedUnits, u);
-        units.insertBefore(generatedUnits, units.getFirst());
+        boolean foundNonThisOrParamIdentityStatement = false;
+        boolean firstStatement = true;
+        Unit insertBefore = null;
+        for (Unit unit : units) {
+            boolean mayBeSelected = true;
+            if (unit instanceof IdentityStmt) {
+                IdentityStmt identityStmt = (IdentityStmt) unit;
+                if (identityStmt.getRightOp() instanceof ThisRef) {
+                    if (firstStatement) {
+                        mayBeSelected = false;
+                    }
+                } else if (identityStmt.getRightOp() instanceof ParameterRef) {
+                    if (!foundNonThisOrParamIdentityStatement) {
+                        mayBeSelected = false;
+                    }
+                } else {
+                    foundNonThisOrParamIdentityStatement = true;
+                }
+            } else {
+                foundNonThisOrParamIdentityStatement = true;
+            }
+            firstStatement = false;
+            if (mayBeSelected && insertBefore == null) {
+                insertBefore = unit;
+            }
+        }
 
-        System.out.println("Body : ");
-        System.out.println(b.toString());
+        units.insertBefore(generatedUnits, insertBefore);
+
         //check that we did not mess up the Jimple
         b.validate();
     }
