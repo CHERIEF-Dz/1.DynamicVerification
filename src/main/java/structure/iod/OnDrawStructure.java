@@ -3,12 +3,16 @@ package structure.iod;
 import structure.Structure;
 import utils.CodeLocation;
 
+import java.util.Calendar;
+import java.util.Date;
+
 public class OnDrawStructure implements Structure {
 
 
     protected CodeLocation structureImplementation;
     protected String id;
     protected boolean codeSmellFound;
+    private String begin, end;
 
     public OnDrawStructure(CodeLocation implementation, String id) {
         this.structureImplementation = implementation;
@@ -42,5 +46,14 @@ public class OnDrawStructure implements Structure {
 
     public CodeLocation getLocation() {
         return this.structureImplementation;
+    }
+
+    public void begin(String date) {
+       //this.begin = Calendar.getInstance().
+        this.begin = date;
+    }
+
+    public void end(String date) {
+        this.end = date;
     }
 }

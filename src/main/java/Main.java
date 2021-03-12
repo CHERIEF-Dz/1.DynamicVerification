@@ -27,7 +27,7 @@ public class Main {
         ManagerGroup managerGroup;
         //manager = classicAnalyzer();
         String platformPath = "android-platforms";
-        String apkPath = "tests_apks/app-debug_2.apk";
+        String apkPath = "tests_apks/app-debug_iod.apk";
 
         if (choice == 1) {
             managerGroup = sootAnalyzer(platformPath, apkPath, true);

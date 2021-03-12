@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 
 public final class DWAnalyzer extends CodeSmellAnalyzer{
 
-    public static void checkEverything(String line, String path, String name, String methodName, int lineNumber, ManagerGroup managerGroup, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting) {
+    public static void checkLine(String line, String path, String name, String methodName, int lineNumber, ManagerGroup managerGroup, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting) {
         checkDWAcquire(line, "test", name, methodName, 0, managerGroup.managerDW, b, u, b.getUnits(), isInstrumenting);
         checkDWRelease(line, "test", name, methodName, 0, managerGroup.managerDW, b, u, b.getUnits(), isInstrumenting);
     }
