@@ -27,14 +27,14 @@ public class Main {
         ManagerGroup managerGroup;
         //manager = classicAnalyzer();
         String platformPath = "android-platforms";
-        String apkPath = "tests_apks/app-debug_iod.apk";
+        String apkPath = "tests_apks/app-debug_iod_timed.apk";
 
         if (choice == 1) {
             managerGroup = sootAnalyzer(platformPath, apkPath, true);
         }
         else if (choice == 2) {
             managerGroup = sootAnalyzer(platformPath, apkPath, false);
-            String tracePath = "tests_ressources/lambda.txt";
+            String tracePath = "tests_ressources/trace_iod_timed.txt";
             sootanalyzeTrace(managerGroup, tracePath);
         }
         /*
@@ -82,7 +82,6 @@ public class Main {
                         //HMU
                         HMUManager managerHMU = managerGroup.managerHMU;
                         if ("hmuimpl".equals(result[3])) {
-                            System.out.println("Line : " + line);
                             managerHMU.executeImplementation(key, id);
                         } else if ("hmuadd".equals(result[3])) {
                             //System.out.println("Addition line !");
@@ -95,6 +94,11 @@ public class Main {
                             managerGroup.managerDW.executeAcquire(key, id);
                         } else if ("dwrel".equals(result[3])) {
                             managerGroup.managerDW.executeRelease(key, id);
+                        } else if ("iodenter".equals(result[3])) {
+                            System.out.println("Enter !");
+                            managerGroup.managerIOD.executeEnter(key, fileName, Long.valueOf(id));
+                        } else if ("iodexit".equals(result[3])) {
+                            managerGroup.managerIOD.executeExit(key, fileName, Long.valueOf(id));
                         }
                     }
                 }

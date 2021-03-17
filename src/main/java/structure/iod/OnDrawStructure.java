@@ -12,7 +12,7 @@ public class OnDrawStructure implements Structure {
     protected CodeLocation structureImplementation;
     protected String id;
     protected boolean codeSmellFound;
-    private String begin, end;
+    private long begin, end;
 
     public OnDrawStructure(CodeLocation implementation, String id) {
         this.structureImplementation = implementation;
@@ -37,6 +37,10 @@ public class OnDrawStructure implements Structure {
             this.foundCodeSmell();
         }
         */
+        if (((this.end-this.begin)/1000000.0) > ((1000)/60.0)) {
+            this.foundCodeSmell();
+        }
+        //System.out.println("Coucou ! Début : " + this.begin + " fin : " + this.end + " différence : " + ((this.end-this.begin)/1000000.0) + " and inferior to " + ((1000)/60));
     }
 
     @Override
@@ -48,12 +52,12 @@ public class OnDrawStructure implements Structure {
         return this.structureImplementation;
     }
 
-    public void begin(String date) {
+    public void begin(long date) {
        //this.begin = Calendar.getInstance().
         this.begin = date;
     }
 
-    public void end(String date) {
+    public void end(long date) {
         this.end = date;
     }
 }

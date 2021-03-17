@@ -9,7 +9,7 @@ public class IODEnter extends ConcreteAction {
         super(location);
     }
 
-    public OnDrawStructure execute(String id, String date) {
+    public OnDrawStructure execute(String id, long date) {
         OnDrawStructure toReturn = new OnDrawStructure(this.location, id);
         toReturn.begin(date);
         return toReturn;

@@ -10,7 +10,7 @@ public class IODExit extends ConcreteAction {
         super(location);
     }
 
-    public void execute(OnDrawStructure onDrawMethod, String date) {
+    public void execute(OnDrawStructure onDrawMethod, long date) {
         onDrawMethod.end(date);
     }
 

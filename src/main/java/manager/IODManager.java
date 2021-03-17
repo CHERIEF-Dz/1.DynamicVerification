@@ -2,6 +2,7 @@ package manager;
 
 import actions.iod.IODEnter;
 import actions.iod.IODExit;
+import structure.dw.WakeLockStructure;
 import structure.iod.OnDrawStructure;
 
 import java.util.HashMap;
@@ -19,7 +20,10 @@ public class IODManager implements Manager{
 
     @Override
     public void checkStructures() {
-        //Todo
+        for (java.util.Map.Entry<String, OnDrawStructure> stringStructureEntry : this.structures.entrySet()) {
+            HashMap.Entry<String, OnDrawStructure> pair = (HashMap.Entry) stringStructureEntry;
+            pair.getValue().checkStructure();
+        }
     }
 
     public void addEnter(String key, IODEnter enter) {
@@ -30,11 +34,11 @@ public class IODManager implements Manager{
         this.exits.put(key, exit);
     }
 
-    public void executeEnter(String key, String id, String date) {
+    public void executeEnter(String key, String id, long date) {
         this.structures.put(id, this.enters.get(key).execute(id, date));
     }
 
-    public void executeExit(String key, String id, String date) {
+    public void executeExit(String key, String id, long date) {
         this.exits.get(key).execute(this.structures.get(id), date);
     }
 

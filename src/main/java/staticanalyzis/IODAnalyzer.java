@@ -28,7 +28,6 @@ public class IODAnalyzer extends CodeSmellAnalyzer {
     private static void checkIOD(String path, String name, String methodName, int lineNumber, IODManager manager, Body b, UnitPatchingChain units, boolean isInstrumenting) {
         Matcher m = findPattern(methodName, "onDraw");
         if (m.find()) {
-            System.out.println("On Draw !!");
             String key=generateKey(name);
             String variableName=m.group(0).split("\\.")[0];
             manager.addEnter(key, new IODEnter(new CodeLocation(path, name, methodName, lineNumber)));
@@ -36,7 +35,7 @@ public class IODAnalyzer extends CodeSmellAnalyzer {
 
             if (isInstrumenting) {
                 //System.out.println(b.toString());
-                buildInstrumentationMethod(units, b, "iodenter:");
+                buildInstrumentationMethod(units, b, "iodenter:", "iodexit:");
             }
         }
     }
@@ -91,15 +90,32 @@ public class IODAnalyzer extends CodeSmellAnalyzer {
         return generatedUnits;
     }
 
-    protected static void buildInstrumentationMethod(UnitPatchingChain units, Body b, String suffix) {
+    private static List<Unit> buildTimerPrint(List<Unit> generatedUnits, Local refTime, Local refBuilder) {
+        SootMethod timeMethod = Scene.v().getSootClass("java.lang.System").getMethod("long nanoTime()");
+        AssignStmt actualTime = Jimple.v().newAssignStmt(refTime,
+                Jimple.v().newStaticInvokeExpr(timeMethod.makeRef())
+        );
+        generatedUnits.add(actualTime);
+
+        //Append identity
+        SootMethod appendMethod2 = Scene.v().getSootClass("java.lang.StringBuilder").getMethod("java.lang.StringBuilder append(long)");
+        InvokeStmt invokeAppend2 = Jimple.v().newInvokeStmt(
+                Jimple.v().newVirtualInvokeExpr(refBuilder, appendMethod2.makeRef(), refTime));
+        generatedUnits.add(invokeAppend2);
+        return generatedUnits;
+    }
+
+    protected static void buildInstrumentationMethod(UnitPatchingChain units, Body b, String suffixBeginning, String suffixEnding) {
         //Add Print
-        Local refIdentity = addTmpRef(b, "refIdentity", IntType.v());
+        Local refTime = addTmpRef(b, "refIdentity", LongType.v());
         Local refBuilder = addTmpRef(b, "refBuilder", RefType.v("java.lang.StringBuilder"));
         Local refPrint = addTmpRef(b, "refPrint", RefType.v("java.io.PrintStream"));
         Local tmpString = addTmpRef(b, "tmpString", RefType.v("java.lang.String"));
         List<Unit> generatedUnits;
 
-        generatedUnits = buildBeginningPrint(b, refPrint, refBuilder, tmpString, suffix);
+        generatedUnits = buildBeginningPrint(b, refPrint, refBuilder, tmpString, suffixBeginning);
+
+        generatedUnits = buildTimerPrint(generatedUnits, refTime, refBuilder);
 
         generatedUnits = buildEndingPrint(generatedUnits, refPrint, refBuilder, tmpString);
 
@@ -131,6 +147,18 @@ public class IODAnalyzer extends CodeSmellAnalyzer {
         }
 
         units.insertBefore(generatedUnits, insertBefore);
+
+        //End
+
+        List<Unit> generatedEndingUnits;
+
+        generatedEndingUnits = buildBeginningPrint(b, refPrint, refBuilder, tmpString, suffixEnding);
+
+        generatedEndingUnits = buildTimerPrint(generatedEndingUnits, refTime, refBuilder);
+
+        generatedEndingUnits = buildEndingPrint(generatedEndingUnits, refPrint, refBuilder, tmpString);
+
+        units.insertBefore(generatedEndingUnits, b.getUnits().getLast());
 
         //check that we did not mess up the Jimple
         b.validate();
