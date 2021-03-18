@@ -23,11 +23,11 @@ public class HMUImplementation extends ConcreteAction {
         //System.out.println("Test[Impl] : " + this.location.toString());
         MapStructure toReturn = null;
         if ("HashMap".equals(type)) {
-            toReturn = new HashMapStructure(this.location, id);
+            toReturn = new HashMapStructure(this.location, id, this.variableName);
         } else if ("ArrayMap".equals(type)) {
-            toReturn = new ArrayMapStructure(this.location, id);
+            toReturn = new ArrayMapStructure(this.location, id, this.variableName);
         } else if ("SimpleArrayMap".equals(type)) {
-            toReturn = new SimpleArrayMapStructure(this.location, id);
+            toReturn = new SimpleArrayMapStructure(this.location, id, this.variableName);
         }
         return toReturn;
     }

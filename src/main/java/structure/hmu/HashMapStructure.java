@@ -6,8 +6,8 @@ public class HashMapStructure extends MapStructure {
 
     public int LittleHashMapThreshold = 500;
 
-    public HashMapStructure(CodeLocation implementation, String id) {
-        super(implementation, id);
+    public HashMapStructure(CodeLocation implementation, String id, String name) {
+        super(implementation, id, name);
         this.actualSize = 0;
         this.structureImplementation = implementation;
     }

@@ -43,8 +43,14 @@ public class DWManager implements Manager {
         }
     }
 
-    public void generateCSV() {
-        File csvOutputFile = new File("test_DW.csv");
+    public void generateCSV(String outputPath) {
+
+        File directory = new File(outputPath);
+        if (! directory.exists()){
+            directory.mkdir();
+        }
+
+        File csvOutputFile = new File(outputPath+"test_DW.csv");
         try (PrintWriter writer = new PrintWriter(csvOutputFile)) {
             writer.write("apk, package, file, method\n");
             for (java.util.Map.Entry<String, WakeLockStructure> stringStructureEntry : this.structures.entrySet()) {

@@ -43,7 +43,7 @@ public class IODManager implements Manager{
     }
 
     @Override
-    public void generateCSV() {
+    public void generateCSV(String outputPath) {
         //Todo
     }
 

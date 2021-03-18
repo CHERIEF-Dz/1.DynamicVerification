@@ -2,6 +2,6 @@ package manager;
 
 public interface Manager {
     void checkStructures();
-    void generateCSV();
+    void generateCSV(String outputPath);
     String getBreakpoints();
 }

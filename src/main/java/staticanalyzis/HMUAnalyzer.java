@@ -26,7 +26,6 @@ public final class HMUAnalyzer extends CodeSmellAnalyzer {
     private static void checkHMUInst(String line, String path, String name, String methodName, int lineNumber, HMUManager manager, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting) {
         Matcher m = findPattern(line, "(?<=(HashMap))(.*)(?=void <init>\\()");
         if (m.find()) {
-            //System.out.println("New HashMap !! : " + line);
             String variableName=m.group(0).split("=")[0].replaceAll("\\s","");
             manager.addImplementation(generateKey(name), new HMUImplementation(new CodeLocation(path, name, methodName, lineNumber), "HashMap", variableName));
             if (isInstrumenting) {

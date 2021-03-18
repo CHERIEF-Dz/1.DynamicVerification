@@ -1,3 +1,5 @@
+import net.sourceforge.argparse4j.ArgumentParsers;
+import net.sourceforge.argparse4j.inf.*;
 import staticanalyzis.Analyzer;
 import staticanalyzis.SootAnalyzer;
 import manager.HMUManager;
@@ -16,7 +18,35 @@ public class Main {
 
 
     public static void main(String[] args) throws IOException {
+        ArgumentParser parser = ArgumentParsers.newFor("ddcf").build().description("A dynamic analysis tool to detect Android Code smells");
+        Subparsers subparsers = parser.addSubparsers().dest("sub_command");;
+        Subparser analyseParser = subparsers.addParser("instrumentation").help("Instrumentalize an app");
+        analyseParser.addArgument("apk").required(true).help("Path of the APK to analyze");
+        analyseParser.addArgument("-a", "--androidJars").required(true).help("Path to android platforms jars");
+        analyseParser.addArgument("-o", "--output").required(true).help("Path to the folder where the instrumented APK output is generated");
 
+        Subparser queryParser = subparsers.addParser("analyse").help("Analyse the execution trace of an app");
+        queryParser.addArgument("apk").required(true).help("Path of the APK to analyze");
+        queryParser.addArgument("-a", "--androidJars").required(true).help("Path to android platforms jars");
+        queryParser.addArgument("-t", "--trace").required(true).help("Path to the execution trace");
+        queryParser.addArgument("-o", "--output").required(true).help("Path to the folder for the .csv results of the detection");
+
+        ManagerGroup managerGroup;
+        try {
+            Namespace res = parser.parseArgs(args);
+            //System.out.println();
+            if (res.getString("sub_command").equals("instrumentation")) {
+                managerGroup = sootAnalyzer(res.getString("androidJars"), res.getString("apk"), res.getString("output"), true);
+            }
+            else if (res.getString("sub_command").equals("analyse")) {
+                managerGroup = sootAnalyzer(res.getString("androidJars"), res.getString("apk"), "", false);
+                String tracePath = res.getString("trace");
+                sootanalyzeTrace(managerGroup, tracePath, res.getString("output"));
+            }
+        } catch (ArgumentParserException e) {
+            parser.handleError(e);
+        }
+        /*
         Scanner S = new Scanner(System.in);
         System.out.println("Faites votre choix :");
         System.out.println("1 : Instrumentation");
@@ -27,7 +57,7 @@ public class Main {
         ManagerGroup managerGroup;
         //manager = classicAnalyzer();
         String platformPath = "android-platforms";
-        String apkPath = "tests_apks/app-debug_iod_timed.apk";
+        String apkPath = "tests_apks/nour/app-debug-androidTest.apk";
 
         if (choice == 1) {
             managerGroup = sootAnalyzer(platformPath, apkPath, true);
@@ -37,6 +67,8 @@ public class Main {
             String tracePath = "tests_ressources/trace_iod_timed.txt";
             sootanalyzeTrace(managerGroup, tracePath);
         }
+
+         */
         /*
         String tracePath = "tests_ressources/trace_test_1.txt";
         analyzeTrace(manager, tracePath);
@@ -52,18 +84,18 @@ public class Main {
         return manager;
     }
 
-    public static ManagerGroup sootAnalyzer(String platformPath, String apkPath, boolean isInstrumenting) {
+    public static ManagerGroup sootAnalyzer(String platformPath, String apkPath, String outputPath, boolean isInstrumenting) {
         ManagerGroup managerGroup = new ManagerGroup();
-        SootAnalyzer test = new SootAnalyzer(platformPath, apkPath);
+        SootAnalyzer test = new SootAnalyzer(platformPath, apkPath, outputPath);
         test.analyze(managerGroup, isInstrumenting);
         return managerGroup;
     }
 
-    public static void sootanalyzeTrace(ManagerGroup managerGroup, String tracePath) {
+    public static void sootanalyzeTrace(ManagerGroup managerGroup, String tracePath, String outputPath) {
         BufferedReader reader;
         int traceNumberLine=1;
         String timeStamp1 = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
-        System.out.println("Début analyse : " + timeStamp1);
+        //System.out.println("Début analyse : " + timeStamp1);
         try {
             reader = new BufferedReader(new FileReader(
                     tracePath));
@@ -95,7 +127,6 @@ public class Main {
                         } else if ("dwrel".equals(result[3])) {
                             managerGroup.managerDW.executeRelease(key, id);
                         } else if ("iodenter".equals(result[3])) {
-                            System.out.println("Enter !");
                             managerGroup.managerIOD.executeEnter(key, fileName, Long.valueOf(id));
                         } else if ("iodexit".equals(result[3])) {
                             managerGroup.managerIOD.executeExit(key, fileName, Long.valueOf(id));
@@ -113,8 +144,10 @@ public class Main {
             e.printStackTrace();
         }
         managerGroup.checkStructures();
+        managerGroup.generateCSV(outputPath);
+        //System.out.println(managerGroup.managerHMU.getBreakpoints());
         String timeStamp2 = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
-        System.out.println("Fin analyse : " + timeStamp2);
+        //System.out.println("Fin analyse : " + timeStamp2);
     }
 
     public static void analyzeTrace(HMUManager manager, String tracePath) {

@@ -11,11 +11,12 @@ import java.util.Map;
 
 public class SootAnalyzer {
 
-    private String apkPath, platformPath;
+    private String apkPath, platformPath, outputPath;
 
-    public SootAnalyzer(String platformPath, String apkPath) {
+    public SootAnalyzer(String platformPath, String apkPath, String outputPath) {
         this.platformPath = platformPath;
         this.apkPath = apkPath;
+        this.outputPath = outputPath;
     }
 
     public void setupSoot() {
@@ -31,7 +32,7 @@ public class SootAnalyzer {
         Options.v().set_process_dir(Collections.singletonList(this.apkPath));
         Options.v().set_include_all(true);
         Options.v().set_process_multiple_dex(true);
-        Options.v().set_output_dir("tests");
+        Options.v().set_output_dir(this.outputPath);
         Scene.v().addBasicClass("java.io.PrintStream",SootClass.SIGNATURES);
         Scene.v().addBasicClass("java.lang.System",SootClass.SIGNATURES);
         Scene.v().loadNecessaryClasses();

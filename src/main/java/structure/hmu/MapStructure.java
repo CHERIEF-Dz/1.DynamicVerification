@@ -9,11 +9,13 @@ public class MapStructure implements Structure {
     protected CodeLocation structureImplementation;
     protected String id;
     protected boolean codeSmellFound;
+    protected String name;
 
-    public MapStructure(CodeLocation implementation, String id) {
+    public MapStructure(CodeLocation implementation, String id, String name) {
         this.actualSize = 0;
         this.structureImplementation = implementation;
         this.id = id;
+        this.name = name;
         this.codeSmellFound=false;
     }
 
@@ -42,6 +44,8 @@ public class MapStructure implements Structure {
     }
 
     public int  getSize() {return this.actualSize;}
+
+    public String getName() {return this.name;}
 
     public String getId() {return this.id;}
 

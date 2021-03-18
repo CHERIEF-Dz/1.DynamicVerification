@@ -6,8 +6,8 @@ public class ArrayMapStructure extends MapStructure {
 
     public static int bigArrayMapTreshold=500;
 
-    public ArrayMapStructure(CodeLocation implementation, String id) {
-        super(implementation, id);
+    public ArrayMapStructure(CodeLocation implementation, String id, String name) {
+        super(implementation, id, name);
         this.actualSize = 0;
         this.structureImplementation = implementation;
     }

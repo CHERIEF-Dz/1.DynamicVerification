@@ -15,8 +15,12 @@ public class ManagerGroup {
         this.managerHMU.checkStructures();
         this.managerDW.checkStructures();
         this.managerIOD.checkStructures();
-        this.managerDW.generateCSV();
-        this.managerHMU.generateCSV();
-        this.managerIOD.generateCSV();
+
+    }
+
+    public void generateCSV(String outputPath) {
+        this.managerDW.generateCSV(outputPath);
+        this.managerHMU.generateCSV(outputPath);
+        this.managerIOD.generateCSV(outputPath);
     }
 }
