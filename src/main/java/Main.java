@@ -24,22 +24,24 @@ public class Main {
         analyseParser.addArgument("apk").required(true).help("Path of the APK to analyze");
         analyseParser.addArgument("-a", "--androidJars").required(true).help("Path to android platforms jars");
         analyseParser.addArgument("-o", "--output").required(true).help("Path to the folder where the instrumented APK output is generated");
+        analyseParser.addArgument("-p", "--package").required(true).help("Main package of the app");
 
         Subparser queryParser = subparsers.addParser("analyse").help("Analyse the execution trace of an app");
         queryParser.addArgument("apk").required(true).help("Path of the APK to analyze");
         queryParser.addArgument("-a", "--androidJars").required(true).help("Path to android platforms jars");
         queryParser.addArgument("-t", "--trace").required(true).help("Path to the execution trace");
         queryParser.addArgument("-o", "--output").required(true).help("Path to the folder for the .csv results of the detection");
+        queryParser.addArgument("-p", "--package").required(true).help("Main package of the app");
 
         ManagerGroup managerGroup;
         try {
             Namespace res = parser.parseArgs(args);
             //System.out.println();
             if (res.getString("sub_command").equals("instrumentation")) {
-                managerGroup = sootAnalyzer(res.getString("androidJars"), res.getString("apk"), res.getString("output"), true);
+                managerGroup = sootAnalyzer(res.getString("androidJars"), res.getString("apk"), res.getString("output"), res.getString("package"), true);
             }
             else if (res.getString("sub_command").equals("analyse")) {
-                managerGroup = sootAnalyzer(res.getString("androidJars"), res.getString("apk"), "", false);
+                managerGroup = sootAnalyzer(res.getString("androidJars"), res.getString("apk"), "", res.getString("package"),false);
                 String tracePath = res.getString("trace");
                 sootanalyzeTrace(managerGroup, tracePath, res.getString("output"));
             }
@@ -84,10 +86,10 @@ public class Main {
         return manager;
     }
 
-    public static ManagerGroup sootAnalyzer(String platformPath, String apkPath, String outputPath, boolean isInstrumenting) {
+    public static ManagerGroup sootAnalyzer(String platformPath, String apkPath, String outputPath, String pack, boolean isInstrumenting) {
         ManagerGroup managerGroup = new ManagerGroup();
         SootAnalyzer test = new SootAnalyzer(platformPath, apkPath, outputPath);
-        test.analyze(managerGroup, isInstrumenting);
+        test.analyze(managerGroup, isInstrumenting, pack);
         return managerGroup;
     }
 

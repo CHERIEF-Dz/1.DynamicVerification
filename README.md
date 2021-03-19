@@ -25,7 +25,7 @@ named arguments:
 
 ####Instrumentation mode usage
 ```
-usage: ddcf instrumentation [-h] -a ANDROIDJARS -o OUTPUT apk
+usage: ddcf instrumentation [-h] -a ANDROIDJARS -o OUTPUT -p PACKAGE apk
 
 positional arguments:
   apk                    Path of the APK to analyze
@@ -37,11 +37,13 @@ named arguments:
   -o OUTPUT, --output OUTPUT
                          Path to  the  folder  where  the  instrumented APK
                          output is generated
+  -p PACKAGE, --package PACKAGE
+                         Main package of the app
 ```
 
 ####Analyse mode usage
 ```
-usage: ddcf analyse [-h] -a ANDROIDJARS -t TRACE -o OUTPUT apk
+usage: ddcf analyse [-h] -a ANDROIDJARS -t TRACE -o OUTPUT -p PACKAGE apk
 
 positional arguments:
   apk                    Path of the APK to analyze
@@ -55,14 +57,16 @@ named arguments:
   -o OUTPUT, --output OUTPUT
                          Path to the folder  for  the  .csv  results of the
                          detection
+  -p PACKAGE, --package PACKAGE
+                         Main package of the app
 ```
 
 Example of usage :
 ```
-java -jar ddcf.jar instrumentation -a android-platforms/ -o apkOutputs/ application.apk
+java -jar ddcf.jar instrumentation -a android-platforms/ -o apkOutputs/ -p com.core.package application.apk
 ```
 
 Analyse :
 ```
-java -jar ddcf.jar analyse -a android-platforms/ -t trace.txt -o csvOutputs/ application.apk
+java -jar ddcf.jar analyse -a android-platforms/ -t trace.txt -o csvOutputs/ -p com.core.package application.apk
 ```

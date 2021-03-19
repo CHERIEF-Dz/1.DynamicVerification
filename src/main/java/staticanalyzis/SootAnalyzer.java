@@ -39,9 +39,8 @@ public class SootAnalyzer {
         System.setOut(originalStream);
     }
 
-    public void analyze(ManagerGroup managerGroup, boolean isInstrumenting) {
+    public void analyze(ManagerGroup managerGroup, boolean isInstrumenting, String pack) {
         setupSoot();
-        String pack = "com.core.lambdaapp";
 
         PackManager.v().getPack("jtp").add(new Transform("jtp.myInstrumenter", new BodyTransformer() {
             @Override
