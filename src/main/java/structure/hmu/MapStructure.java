@@ -10,9 +10,11 @@ public class MapStructure implements Structure {
     protected String id;
     protected boolean codeSmellFound;
     protected String name;
+    protected int maximumSize;
 
     public MapStructure(CodeLocation implementation, String id, String name) {
         this.actualSize = 0;
+        this.maximumSize=0;
         this.structureImplementation = implementation;
         this.id = id;
         this.name = name;
@@ -21,6 +23,8 @@ public class MapStructure implements Structure {
 
     public void addElement() {
         actualSize++;
+        if (actualSize>maximumSize)
+            maximumSize=actualSize;
     }
 
     public void deleteElement() {actualSize--; }
@@ -40,7 +44,7 @@ public class MapStructure implements Structure {
     }
 
     public void checkStructure() {
-        //
+        System.out.println("Structure : " + this.id + " has : " + this.maximumSize);
     }
 
     public int  getSize() {return this.actualSize;}

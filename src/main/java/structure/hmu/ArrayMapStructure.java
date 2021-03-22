@@ -4,7 +4,7 @@ import utils.CodeLocation;
 
 public class ArrayMapStructure extends MapStructure {
 
-    public static int bigArrayMapTreshold=500;
+    public static int bigArrayMapTreshold=400;
 
     public ArrayMapStructure(CodeLocation implementation, String id, String name) {
         super(implementation, id, name);

@@ -13,11 +13,13 @@ public class OnDrawStructure implements Structure {
     protected String id;
     protected boolean codeSmellFound;
     private long begin, end;
+    private int nbInstanciations;
 
     public OnDrawStructure(CodeLocation implementation, String id) {
         this.structureImplementation = implementation;
         this.id = id;
         this.codeSmellFound=false;
+        this.nbInstanciations = 0;
     }
     @Override
     public void foundCodeSmell() {
@@ -60,4 +62,6 @@ public class OnDrawStructure implements Structure {
     public void end(long date) {
         this.end = date;
     }
+
+    public void newInstance() {this.nbInstanciations++;}
 }

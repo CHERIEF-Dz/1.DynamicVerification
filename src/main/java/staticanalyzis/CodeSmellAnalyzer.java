@@ -27,6 +27,56 @@ public class CodeSmellAnalyzer {
         return m;
     }
 
+    protected static List<Unit> buildBeginningPrint(Body b, Local refPrint, Local refBuilder, Local tmpString, String suffix) {
+        // insert "refPrint = java.lang.System.out;"
+
+
+        List<Unit> generatedUnits = new ArrayList<>();
+        AssignStmt printStmt = Jimple.v().newAssignStmt(
+                refPrint, Jimple.v().newStaticFieldRef(
+                        Scene.v().getField("<java.lang.System: java.io.PrintStream out>").makeRef()));
+        generatedUnits.add(printStmt);
+
+        // insert "tmpLong = 'HELLO';"
+        AssignStmt stringStmt = Jimple.v().newAssignStmt(tmpString,
+                StringConstant.v(CodeSmellAnalyzer.prefix+b.getMethod().getDeclaringClass().getName() + ".java:"+CodeSmellAnalyzer.keyCpt+":"+suffix));
+        generatedUnits.add(stringStmt);
+
+        // insert tmpRef = new java.lang.StringBuilder;
+        NewExpr newString = Jimple.v().newNewExpr(RefType.v("java.lang.StringBuilder"));
+        AssignStmt builderStmt = Jimple.v().newAssignStmt(refBuilder, newString);
+        generatedUnits.add(builderStmt);
+
+        // special invoke init
+        InvokeStmt initBuilder = Jimple.v().newInvokeStmt(Jimple.v().newSpecialInvokeExpr(refBuilder,
+                Scene.v().getSootClass("java.lang.StringBuilder").getMethod("void <init>()").makeRef()));
+        generatedUnits.add(initBuilder);
+
+        //Virtual call Append
+        SootMethod appendMethod1 = Scene.v().getSootClass("java.lang.StringBuilder").getMethod("java.lang.StringBuilder append(java.lang.String)");
+        InvokeStmt invokeAppend1 = Jimple.v().newInvokeStmt(
+                Jimple.v().newVirtualInvokeExpr(refBuilder, appendMethod1.makeRef(), tmpString));
+        generatedUnits.add(invokeAppend1);
+
+        return generatedUnits;
+    }
+
+    protected static List<Unit> buildEndingPrint(List<Unit> generatedUnits, Local refPrint, Local refBuilder, Local tmpString) {
+        //Builder to String
+        SootMethod toStringMethod = Scene.v().getSootClass("java.lang.StringBuilder").getMethod("java.lang.String toString()");
+        AssignStmt builderString = Jimple.v().newAssignStmt(tmpString,
+                Jimple.v().newVirtualInvokeExpr(refBuilder, toStringMethod.makeRef())
+        );
+        generatedUnits.add(builderString);
+
+        // insert "tmpRef.println(tmpString);"
+        SootMethod printMethod = Scene.v().getSootClass("java.io.PrintStream").getMethod("void println(java.lang.String)");
+        InvokeStmt invokePrint = Jimple.v().newInvokeStmt(
+                Jimple.v().newVirtualInvokeExpr(refPrint, printMethod.makeRef(), tmpString));
+        generatedUnits.add(invokePrint);
+        return generatedUnits;
+    }
+
     protected static void buildInstrumentation(String structureLocalName, UnitPatchingChain units, Unit u, Body b, String suffix) {
         //Add Print
         Local refPrint = addTmpRef(b, "refPrint", RefType.v("java.io.PrintStream"));
@@ -36,6 +86,13 @@ public class CodeSmellAnalyzer {
 
         List<Unit> generatedUnits = new ArrayList<>();
 
+        generatedUnits = buildBeginningPrint(b, refPrint, refBuilder, tmpString, suffix);
+
+        //generatedUnits = buildTimerPrint(generatedUnits, refTime, refBuilder);
+
+
+
+        /*
         // insert "refPrint = java.lang.System.out;"
         AssignStmt printStmt = Jimple.v().newAssignStmt(
                 refPrint, Jimple.v().newStaticFieldRef(
@@ -63,6 +120,8 @@ public class CodeSmellAnalyzer {
                 Jimple.v().newVirtualInvokeExpr(refBuilder, appendMethod1.makeRef(), tmpString));
         generatedUnits.add(invokeAppend1);
 
+        */
+
         //Get Identity
         Local structureLocal = null;
         Iterator<Local> localIterator = b.getLocals().iterator();
@@ -85,6 +144,9 @@ public class CodeSmellAnalyzer {
                 Jimple.v().newVirtualInvokeExpr(refBuilder, appendMethod2.makeRef(), refIdentity));
         generatedUnits.add(invokeAppend2);
 
+        generatedUnits = buildEndingPrint(generatedUnits, refPrint, refBuilder, tmpString);
+
+        /*
         //Builder to String
         SootMethod toStringMethod = Scene.v().getSootClass("java.lang.StringBuilder").getMethod("java.lang.String toString()");
         AssignStmt builderString = Jimple.v().newAssignStmt(tmpString,
@@ -97,6 +159,8 @@ public class CodeSmellAnalyzer {
         InvokeStmt invokePrint = Jimple.v().newInvokeStmt(
                 Jimple.v().newVirtualInvokeExpr(refPrint, printMethod.makeRef(), tmpString));
         generatedUnits.add(invokePrint);
+
+        */
 
         units.insertAfter(generatedUnits, u);
 

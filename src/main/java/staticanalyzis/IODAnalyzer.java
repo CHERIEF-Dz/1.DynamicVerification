@@ -2,9 +2,12 @@ package staticanalyzis;
 
 import actions.dw.DWAcquire;
 import actions.dw.DWRelease;
+import actions.hmu.HMUAddition;
 import actions.iod.IODEnter;
 import actions.iod.IODExit;
+import actions.iod.IODNew;
 import manager.DWManager;
+import manager.HMUManager;
 import manager.IODManager;
 import manager.ManagerGroup;
 import soot.*;
@@ -18,6 +21,21 @@ import java.util.List;
 import java.util.regex.Matcher;
 
 public class IODAnalyzer extends CodeSmellAnalyzer {
+
+    public static void checkLine(String line, String path, String name, String methodName, int lineNumber, ManagerGroup managerGroup, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting) {
+        checkNew(line, "test", name, methodName,0, managerGroup.managerIOD, b, u, b.getUnits(), isInstrumenting);
+    }
+
+    public static void checkNew(String line, String path, String name, String methodName, int lineNumber, IODManager manager, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting) {
+        Matcher m = findPattern(line, "<init>");
+        if (m.find()) {
+            String variableName=m.group(0).split("\\.")[0];
+            manager.addNew(generateKey(name), new IODNew(new CodeLocation(path, name, methodName, lineNumber)));
+            if (isInstrumenting) {
+                buildInstrumentation(getStructureCallerLocalName(line), units, u, b, "iodnew:");
+            }
+        }
+    }
 
     public static void checkMethod(String path, String name, String methodName, int lineNumber, ManagerGroup managerGroup, Body b, UnitPatchingChain units, boolean isInstrumenting) {
         checkIOD("test", name, methodName,0, managerGroup.managerIOD, b, b.getUnits(), isInstrumenting);
@@ -38,56 +56,6 @@ public class IODAnalyzer extends CodeSmellAnalyzer {
                 buildInstrumentationMethod(units, b, "iodenter:", "iodexit:");
             }
         }
-    }
-
-    private static List<Unit> buildBeginningPrint(Body b, Local refPrint, Local refBuilder, Local tmpString, String suffix) {
-        // insert "refPrint = java.lang.System.out;"
-
-
-        List<Unit> generatedUnits = new ArrayList<>();
-        AssignStmt printStmt = Jimple.v().newAssignStmt(
-                refPrint, Jimple.v().newStaticFieldRef(
-                        Scene.v().getField("<java.lang.System: java.io.PrintStream out>").makeRef()));
-        generatedUnits.add(printStmt);
-
-        // insert "tmpLong = 'HELLO';"
-        AssignStmt stringStmt = Jimple.v().newAssignStmt(tmpString,
-                StringConstant.v(CodeSmellAnalyzer.prefix+b.getMethod().getDeclaringClass().getName() + ".java:"+CodeSmellAnalyzer.keyCpt+":"+suffix));
-        generatedUnits.add(stringStmt);
-
-        // insert tmpRef = new java.lang.StringBuilder;
-        NewExpr newString = Jimple.v().newNewExpr(RefType.v("java.lang.StringBuilder"));
-        AssignStmt builderStmt = Jimple.v().newAssignStmt(refBuilder, newString);
-        generatedUnits.add(builderStmt);
-
-        // special invoke init
-        InvokeStmt initBuilder = Jimple.v().newInvokeStmt(Jimple.v().newSpecialInvokeExpr(refBuilder,
-                Scene.v().getSootClass("java.lang.StringBuilder").getMethod("void <init>()").makeRef()));
-        generatedUnits.add(initBuilder);
-
-        //Virtual call Append
-        SootMethod appendMethod1 = Scene.v().getSootClass("java.lang.StringBuilder").getMethod("java.lang.StringBuilder append(java.lang.String)");
-        InvokeStmt invokeAppend1 = Jimple.v().newInvokeStmt(
-                Jimple.v().newVirtualInvokeExpr(refBuilder, appendMethod1.makeRef(), tmpString));
-        generatedUnits.add(invokeAppend1);
-
-        return generatedUnits;
-    }
-
-    private static List<Unit> buildEndingPrint(List<Unit> generatedUnits, Local refPrint, Local refBuilder, Local tmpString) {
-        //Builder to String
-        SootMethod toStringMethod = Scene.v().getSootClass("java.lang.StringBuilder").getMethod("java.lang.String toString()");
-        AssignStmt builderString = Jimple.v().newAssignStmt(tmpString,
-                Jimple.v().newVirtualInvokeExpr(refBuilder, toStringMethod.makeRef())
-        );
-        generatedUnits.add(builderString);
-
-        // insert "tmpRef.println(tmpString);"
-        SootMethod printMethod = Scene.v().getSootClass("java.io.PrintStream").getMethod("void println(java.lang.String)");
-        InvokeStmt invokePrint = Jimple.v().newInvokeStmt(
-                Jimple.v().newVirtualInvokeExpr(refPrint, printMethod.makeRef(), tmpString));
-        generatedUnits.add(invokePrint);
-        return generatedUnits;
     }
 
     private static List<Unit> buildTimerPrint(List<Unit> generatedUnits, Local refTime, Local refBuilder) {

@@ -2,6 +2,7 @@ package manager;
 
 import actions.iod.IODEnter;
 import actions.iod.IODExit;
+import actions.iod.IODNew;
 import structure.dw.WakeLockStructure;
 import structure.iod.OnDrawStructure;
 
@@ -10,11 +11,13 @@ import java.util.HashMap;
 public class IODManager implements Manager{
     private HashMap<String, IODEnter> enters; // Key = CodeLocation
     private HashMap<String, IODExit> exits; // Key = CodeLocation
+    private HashMap<String, IODNew> news;
     private HashMap<String, OnDrawStructure> structures;
 
     public IODManager() {
         this.enters = new HashMap<String, IODEnter>();
         this.exits = new HashMap<String, IODExit>();
+        this.news = new HashMap<String, IODNew>();
         this.structures = new HashMap<String, OnDrawStructure>();
     }
 
@@ -34,12 +37,18 @@ public class IODManager implements Manager{
         this.exits.put(key, exit);
     }
 
+    public void addNew(String key, IODNew newElement) { this.news.put(key, newElement); }
+
     public void executeEnter(String key, String id, long date) {
         this.structures.put(id, this.enters.get(key).execute(id, date));
     }
 
     public void executeExit(String key, String id, long date) {
         this.exits.get(key).execute(this.structures.get(id), date);
+    }
+
+    public void executeNew(String key, String id) {
+        this.news.get(key).execute(this.structures.get(id));
     }
 
     @Override
