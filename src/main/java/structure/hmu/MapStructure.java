@@ -3,7 +3,7 @@ package structure.hmu;
 import structure.Structure;
 import utils.CodeLocation;
 
-public class MapStructure implements Structure {
+public abstract class MapStructure implements Structure {
 
     protected int actualSize;
     protected CodeLocation structureImplementation;

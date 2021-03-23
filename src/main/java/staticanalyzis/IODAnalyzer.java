@@ -22,34 +22,34 @@ import java.util.regex.Matcher;
 
 public class IODAnalyzer extends CodeSmellAnalyzer {
 
-    public static void checkLine(String line, String path, String name, String methodName, int lineNumber, ManagerGroup managerGroup, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting) {
-        checkNew(line, "test", name, methodName,0, managerGroup.managerIOD, b, u, b.getUnits(), isInstrumenting);
+    public static void checkLine(String line, String name, String methodName, int lineNumber, ManagerGroup managerGroup, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting) {
+        checkNew(line, name, methodName,0, managerGroup.managerIOD, b, u, b.getUnits(), isInstrumenting);
     }
 
-    public static void checkNew(String line, String path, String name, String methodName, int lineNumber, IODManager manager, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting) {
+    public static void checkNew(String line, String name, String methodName, int lineNumber, IODManager manager, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting) {
         Matcher m = findPattern(line, "<init>");
         if (m.find()) {
             String variableName=m.group(0).split("\\.")[0];
-            manager.addNew(generateKey(name), new IODNew(new CodeLocation(path, name, methodName, lineNumber)));
+            manager.addNew(generateKey(name), new IODNew(new CodeLocation(name, methodName, lineNumber)));
             if (isInstrumenting) {
                 buildInstrumentation(getStructureCallerLocalName(line), units, u, b, "iodnew:");
             }
         }
     }
 
-    public static void checkMethod(String path, String name, String methodName, int lineNumber, ManagerGroup managerGroup, Body b, UnitPatchingChain units, boolean isInstrumenting) {
-        checkIOD("test", name, methodName,0, managerGroup.managerIOD, b, b.getUnits(), isInstrumenting);
+    public static void checkMethod(String name, String methodName, int lineNumber, ManagerGroup managerGroup, Body b, UnitPatchingChain units, boolean isInstrumenting) {
+        checkIOD(name, methodName,0, managerGroup.managerIOD, b, b.getUnits(), isInstrumenting);
         ///checkIODExit(line, "test", name, methodName,0, managerGroup.managerIOD, b, u, b.getUnits(), isInstrumenting);
     }
 
 
-    private static void checkIOD(String path, String name, String methodName, int lineNumber, IODManager manager, Body b, UnitPatchingChain units, boolean isInstrumenting) {
+    private static void checkIOD(String name, String methodName, int lineNumber, IODManager manager, Body b, UnitPatchingChain units, boolean isInstrumenting) {
         Matcher m = findPattern(methodName, "onDraw");
         if (m.find()) {
             String key=generateKey(name);
             String variableName=m.group(0).split("\\.")[0];
-            manager.addEnter(key, new IODEnter(new CodeLocation(path, name, methodName, lineNumber)));
-            manager.addExit(key, new IODExit(new CodeLocation(path, name, methodName, lineNumber)));
+            manager.addEnter(key, new IODEnter(new CodeLocation(name, methodName, lineNumber)));
+            manager.addExit(key, new IODExit(new CodeLocation(name, methodName, lineNumber)));
 
             if (isInstrumenting) {
                 //System.out.println(b.toString());

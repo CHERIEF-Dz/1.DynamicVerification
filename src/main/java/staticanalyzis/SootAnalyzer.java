@@ -51,7 +51,7 @@ public class SootAnalyzer {
                     String name = body.getMethod().getDeclaringClass().getName()+".java";
                     String methodName = body.getMethod().getName();
                     //Check methods
-                    IODAnalyzer.checkMethod("test", name, methodName, 0, managerGroup, body, body.getUnits(), isInstrumenting);
+                    IODAnalyzer.checkMethod(name, methodName, 0, managerGroup, body, body.getUnits(), isInstrumenting);
 
                     //Check lines
 
@@ -59,8 +59,9 @@ public class SootAnalyzer {
                     for (Iterator<Unit> iter = chain.snapshotIterator(); iter.hasNext(); ) {
                         final Unit u = iter.next();
                         String line = u.toString();
-                        DWAnalyzer.checkLine(line, "test", name, methodName, 0, managerGroup, body, u, body.getUnits(), isInstrumenting);
-                        HMUAnalyzer.checkLine(line, "test", name, methodName, 0, managerGroup, body, u, body.getUnits(), isInstrumenting);
+                        DWAnalyzer.checkLine(line, name, methodName, 0, managerGroup, body, u, body.getUnits(), isInstrumenting);
+                        HMUAnalyzer.checkLine(line, name, methodName, 0, managerGroup, body, u, body.getUnits(), isInstrumenting);
+                        IODAnalyzer.checkLine(line, name, methodName, 0, managerGroup, body, u, body.getUnits(), isInstrumenting);
                     }
                 }
             }

@@ -1,6 +1,5 @@
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.*;
-import staticanalyzis.Analyzer;
 import staticanalyzis.SootAnalyzer;
 import manager.HMUManager;
 import manager.ManagerGroup;
@@ -10,7 +9,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Scanner;
 
 
 public class Main {
@@ -48,42 +46,6 @@ public class Main {
         } catch (ArgumentParserException e) {
             parser.handleError(e);
         }
-        /*
-        Scanner S = new Scanner(System.in);
-        System.out.println("Faites votre choix :");
-        System.out.println("1 : Instrumentation");
-        System.out.println("2 : Analyse");
-        int choice = S.nextInt();
-        System.out.println("Choix : " + choice);
-
-        ManagerGroup managerGroup;
-        //manager = classicAnalyzer();
-        String platformPath = "android-platforms";
-        String apkPath = "tests_apks/nour/app-debug-androidTest.apk";
-
-        if (choice == 1) {
-            managerGroup = sootAnalyzer(platformPath, apkPath, true);
-        }
-        else if (choice == 2) {
-            managerGroup = sootAnalyzer(platformPath, apkPath, false);
-            String tracePath = "tests_ressources/trace_iod_timed.txt";
-            sootanalyzeTrace(managerGroup, tracePath);
-        }
-
-         */
-        /*
-        String tracePath = "tests_ressources/trace_test_1.txt";
-        analyzeTrace(manager, tracePath);
-         */
-    }
-
-    public static HMUManager classicAnalyzer() throws IOException {
-        HMUManager manager = new HMUManager();
-        String path = "tests_folders/LambdaApp";
-        Analyzer test = new Analyzer();
-
-        test.analyze(manager, path);
-        return manager;
     }
 
     public static ManagerGroup sootAnalyzer(String platformPath, String apkPath, String outputPath, String pack, boolean isInstrumenting) {
@@ -150,45 +112,6 @@ public class Main {
         //System.out.println(managerGroup.managerHMU.getBreakpoints());
         String timeStamp2 = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
         //System.out.println("Fin analyse : " + timeStamp2);
-    }
-
-    public static void analyzeTrace(HMUManager manager, String tracePath) {
-        BufferedReader reader;
-        int traceNumberLine=1;
-        try {
-            reader = new BufferedReader(new FileReader(
-                    tracePath));
-            String line = reader.readLine();
-            while (line != null) {
-                //System.out.println(line);
-                String[] result = line.split(":");
-                if (result.length==4) {
-                    //System.out.println("[TOCHECK]" + traceNumberLine + " " + line);
-                    String fileName = result[0];
-                    String lineNumber = result[1];
-                    String id = result[3];
-                    String key = fileName + ":" + lineNumber;
-                    if ("impl".equals(result[2])) {
-                        manager.executeImplementation(key, id);
-                    } else if ("add".equals(result[2])) {
-                        manager.executeAddition(key, id);
-                    } else if ("del".equals(result[2])) {
-                        manager.executeDeletion(key, id);
-                    } else if ("cln".equals(result[2])) {
-                        manager.executeDeletion(key, id);
-                    }
-                }
-                else {
-                    //System.out.println("[AVOID]" + traceNumberLine + " " + line);
-                }
-                line = reader.readLine();
-                traceNumberLine++;
-            }
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        manager.checkStructures();
     }
 
 }

@@ -4,6 +4,8 @@ import actions.hmu.HMUAddition;
 import actions.hmu.HMUClean;
 import actions.hmu.HMUDeletion;
 import actions.hmu.HMUImplementation;
+import structure.hmu.ArrayMapStructure;
+import structure.hmu.HashMapStructure;
 import structure.hmu.MapStructure;
 
 import java.io.File;
@@ -90,14 +92,23 @@ public class HMUManager implements Manager{
 
         File csvOutputFile = new File(outputPath+"test_HMU.csv");
         try (PrintWriter writer = new PrintWriter(csvOutputFile)) {
-            writer.write("apk, package, file, method, variable Name\n");
+            writer.write("apk,package,file,method,variable Name,structure Type\n");
             for (java.util.Map.Entry<String, MapStructure> stringStructureEntry : this.structures.entrySet()) {
                 HashMap.Entry<String, MapStructure> pair = (HashMap.Entry) stringStructureEntry;
                 if (pair.getValue().hasCodeSmell()) {
                     String fileName = pair.getValue().getLocation().getFileName();
                     String methodName = pair.getValue().getLocation().getMethodName();
                     String variableName = pair.getValue().getName();
-                    writer.write("apk,package,"+fileName+","+methodName+","+ variableName + "\n");
+                    String structureType = "HashMap";
+                    if (pair.getValue() instanceof ArrayMapStructure) {
+                        if (((ArrayMapStructure) pair.getValue()).isSimple) {
+                            structureType = "SimpleArrayMap";
+                        }
+                        else {
+                            structureType = "ArrayMap";
+                        }
+                    }
+                    writer.write("apk,package,"+fileName+","+methodName+","+ variableName + "," + structureType + "\n");
                 }
             }
         } catch (FileNotFoundException e) {

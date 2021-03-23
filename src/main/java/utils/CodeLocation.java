@@ -6,8 +6,7 @@ public class CodeLocation {
     private String methodName;
     private int line;
 
-    public CodeLocation(String path, String fileName, String methodName, int line) {
-        this.path = path;
+    public CodeLocation(String fileName, String methodName, int line) {
         this.fileName = fileName;
         this.line = line;
         this.methodName = methodName;
@@ -23,10 +22,10 @@ public class CodeLocation {
 
     public String toString() {
         if (line != 0) {
-            return "at line " + line + " in class " + fileName + " and method " + methodName + " at " + path;
+            return "at line " + line + " in class " + fileName + " and method " + methodName;
         }
         else {
-            return "in class " + fileName + " and method " + methodName + " at " + path;
+            return "in class " + fileName + " and method " + methodName;
         }
     }
 }

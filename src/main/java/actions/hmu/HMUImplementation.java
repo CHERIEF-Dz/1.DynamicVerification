@@ -4,8 +4,6 @@ import actions.ConcreteAction;
 import structure.hmu.ArrayMapStructure;
 import structure.hmu.HashMapStructure;
 import structure.hmu.MapStructure;
-import structure.hmu.SimpleArrayMapStructure;
-import structure.Structure;
 import utils.CodeLocation;
 
 public class HMUImplementation extends ConcreteAction {
@@ -25,9 +23,9 @@ public class HMUImplementation extends ConcreteAction {
         if ("HashMap".equals(type)) {
             toReturn = new HashMapStructure(this.location, id, this.variableName);
         } else if ("ArrayMap".equals(type)) {
-            toReturn = new ArrayMapStructure(this.location, id, this.variableName);
+            toReturn = new ArrayMapStructure(this.location, id, this.variableName, false);
         } else if ("SimpleArrayMap".equals(type)) {
-            toReturn = new SimpleArrayMapStructure(this.location, id, this.variableName);
+            toReturn = new ArrayMapStructure(this.location, id, this.variableName, true);
         }
         return toReturn;
     }
