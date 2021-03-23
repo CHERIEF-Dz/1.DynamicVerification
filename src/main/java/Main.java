@@ -94,6 +94,8 @@ public class Main {
                             managerGroup.managerIOD.executeEnter(key, fileName, Long.valueOf(id));
                         } else if ("iodexit".equals(result[3])) {
                             managerGroup.managerIOD.executeExit(key, fileName, Long.valueOf(id));
+                        } else if ("iodnew".equals(result[3])) {
+                            managerGroup.managerIOD.executeNew(key, fileName);
                         }
                     }
                 }

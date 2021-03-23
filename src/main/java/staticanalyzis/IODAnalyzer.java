@@ -28,11 +28,14 @@ public class IODAnalyzer extends CodeSmellAnalyzer {
 
     public static void checkNew(String line, String name, String methodName, int lineNumber, IODManager manager, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting) {
         Matcher m = findPattern(line, "<init>");
-        if (m.find()) {
+        Matcher m2 = findPattern(methodName, "onDraw");
+        if (m2.find() && m.find()) {
             String variableName=m.group(0).split("\\.")[0];
-            manager.addNew(generateKey(name), new IODNew(new CodeLocation(name, methodName, lineNumber)));
-            if (isInstrumenting) {
-                buildInstrumentation(getStructureCallerLocalName(line), units, u, b, "iodnew:");
+            if (!getStructureInstanceLocalName(line).equals("refBuilder")) {
+                manager.addNew(generateKey(name), new IODNew(new CodeLocation(name, methodName, lineNumber)));
+                if (isInstrumenting) {
+                    buildInstrumentation(getStructureInstanceLocalName(line), units, u, b, "iodnew:");
+                }
             }
         }
     }

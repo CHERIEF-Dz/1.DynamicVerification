@@ -39,6 +39,7 @@ public class OnDrawStructure implements Structure {
             this.foundCodeSmell();
         }
         */
+        System.out.println("Structure : " + this.id + " has : " + this.nbInstanciations);
         if (((this.end-this.begin)/1000000.0) > ((1000)/60.0)) {
             this.foundCodeSmell();
         }
