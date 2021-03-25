@@ -51,8 +51,8 @@ public class SootAnalyzer {
                     String name = body.getMethod().getDeclaringClass().getName()+".java";
                     String methodName = body.getMethod().getName();
                     //Check methods
-                    IODAnalyzer.checkMethod(name, methodName, 0, managerGroup, body, body.getUnits(), isInstrumenting);
-
+                    IODAnalyzer.methodsToCheck(name, methodName, 0, managerGroup, body, body.getUnits(), isInstrumenting);
+                    HPAnalyzer.methodsToCheck(name, methodName, 0, managerGroup, body, body.getUnits(), isInstrumenting);
                     //Check lines
 
                     UnitPatchingChain chain = body.getUnits();

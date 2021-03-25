@@ -1,7 +1,7 @@
 package actions.hp;
 
 import actions.ConcreteAction;
-import structure.iod.OnDrawStructure;
+import structure.hp.HeavyProcessStructure;
 import utils.CodeLocation;
 
 public class HPEnter extends ConcreteAction {
@@ -10,8 +10,8 @@ public class HPEnter extends ConcreteAction {
         super(location);
     }
 
-    public OnDrawStructure execute(String id, long date) {
-        OnDrawStructure toReturn = new OnDrawStructure(this.location, id);
+    public HeavyProcessStructure execute(String id, long date) {
+        HeavyProcessStructure toReturn = new HeavyProcessStructure(this.location, id);
         toReturn.begin(date);
         return toReturn;
     }

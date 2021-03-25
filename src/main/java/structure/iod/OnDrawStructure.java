@@ -3,23 +3,19 @@ package structure.iod;
 import structure.Structure;
 import utils.CodeLocation;
 
-import java.util.Calendar;
-import java.util.Date;
-
 public class OnDrawStructure implements Structure {
-
 
     protected CodeLocation structureImplementation;
     protected String id;
     protected boolean codeSmellFound;
     private long begin, end;
-    private int nbInstanciations;
+    private int nbInstantiations;
 
     public OnDrawStructure(CodeLocation implementation, String id) {
         this.structureImplementation = implementation;
         this.id = id;
         this.codeSmellFound=false;
-        this.nbInstanciations = 0;
+        this.nbInstantiations = 0;
     }
     @Override
     public void foundCodeSmell() {
@@ -33,17 +29,10 @@ public class OnDrawStructure implements Structure {
 
     @Override
     public void checkStructure() {
-        /*
-        if (this.locked) {
-            System.out.println("WakeLock defined " + this.structureImplementation.toString() + " has DW code smell (Lock not released).");
-            this.foundCodeSmell();
-        }
-        */
-        System.out.println("Structure : " + this.id + " has : " + this.nbInstanciations);
+        System.out.println("Structure : " + this.id + " has : " + this.nbInstantiations);
         if (((this.end-this.begin)/1000000.0) > ((1000)/60.0)) {
             this.foundCodeSmell();
         }
-        //System.out.println("Coucou ! Début : " + this.begin + " fin : " + this.end + " différence : " + ((this.end-this.begin)/1000000.0) + " and inferior to " + ((1000)/60));
     }
 
     @Override
@@ -56,7 +45,6 @@ public class OnDrawStructure implements Structure {
     }
 
     public void begin(long date) {
-       //this.begin = Calendar.getInstance().
         this.begin = date;
     }
 
@@ -64,5 +52,5 @@ public class OnDrawStructure implements Structure {
         this.end = date;
     }
 
-    public void newInstance() {this.nbInstanciations++;}
+    public void newInstance() {this.nbInstantiations++;}
 }
