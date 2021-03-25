@@ -2,10 +2,7 @@ package staticanalyzis;
 
 import actions.hp.HPEnter;
 import actions.hp.HPExit;
-import actions.iod.IODEnter;
-import actions.iod.IODExit;
 import manager.HPManager;
-import manager.IODManager;
 import manager.ManagerGroup;
 import soot.Body;
 import soot.UnitPatchingChain;
