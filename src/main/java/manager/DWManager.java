@@ -71,4 +71,13 @@ public class DWManager implements Manager {
         //Todo
         return null;
     }
+
+    @Override
+    public void execute(String key, String fileName, String lineNumber, String code, String id) {
+        if ("dwacq".equals(code)) {
+            executeAcquire(key, id);
+        } else if ("dwrel".equals(code)) {
+            executeRelease(key, id);
+        }
+    }
 }

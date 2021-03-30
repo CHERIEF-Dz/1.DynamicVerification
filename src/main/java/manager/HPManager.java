@@ -3,7 +3,11 @@ package manager;
 import actions.hp.HPEnter;
 import actions.hp.HPExit;
 import structure.hp.HeavyProcessStructure;
+import structure.iod.OnDrawStructure;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 
 public class HPManager implements Manager{
@@ -28,12 +32,47 @@ public class HPManager implements Manager{
 
     @Override
     public void generateCSV(String outputPath) {
+        File directory = new File(outputPath);
+        if (! directory.exists()){
+            directory.mkdir();
+        }
 
+        File csvOutputFile = new File(outputPath+"test_HP.csv");
+        try (PrintWriter writer = new PrintWriter(csvOutputFile)) {
+            writer.write("apk,package,file,method\n");
+            for (java.util.Map.Entry<String, HeavyProcessStructure> stringStructureEntry : this.structures.entrySet()) {
+                HashMap.Entry<String, HeavyProcessStructure> pair = (HashMap.Entry) stringStructureEntry;
+                if (pair.getValue().hasCodeSmell()) {
+                    String fileName = pair.getValue().getLocation().getFileName();
+                    String methodName = pair.getValue().getLocation().getMethodName();
+                    writer.write("apk,package,"+fileName+","+methodName+ "\n");
+                }
+            }
+        } catch (FileNotFoundException e) {
+            // Do something
+        }
     }
 
     @Override
     public String getBreakpoints() {
         return null;
+    }
+
+    @Override
+    public void execute(String key, String fileName, String lineNumber, String code, String id) {
+        if ("hasenter".equals(code)) {
+            executeEnter(key, fileName, Long.parseLong(id));
+        } else if ("hasexit".equals(code)) {
+            executeExit(key, fileName, Long.parseLong(id));
+        } else if ("hbrenter".equals(code)) {
+            executeEnter(key, fileName, Long.parseLong(id));
+        } else if ("hbrexit".equals(code)) {
+            executeExit(key, fileName, Long.parseLong(id));
+        } else if ("hssenter".equals(code)) {
+            executeEnter(key, fileName, Long.parseLong(id));
+        } else if ("hssexit".equals(code)) {
+            executeExit(key, fileName, Long.parseLong(id));
+        }
     }
 
     public void addEnter(String key, HPEnter enter) {

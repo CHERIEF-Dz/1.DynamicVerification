@@ -72,11 +72,15 @@ public class Main {
                         //System.out.println("[TOCHECK]" + traceNumberLine + " " + line);
                         String fileName = result[1];
                         String lineNumber = result[2];
+                        String code = result[3];
                         String id = result[4];
                         String key = fileName + ":" + lineNumber;
                         //System.out.println("Key : " + key);
                         //HMU
-                        HMUManager managerHMU = managerGroup.managerHMU;
+                        //HMUManager managerHMU = managerGroup.managerHMU;
+                        managerGroup.execute(key, fileName, lineNumber, code, id);
+                        //managerHMU.execute(key, fileName, lineNumber, code, id);
+                        /*
                         if ("hmuimpl".equals(result[3])) {
                             managerHMU.executeImplementation(key, id);
                         } else if ("hmuadd".equals(result[3])) {
@@ -96,7 +100,7 @@ public class Main {
                             managerGroup.managerIOD.executeExit(key, fileName, Long.valueOf(id));
                         } else if ("iodnew".equals(result[3])) {
                             managerGroup.managerIOD.executeNew(key, fileName);
-                        }
+                        }*/
                     }
                 }
                 else {

@@ -52,6 +52,20 @@ public class HMUManager implements Manager{
         return tags;
     }
 
+    @Override
+    public void execute(String key, String fileName, String lineNumber, String code, String id) {
+        if ("hmuimpl".equals(code)) {
+            executeImplementation(key, id);
+        } else if ("hmuadd".equals(code)) {
+            //System.out.println("Addition line !");
+            executeAddition(key, id);
+        } else if ("hmudel".equals(code)) {
+            executeDeletion(key, id);
+        } else if ("hmucln".equals(code)) {
+            executeClean(key, id);
+        }
+    }
+
     public void addDeletion(String key, HMUDeletion deletion) {
         this.deletions.put(key, deletion);
     }

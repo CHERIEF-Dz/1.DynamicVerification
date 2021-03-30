@@ -44,8 +44,7 @@ public abstract class MapStructure implements Structure {
     }
 
     public void checkStructure() {
-        System.out.println("Structure : " + this.id + " has : " + this.maximumSize);
-    }
+        }
 
     public int  getSize() {return this.actualSize;}
 

@@ -7,6 +7,9 @@ import actions.nlmr.NLMRExit;
 import structure.hp.HeavyProcessStructure;
 import structure.nlmr.NLMRStructure;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 
 public class NLMRManager implements Manager{
@@ -30,12 +33,39 @@ public class NLMRManager implements Manager{
 
     @Override
     public void generateCSV(String outputPath) {
+        File directory = new File(outputPath);
+        if (! directory.exists()){
+            directory.mkdir();
+        }
 
+        File csvOutputFile = new File(outputPath+"test_HP.csv");
+        try (PrintWriter writer = new PrintWriter(csvOutputFile)) {
+            writer.write("apk,package,file,method\n");
+            for (java.util.Map.Entry<String, NLMRStructure> stringStructureEntry : this.structures.entrySet()) {
+                HashMap.Entry<String, NLMRStructure> pair = (HashMap.Entry) stringStructureEntry;
+                if (pair.getValue().hasCodeSmell()) {
+                    String fileName = pair.getValue().getLocation().getFileName();
+                    String methodName = pair.getValue().getLocation().getMethodName();
+                    writer.write("apk,package,"+fileName+","+methodName+ "\n");
+                }
+            }
+        } catch (FileNotFoundException e) {
+            // Do something
+        }
     }
 
     @Override
     public String getBreakpoints() {
         return null;
+    }
+
+    @Override
+    public void execute(String key, String fileName, String lineNumber, String code, String id) {
+        if ("nlmrenter".equals(code)) {
+            executeEnter(key, fileName, Long.parseLong(id));
+        } else if ("nlmrexit".equals(code)) {
+            executeExit(key, fileName, Long.parseLong(id));
+        }
     }
 
     public void addEnter(String key, NLMREnter enter) {

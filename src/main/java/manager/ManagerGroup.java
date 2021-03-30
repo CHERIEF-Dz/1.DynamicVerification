@@ -30,4 +30,12 @@ public class ManagerGroup {
         this.managerHP.generateCSV(outputPath);
         this.managerNLMR.generateCSV(outputPath);
     }
+
+    public void execute(String key, String fileName, String lineNumber, String code, String id) {
+        managerDW.execute(key, fileName, lineNumber, code, id);
+        managerHMU.execute(key, fileName, lineNumber, code, id);
+        managerIOD.execute(key, fileName, lineNumber, code, id);
+        managerHP.execute(key, fileName, lineNumber, code, id);
+        managerNLMR.execute(key, fileName, lineNumber, code, id);
+    }
 }

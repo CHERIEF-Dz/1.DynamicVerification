@@ -30,7 +30,8 @@ public class OnDrawStructure implements Structure {
     @Override
     public void checkStructure() {
         System.out.println("Structure : " + this.id + " has : " + this.nbInstantiations);
-        if (((this.end-this.begin)/1000000.0) > ((1000)/60.0)) {
+        if (((this.end-this.begin)/1000000.0) > ((1000)/60.0) || this.nbInstantiations > 0) {
+            System.out.println("onDraw defined " + this.structureImplementation.toString() + " has IOD code smell.");
             this.foundCodeSmell();
         }
     }
