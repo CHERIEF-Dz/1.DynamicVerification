@@ -65,13 +65,13 @@ public class IODManager implements Manager{
 
         File csvOutputFile = new File(outputPath+"test_IOD.csv");
         try (PrintWriter writer = new PrintWriter(csvOutputFile)) {
-            writer.write("apk,package,file,method\n");
+            writer.write("apk,package,file,method,average executing time,worst executing time,average number of instantiations,worst number of instantiations \n");
             for (java.util.Map.Entry<String, OnDrawStructure> stringStructureEntry : this.structures.entrySet()) {
                 HashMap.Entry<String, OnDrawStructure> pair = (HashMap.Entry) stringStructureEntry;
                 if (pair.getValue().hasCodeSmell()) {
                     String fileName = pair.getValue().getLocation().getFileName();
                     String methodName = pair.getValue().getLocation().getMethodName();
-                    writer.write("apk,package,"+fileName+","+methodName+ "\n");
+                    writer.write("apk,package,"+fileName+","+methodName+ ",?,?,?,?\n");
                 }
             }
         } catch (FileNotFoundException e) {

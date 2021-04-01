@@ -13,7 +13,7 @@ public class NLMREnter extends ConcreteAction {
 
     public NLMRStructure execute(String id, long date) {
         NLMRStructure toReturn = new NLMRStructure(this.location, id);
-        //toReturn.begin(date);
+        toReturn.begin(date);
         return toReturn;
     }
 

@@ -40,13 +40,13 @@ public class NLMRManager implements Manager{
 
         File csvOutputFile = new File(outputPath+"test_NLMR.csv");
         try (PrintWriter writer = new PrintWriter(csvOutputFile)) {
-            writer.write("apk,package,file,method\n");
+            writer.write("apk,package,file,method,average Memory released,maximum memory released\n");
             for (java.util.Map.Entry<String, NLMRStructure> stringStructureEntry : this.structures.entrySet()) {
                 HashMap.Entry<String, NLMRStructure> pair = (HashMap.Entry) stringStructureEntry;
                 if (pair.getValue().hasCodeSmell()) {
                     String fileName = pair.getValue().getLocation().getFileName();
                     String methodName = pair.getValue().getLocation().getMethodName();
-                    writer.write("apk,package,"+fileName+","+methodName+ "\n");
+                    writer.write("apk,package,"+fileName+","+methodName+ ","+pair.getValue().getBetterMemory()+","+pair.getValue().getAverageMemory()+"\n");
                 }
             }
         } catch (FileNotFoundException e) {

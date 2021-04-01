@@ -8,14 +8,18 @@ public class HeavyProcessStructure implements Structure {
     protected CodeLocation structureImplementation;
     protected String id;
     protected boolean codeSmellFound;
-    private long begin, end;
-    private int nbInstantiations;
+    private long lastBegin, lastEnd;
+    private long averageTime;
+    private long worstTime;
+    private int nbCalls;
 
     public HeavyProcessStructure(CodeLocation implementation, String id) {
         this.structureImplementation = implementation;
         this.id = id;
         this.codeSmellFound=false;
-        this.nbInstantiations = 0;
+        this.worstTime=0;
+        this.nbCalls=0;
+        this.averageTime=0;
     }
 
     @Override
@@ -30,11 +34,13 @@ public class HeavyProcessStructure implements Structure {
 
     @Override
     public void checkStructure() {
-        System.out.println("Structure : " + this.id + " has : " + this.nbInstantiations);
-        if (((this.end-this.begin)/1000000.0) > (5000)) {
+        if (((this.lastEnd -this.lastBegin)/1000000.0) > (5000)) {
             this.foundCodeSmell();
         }
     }
+    public long getAverageTime() {return this.averageTime;}
+
+    public long getWorstTime() {return this.worstTime;}
 
     @Override
     public String getId() {
@@ -46,12 +52,15 @@ public class HeavyProcessStructure implements Structure {
     }
 
     public void begin(long date) {
-        this.begin = date;
+        this.lastBegin = date;
     }
 
     public void end(long date) {
-        this.end = date;
+        this.lastEnd = date;
+        long elapsedTime = (long) ((this.lastEnd -this.lastBegin)/1000000.0);
+        if (elapsedTime>worstTime)
+            this.worstTime=elapsedTime;
+        this.averageTime=(this.averageTime+this.nbCalls+elapsedTime)/(this.nbCalls+1);
+        this.nbCalls++;
     }
-
-    public void newInstance() {this.nbInstantiations++;}
 }
