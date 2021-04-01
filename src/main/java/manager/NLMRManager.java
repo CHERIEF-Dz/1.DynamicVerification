@@ -38,7 +38,7 @@ public class NLMRManager implements Manager{
             directory.mkdir();
         }
 
-        File csvOutputFile = new File(outputPath+"test_HP.csv");
+        File csvOutputFile = new File(outputPath+"test_NLMR.csv");
         try (PrintWriter writer = new PrintWriter(csvOutputFile)) {
             writer.write("apk,package,file,method\n");
             for (java.util.Map.Entry<String, NLMRStructure> stringStructureEntry : this.structures.entrySet()) {
@@ -61,6 +61,8 @@ public class NLMRManager implements Manager{
 
     @Override
     public void execute(String key, String fileName, String lineNumber, String code, String id) {
+        key = key.replace("$Runner", "");
+        fileName = fileName.replace("$Runner", "");
         if ("nlmrenter".equals(code)) {
             executeEnter(key, fileName, Long.parseLong(id));
         } else if ("nlmrexit".equals(code)) {
@@ -81,6 +83,17 @@ public class NLMRManager implements Manager{
     }
 
     public void executeExit(String key, String id, long date) {
+        System.out.println("Key : " + key);
+        for (java.util.Map.Entry<String, NLMRExit> exitEntry : this.exits.entrySet()) {
+            HashMap.Entry<String, NLMRExit> pair = (HashMap.Entry) exitEntry;
+            System.out.println("Exit : " + pair.getKey());
+        }
+        System.out.println("Id : " + id);
+        for (java.util.Map.Entry<String, NLMRStructure> stringStructureEntry : this.structures.entrySet()) {
+            HashMap.Entry<String, NLMRStructure> pair = (HashMap.Entry) stringStructureEntry;
+            System.out.println("Structure : " + pair.getKey());
+        }
+
         this.exits.get(key).execute(this.structures.get(id), date);
     }
 }

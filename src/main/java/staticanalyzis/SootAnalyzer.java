@@ -2,12 +2,12 @@ package staticanalyzis;
 
 import manager.ManagerGroup;
 import soot.*;
+import soot.javaToJimple.AnonClassInitMethodSource;
+import soot.jimple.*;
 import soot.options.Options;
 
 import java.io.PrintStream;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 public class SootAnalyzer {
 
@@ -34,6 +34,8 @@ public class SootAnalyzer {
         Options.v().set_process_multiple_dex(true);
         Options.v().set_output_dir(this.outputPath);
         Scene.v().addBasicClass("java.io.PrintStream",SootClass.SIGNATURES);
+        Scene.v().addBasicClass("android.os.Handler",SootClass.SIGNATURES);
+        Scene.v().addBasicClass("java.lang.Runtime", SootClass.SIGNATURES);
         Scene.v().addBasicClass("java.lang.System",SootClass.SIGNATURES);
         Scene.v().loadNecessaryClasses();
         System.setOut(originalStream);
@@ -50,9 +52,13 @@ public class SootAnalyzer {
                     //System.out.println("classe : " + body.getMethod().getDeclaringClass());
                     String name = body.getMethod().getDeclaringClass().getName()+".java";
                     String methodName = body.getMethod().getName();
+
                     //Check methods
                     IODAnalyzer.methodsToCheck(name, methodName, 0, managerGroup, body, body.getUnits(), isInstrumenting);
                     HPAnalyzer.methodsToCheck(name, methodName, 0, managerGroup, body, body.getUnits(), isInstrumenting);
+                    NLMRAnalyzer.methodsToCheck(name, methodName, 0, managerGroup, body, body.getUnits(), isInstrumenting);
+                    //System.out.println("Method : " + methodName);
+
                     //Check lines
 
                     UnitPatchingChain chain = body.getUnits();
@@ -66,8 +72,9 @@ public class SootAnalyzer {
                 }
             }
         }));
-            // Run Soot packs (note that our transformer pack is added to the phase "jtp")
-            PackManager.v().runPacks();
+
+        // Run Soot packs (note that our transformer pack is added to the phase "jtp")
+        PackManager.v().runPacks();
         if (isInstrumenting) {
             // Write the result of packs in outputPath
             PackManager.v().writeOutput();

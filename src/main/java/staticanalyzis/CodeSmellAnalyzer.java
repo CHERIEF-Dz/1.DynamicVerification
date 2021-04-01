@@ -150,20 +150,7 @@ public abstract class CodeSmellAnalyzer implements Analyzer{
         return generatedUnits;
     }
 
-    protected static void buildInstrumentationMethod(UnitPatchingChain units, Body b, String suffixBeginning, String suffixEnding) {
-        //Add Print
-        Local refTime = addTmpRef(b, "refIdentity", LongType.v());
-        Local refBuilder = addTmpRef(b, "refBuilder", RefType.v("java.lang.StringBuilder"));
-        Local refPrint = addTmpRef(b, "refPrint", RefType.v("java.io.PrintStream"));
-        Local tmpString = addTmpRef(b, "tmpString", RefType.v("java.lang.String"));
-        List<Unit> generatedUnits;
-
-        generatedUnits = buildBeginningPrint(b, refPrint, refBuilder, tmpString, suffixBeginning);
-
-        generatedUnits = buildTimerPrint(generatedUnits, refTime, refBuilder);
-
-        generatedUnits = buildEndingPrint(generatedUnits, refPrint, refBuilder, tmpString);
-
+    protected static Unit getFirstNonIdentityUnit(UnitPatchingChain units) {
         boolean foundNonThisOrParamIdentityStatement = false;
         boolean firstStatement = true;
         Unit insertBefore = null;
@@ -190,20 +177,69 @@ public abstract class CodeSmellAnalyzer implements Analyzer{
                 insertBefore = unit;
             }
         }
+        return insertBefore;
+    }
 
-        units.insertBefore(generatedUnits, insertBefore);
+    protected static void buildInstrumentationMethod(UnitPatchingChain units, Body b, String suffixBeginning, String suffixEnding) {
+        //Add Print
+        Local refTime = addTmpRef(b, "refTime", LongType.v());
+        Local refBuilder = addTmpRef(b, "refBuilder", RefType.v("java.lang.StringBuilder"));
+        Local refPrint = addTmpRef(b, "refPrint", RefType.v("java.io.PrintStream"));
+        Local tmpString = addTmpRef(b, "tmpString", RefType.v("java.lang.String"));
+        List<Unit> generatedUnits;
+
+        generatedUnits = buildBeginningPrint(b, refPrint, refBuilder, tmpString, suffixBeginning);
+
+        generatedUnits = buildTimerPrint(generatedUnits, refTime, refBuilder);
+
+        generatedUnits = buildEndingPrint(generatedUnits, refPrint, refBuilder, tmpString);
+
+        /*
+        boolean foundNonThisOrParamIdentityStatement = false;
+        boolean firstStatement = true;
+        Unit insertBefore = null;
+        for (Unit unit : units) {
+            boolean mayBeSelected = true;
+            if (unit instanceof IdentityStmt) {
+                IdentityStmt identityStmt = (IdentityStmt) unit;
+                if (identityStmt.getRightOp() instanceof ThisRef) {
+                    if (firstStatement) {
+                        mayBeSelected = false;
+                    }
+                } else if (identityStmt.getRightOp() instanceof ParameterRef) {
+                    if (!foundNonThisOrParamIdentityStatement) {
+                        mayBeSelected = false;
+                    }
+                } else {
+                    foundNonThisOrParamIdentityStatement = true;
+                }
+            } else {
+                foundNonThisOrParamIdentityStatement = true;
+            }
+            firstStatement = false;
+            if (mayBeSelected && insertBefore == null) {
+                insertBefore = unit;
+            }
+        }
+        */
+
+        units.insertBefore(generatedUnits, getFirstNonIdentityUnit(units));
 
         //End
 
-        List<Unit> generatedEndingUnits;
+        List<Unit> returnUnits = getReturns(b);
 
-        generatedEndingUnits = buildBeginningPrint(b, refPrint, refBuilder, tmpString, suffixEnding);
+        for (Unit unit : returnUnits) {
+            List<Unit> generatedEndingUnits;
 
-        generatedEndingUnits = buildTimerPrint(generatedEndingUnits, refTime, refBuilder);
+            generatedEndingUnits = buildBeginningPrint(b, refPrint, refBuilder, tmpString, suffixEnding);
 
-        generatedEndingUnits = buildEndingPrint(generatedEndingUnits, refPrint, refBuilder, tmpString);
+            generatedEndingUnits = buildTimerPrint(generatedEndingUnits, refTime, refBuilder);
 
-        units.insertBefore(generatedEndingUnits, b.getUnits().getLast());
+            generatedEndingUnits = buildEndingPrint(generatedEndingUnits, refPrint, refBuilder, tmpString);
+
+            units.insertBefore(generatedEndingUnits, unit);
+        }
 
         //check that we did not mess up the Jimple
         b.validate();
@@ -217,4 +253,15 @@ public abstract class CodeSmellAnalyzer implements Analyzer{
             }
         }
     }
+
+    protected static List<Unit> getReturns(Body body) {
+        List<Unit> returnUnits = new ArrayList<>();
+        for (Unit unit : body.getUnits()) {
+            if (unit instanceof ReturnStmt || unit instanceof ReturnVoidStmt) {
+                returnUnits.add(unit);
+            }
+        }
+        return returnUnits;
+    }
+
 }

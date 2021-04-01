@@ -41,6 +41,6 @@ public class IODAnalyzer extends CodeSmellAnalyzer {
             manager.addEnter(key, new IODEnter(new CodeLocation(name, methodName, lineNumber)));
             manager.addExit(key, new IODExit(new CodeLocation(name, methodName, lineNumber)));
         }
-        buildMethod(methodName, methodName, b, b.getUnits(), "iodenter:", "iodexit:", isInstrumenting);
+        buildMethod(methodName, methodNameNeeded, b, b.getUnits(), "iodenter:", "iodexit:", isInstrumenting);
     }
 }
