@@ -71,7 +71,8 @@ public class IODManager implements Manager{
                 if (pair.getValue().hasCodeSmell()) {
                     String fileName = pair.getValue().getLocation().getFileName();
                     String methodName = pair.getValue().getLocation().getMethodName();
-                    writer.write("apk,package,"+fileName+","+methodName+ ",?,?,?,?\n");
+                    OnDrawStructure structure =  pair.getValue();
+                    writer.write("apk,package,"+fileName+","+methodName+ ","+structure.getAverageTime()+","+structure.getWorstTime()+","+structure.getAverageInstantiations()+","+structure.getWorstInstantations()+"\n");
                 }
             }
         } catch (FileNotFoundException e) {

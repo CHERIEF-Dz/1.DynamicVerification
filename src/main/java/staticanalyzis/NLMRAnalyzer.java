@@ -27,7 +27,7 @@ public class NLMRAnalyzer extends CodeSmellAnalyzer{
     protected static void checkNLMR(String name, String methodName, String methodNameNeeded, int lineNumber, NLMRManager manager, Body b, UnitPatchingChain units, String prefix, String suffix, boolean isInstrumenting) {
         Matcher m = findPattern(methodName, methodNameNeeded);
         if (m.find()) {
-            String key=generateKey(name);
+            String key=generateKey(name, methodName).replace("$onTrimMemory","");
             manager.addEnter(key, new NLMREnter(new CodeLocation(name, methodName, lineNumber)));
             manager.addExit(key, new NLMRExit(new CodeLocation(name, methodName, lineNumber)));
             if (isInstrumenting) {
@@ -54,8 +54,10 @@ public class NLMRAnalyzer extends CodeSmellAnalyzer{
 
         // insert "tmpLong = 'HELLO';"
         AssignStmt stringStmt = Jimple.v().newAssignStmt(tmpString,
-                StringConstant.v(CodeSmellAnalyzer.prefix+newBody.getMethod().getDeclaringClass().getName() + ".java:"+CodeSmellAnalyzer.keyCpt+":"+suffix));
+                StringConstant.v(CodeSmellAnalyzer.prefix+newBody.getMethod().getDeclaringClass().getName() + ".java$"+newBody.getMethod().getName()+":"+getKey(newBody.getMethod().getDeclaringClass().getName()+".java", newBody.getMethod().getName())+":"+suffix));
         generatedUnits.add(stringStmt);
+        //System.out.println("Associated Print : " + stringStmt.toString());
+
 
         // insert tmpRef = new java.lang.StringBuilder;
         NewExpr newString = Jimple.v().newNewExpr(RefType.v("java.lang.StringBuilder"));

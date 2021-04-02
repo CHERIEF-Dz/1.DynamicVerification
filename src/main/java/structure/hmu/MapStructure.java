@@ -45,8 +45,7 @@ public abstract class MapStructure implements Structure {
 
     public void checkStructure() {
         }
-
-    public int  getSize() {return this.actualSize;}
+    public int getMaximumSize() {return this.maximumSize;}
 
     public String getName() {return this.name;}
 

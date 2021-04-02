@@ -60,7 +60,7 @@ public class NLMRStructure implements Structure {
         long consumedMemory = this.lastBegin - this.lastEnd;
         if (consumedMemory>betterMemory)
             this.betterMemory=consumedMemory;
-        this.averageMemory=(this.averageMemory+this.nbCalls+consumedMemory)/(this.nbCalls+1);
+        this.averageMemory=(this.averageMemory*this.nbCalls+consumedMemory)/(this.nbCalls+1);
         this.nbCalls++;
     }
 }

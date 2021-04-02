@@ -64,9 +64,9 @@ public class NLMRManager implements Manager{
         key = key.replace("$Runner", "");
         fileName = fileName.replace("$Runner", "");
         if ("nlmrenter".equals(code)) {
-            executeEnter(key, fileName, Long.parseLong(id));
+            executeEnter(key.replace("$onTrimMemory",""), fileName.replace("$onTrimMemory",""), Long.parseLong(id));
         } else if ("nlmrexit".equals(code)) {
-            executeExit(key, fileName, Long.parseLong(id));
+            executeExit(key.replace("$run",""), fileName.replace("$run",""), Long.parseLong(id));
         }
     }
 
@@ -79,21 +79,10 @@ public class NLMRManager implements Manager{
     }
 
     public void executeEnter(String key, String id, long date) {
-        this.structures.put(id, this.enters.get(key).execute(id, date));
+        this.structures.put(id, this.enters.get(key).execute(key, date));
     }
 
     public void executeExit(String key, String id, long date) {
-        System.out.println("Key : " + key);
-        for (java.util.Map.Entry<String, NLMRExit> exitEntry : this.exits.entrySet()) {
-            HashMap.Entry<String, NLMRExit> pair = (HashMap.Entry) exitEntry;
-            System.out.println("Exit : " + pair.getKey());
-        }
-        System.out.println("Id : " + id);
-        for (java.util.Map.Entry<String, NLMRStructure> stringStructureEntry : this.structures.entrySet()) {
-            HashMap.Entry<String, NLMRStructure> pair = (HashMap.Entry) stringStructureEntry;
-            System.out.println("Structure : " + pair.getKey());
-        }
-
         this.exits.get(key).execute(this.structures.get(id), date);
     }
 }

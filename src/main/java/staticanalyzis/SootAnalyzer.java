@@ -1,6 +1,7 @@
 package staticanalyzis;
 
 import manager.ManagerGroup;
+import ppg.code.Code;
 import soot.*;
 import soot.javaToJimple.AnonClassInitMethodSource;
 import soot.jimple.*;
@@ -49,15 +50,16 @@ public class SootAnalyzer {
             protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
 
                 if (body.getMethod().getDeclaringClass().getName().startsWith(pack)) {
-                    //System.out.println("classe : " + body.getMethod().getDeclaringClass());
+                    //System.out.println("Beginning Class : " + body.getMethod().getDeclaringClass() + " and Method " + body.getMethod());
+
+                    //CodeSmellAnalyzer.keyCpt=0;
                     String name = body.getMethod().getDeclaringClass().getName()+".java";
                     String methodName = body.getMethod().getName();
-
                     //Check methods
                     IODAnalyzer.methodsToCheck(name, methodName, 0, managerGroup, body, body.getUnits(), isInstrumenting);
                     HPAnalyzer.methodsToCheck(name, methodName, 0, managerGroup, body, body.getUnits(), isInstrumenting);
                     NLMRAnalyzer.methodsToCheck(name, methodName, 0, managerGroup, body, body.getUnits(), isInstrumenting);
-                    //System.out.println("Method : " + methodName);
+
 
                     //Check lines
 
@@ -69,6 +71,9 @@ public class SootAnalyzer {
                         HMUAnalyzer.checkLine(line, name, methodName, 0, managerGroup, body, u, body.getUnits(), isInstrumenting);
                         IODAnalyzer.checkLine(line, name, methodName, 0, managerGroup, body, u, body.getUnits(), isInstrumenting);
                     }
+
+                    //System.out.println("End Class");
+                    //System.out.println(body.toString());
                 }
             }
         }));

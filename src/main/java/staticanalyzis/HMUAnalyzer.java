@@ -27,7 +27,7 @@ public final class HMUAnalyzer extends CodeSmellAnalyzer {
         Matcher m = findPattern(line, "(?<=(HashMap))(.*)(?=void <init>\\()");
         if (m.find()) {
             String variableName=m.group(0).split("=")[0].replaceAll("\\s","");
-            manager.addImplementation(generateKey(name), new HMUImplementation(new CodeLocation(name, methodName, lineNumber), "HashMap", variableName));
+            manager.addImplementation(generateKey(name, methodName), new HMUImplementation(new CodeLocation(name, methodName, lineNumber), "HashMap", variableName));
             if (isInstrumenting) {
                 buildInstrumentation(getStructureInstanceLocalName(line), units, u, b, "hmuimpl:");
             }
@@ -36,7 +36,7 @@ public final class HMUAnalyzer extends CodeSmellAnalyzer {
             m = findPattern(line, "(?<=(ArrayMap))(.*)(?=void <init>\\()");
             if (m.find()) {
                 String variableName=m.group(0).split("=")[0].replaceAll("\\s","");
-                manager.addImplementation(generateKey(name), new HMUImplementation(new CodeLocation(name, methodName, lineNumber), "ArrayMap", variableName));
+                manager.addImplementation(generateKey(name, methodName), new HMUImplementation(new CodeLocation(name, methodName, lineNumber), "ArrayMap", variableName));
                 if (isInstrumenting) {
                     buildInstrumentation(getStructureInstanceLocalName(line), units, u, b, "hmuimpl:");
                 }
@@ -45,7 +45,7 @@ public final class HMUAnalyzer extends CodeSmellAnalyzer {
                 m = findPattern(line, "(?<=(SingleArrayMap))(.*)(?=void <init>\\()");
                 if (m.find()) {
                     String variableName=m.group(0).split("=")[0].replaceAll("\\s","");
-                    manager.addImplementation(generateKey(name), new HMUImplementation(new CodeLocation(name, methodName, lineNumber), "SimpleArrayMap", variableName));
+                    manager.addImplementation(generateKey(name, methodName), new HMUImplementation(new CodeLocation(name, methodName, lineNumber), "SimpleArrayMap", variableName));
                     if (isInstrumenting) {
                         buildInstrumentation(getStructureInstanceLocalName(line), units, u, b, "hmuimpl:");
                     }
@@ -59,7 +59,7 @@ public final class HMUAnalyzer extends CodeSmellAnalyzer {
         Matcher m = findPattern(line, "(?<=(HashMap|ArrayMap|SingleArrayMap))(.*)(?=put\\()");
         if (m.find()) {
             String variableName=m.group(0).split("\\.")[0];
-            manager.addAddition(generateKey(name), new HMUAddition(new CodeLocation(name, methodName, lineNumber), variableName));
+            manager.addAddition(generateKey(name, methodName), new HMUAddition(new CodeLocation(name, methodName, lineNumber), variableName));
             if (isInstrumenting) {
                 buildInstrumentation(getStructureCallerLocalName(line), units, u, b, "hmuadd:");
             }
@@ -70,7 +70,7 @@ public final class HMUAnalyzer extends CodeSmellAnalyzer {
         Matcher m = findPattern(line, "(?<=(HashMap|ArrayMap|SingleArrayMap))(.*)(?=remove\\()");
         if (m.find()) {
             String variableName=m.group(0).split("\\.")[0];
-            manager.addDeletion(generateKey(name), new HMUDeletion(new CodeLocation(name, methodName, lineNumber), variableName));
+            manager.addDeletion(generateKey(name, methodName), new HMUDeletion(new CodeLocation(name, methodName, lineNumber), variableName));
             if (isInstrumenting) {
                 buildInstrumentation(getStructureCallerLocalName(line), units, u, b, "hmudel:");
             }
@@ -81,7 +81,7 @@ public final class HMUAnalyzer extends CodeSmellAnalyzer {
         Matcher m = findPattern(line, "(?<=(HashMap|ArrayMap|SingleArrayMap))(.*)(?=clear\\()");
         if (m.find()) {
             String variableName=m.group(0).split("\\.")[0];
-            manager.addClean(generateKey(name), new HMUClean(new CodeLocation(name, methodName, lineNumber), variableName));
+            manager.addClean(generateKey(name, methodName), new HMUClean(new CodeLocation(name, methodName, lineNumber), variableName));
             if (isInstrumenting) {
                 buildInstrumentation(getStructureCallerLocalName(line), units, u, b, "hmucln:");
             }

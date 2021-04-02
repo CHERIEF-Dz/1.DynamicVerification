@@ -22,7 +22,7 @@ public final class DWAnalyzer extends CodeSmellAnalyzer{
     private static void checkDWAcquire(String line, String name, String methodName, int lineNumber, DWManager manager, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting) {
         Matcher m = findPattern(line, "(?<=(WakeLock))(.*)(?=acquire\\()");
         if (m.find()) {
-            String key=generateKey(name);
+            String key=generateKey(name, methodName);
             String variableName=m.group(0).split("\\.")[0];
             manager.addAcquire(key, new DWAcquire(new CodeLocation(name, methodName, lineNumber), variableName));
 
@@ -36,7 +36,7 @@ public final class DWAnalyzer extends CodeSmellAnalyzer{
     private static void checkDWRelease(String line, String name, String methodName, int lineNumber, DWManager manager, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting) {
         Matcher m = findPattern(line, "(?<=(WakeLock))(.*)(?=release\\()");
         if (m.find()) {
-            String key=generateKey(name);
+            String key=generateKey(name, methodName);
             String variableName=m.group(0).split("\\.")[0];
             manager.addRelease(key, new DWRelease(new CodeLocation(name, methodName, lineNumber), variableName));
 

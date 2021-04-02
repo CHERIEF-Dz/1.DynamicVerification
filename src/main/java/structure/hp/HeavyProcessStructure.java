@@ -60,7 +60,7 @@ public class HeavyProcessStructure implements Structure {
         long elapsedTime = (long) ((this.lastEnd -this.lastBegin)/1000000.0);
         if (elapsedTime>worstTime)
             this.worstTime=elapsedTime;
-        this.averageTime=(this.averageTime+this.nbCalls+elapsedTime)/(this.nbCalls+1);
+        this.averageTime=(this.averageTime*this.nbCalls+elapsedTime)/(this.nbCalls+1);
         this.nbCalls++;
     }
 }

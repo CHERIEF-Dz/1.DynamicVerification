@@ -22,7 +22,7 @@ public class IODAnalyzer extends CodeSmellAnalyzer {
         if (m2.find() && m.find()) {
             String variableName=m.group(0).split("\\.")[0];
             if (!getStructureInstanceLocalName(line).equals("refBuilder")) {
-                manager.addNew(generateKey(name), new IODNew(new CodeLocation(name, methodName, lineNumber)));
+                manager.addNew(generateKey(name, methodName), new IODNew(new CodeLocation(name, methodName, lineNumber)));
                 if (isInstrumenting) {
                     buildInstrumentation(getStructureInstanceLocalName(line), units, u, b, "iodnew:");
                 }
@@ -37,7 +37,7 @@ public class IODAnalyzer extends CodeSmellAnalyzer {
     protected static void checkIOD(String name, String methodName, String methodNameNeeded, int lineNumber, IODManager manager, Body b, UnitPatchingChain units, boolean isInstrumenting) {
         Matcher m = findPattern(methodName, methodNameNeeded);
         if (m.find()) {
-            String key=generateKey(name);
+            String key=generateKey(name, methodName);
             manager.addEnter(key, new IODEnter(new CodeLocation(name, methodName, lineNumber)));
             manager.addExit(key, new IODExit(new CodeLocation(name, methodName, lineNumber)));
         }

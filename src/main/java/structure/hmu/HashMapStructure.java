@@ -20,7 +20,7 @@ public class HashMapStructure extends MapStructure {
     @Override
     public void checkStructure() {
         super.checkStructure();
-        if (this.actualSize < LittleHashMapThreshold) {
+        if (this.maximumSize < LittleHashMapThreshold) {
             System.out.println("HashMap defined " + this.structureImplementation.toString() + " has HMU code smell (Too few elements).");
             this.foundCodeSmell();
         }

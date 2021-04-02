@@ -2,7 +2,9 @@ package manager;
 
 import actions.dw.DWAcquire;
 import actions.dw.DWRelease;
+import actions.hmu.HMUImplementation;
 import structure.dw.WakeLockStructure;
+import structure.hmu.MapStructure;
 
 import java.io.File;
 import java.io.FileNotFoundException;
