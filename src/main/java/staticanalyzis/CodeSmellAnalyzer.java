@@ -8,6 +8,7 @@ import soot.jimple.*;
 import utils.CodeLocation;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -15,7 +16,8 @@ import java.util.regex.Pattern;
 
 public abstract class CodeSmellAnalyzer implements Analyzer{
 
-    static int keyCpt=0;
+    //static int keyCpt=0;
+    static HashMap<String, Integer> keyCptMap = new HashMap<>();
     static String prefix = "dynver:";
 
     protected static Local addTmpRef(Body body, String name, Type type)
@@ -43,8 +45,9 @@ public abstract class CodeSmellAnalyzer implements Analyzer{
 
         // insert "tmpLong = 'HELLO';"
         AssignStmt stringStmt = Jimple.v().newAssignStmt(tmpString,
-                StringConstant.v(CodeSmellAnalyzer.prefix+b.getMethod().getDeclaringClass().getName() + ".java:"+CodeSmellAnalyzer.keyCpt+":"+suffix));
+                StringConstant.v(CodeSmellAnalyzer.prefix+b.getMethod().getDeclaringClass().getName() + ".java$"+ b.getMethod().getName()+":"+getKey(b.getMethod().getDeclaringClass().getName()+".java", b.getMethod().getName())+":"+suffix));
         generatedUnits.add(stringStmt);
+        //System.out.println("Associated Print : " + stringStmt.toString());
 
         // insert tmpRef = new java.lang.StringBuilder;
         NewExpr newString = Jimple.v().newNewExpr(RefType.v("java.lang.StringBuilder"));
@@ -130,9 +133,25 @@ public abstract class CodeSmellAnalyzer implements Analyzer{
         return line.substring(line.indexOf("virtualinvoke")).replace("virtualinvoke ", "").trim().split("\\.")[0];
     }
 
-    protected static String generateKey(String name) {
-        CodeSmellAnalyzer.keyCpt++;
-        return name + ":" + CodeSmellAnalyzer.keyCpt;
+    protected static String generateKey(String name, String methodName) {
+        String key = name + "$" + methodName;
+        if (keyCptMap.get(key) == null) {
+            keyCptMap.put(key, 0);
+        } else {
+            keyCptMap.put(key, (keyCptMap.get(key)+1));
+        }
+        //CodeSmellAnalyzer.keyCpt++;
+        return key + ":" + keyCptMap.get(key);
+    }
+
+    protected static int getKey(String name, String methodName) {
+
+        String key = name + "$" + methodName;
+        if (keyCptMap.get(key) == null) {
+            keyCptMap.put(key, 0);
+        }
+        //CodeSmellAnalyzer.keyCpt++;
+        return keyCptMap.get(key);
     }
 
     private static List<Unit> buildTimerPrint(List<Unit> generatedUnits, Local refTime, Local refBuilder) {
