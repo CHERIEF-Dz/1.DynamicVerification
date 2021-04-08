@@ -56,6 +56,9 @@ public class SootAnalyzer {
                     String name = body.getMethod().getDeclaringClass().getName()+".java";
                     String methodName = body.getMethod().getName();
                     //Check methods
+                    //System.out.println(body.getMethod().getDeclaringClass().getName());
+                    //System.out.println(body.getMethod().getName());
+
                     IODAnalyzer.methodsToCheck(name, methodName, 0, managerGroup, body, body.getUnits(), isInstrumenting);
                     HPAnalyzer.methodsToCheck(name, methodName, 0, managerGroup, body, body.getUnits(), isInstrumenting);
                     NLMRAnalyzer.methodsToCheck(name, methodName, 0, managerGroup, body, body.getUnits(), isInstrumenting);
@@ -71,9 +74,6 @@ public class SootAnalyzer {
                         HMUAnalyzer.checkLine(line, name, methodName, 0, managerGroup, body, u, body.getUnits(), isInstrumenting);
                         IODAnalyzer.checkLine(line, name, methodName, 0, managerGroup, body, u, body.getUnits(), isInstrumenting);
                     }
-
-                    //System.out.println("End Class");
-                    //System.out.println(body.toString());
                 }
             }
         }));

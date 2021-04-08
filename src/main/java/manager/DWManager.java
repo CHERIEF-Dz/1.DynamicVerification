@@ -35,7 +35,10 @@ public class DWManager implements Manager {
     }
 
     public void executeRelease(String key, String id) {
-        this.releases.get(key).execute(this.structures.get(id));
+        // If there is a release without acquire, no need
+        if (this.structures.get(id)!=null) {
+            this.releases.get(key).execute(this.structures.get(id));
+        }
     }
 
     public void checkStructures() {

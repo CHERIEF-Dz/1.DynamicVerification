@@ -4,6 +4,7 @@ import actions.hp.HPEnter;
 import actions.hp.HPExit;
 import actions.nlmr.NLMREnter;
 import actions.nlmr.NLMRExit;
+import staticanalyzis.NLMRAnalyzer;
 import structure.hp.HeavyProcessStructure;
 import structure.nlmr.NLMRStructure;
 
@@ -61,8 +62,8 @@ public class NLMRManager implements Manager{
 
     @Override
     public void execute(String key, String fileName, String lineNumber, String code, String id) {
-        key = key.replace("$Runner", "");
-        fileName = fileName.replace("$Runner", "");
+        key = key.replace(NLMRAnalyzer.runnerSuffix, "");
+        fileName = fileName.replace(NLMRAnalyzer.runnerSuffix, "");
         if ("nlmrenter".equals(code)) {
             executeEnter(key.replace("$onTrimMemory",""), fileName.replace("$onTrimMemory",""), Long.parseLong(id));
         } else if ("nlmrexit".equals(code)) {

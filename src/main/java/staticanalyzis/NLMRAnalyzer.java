@@ -19,6 +19,7 @@ import java.util.regex.Matcher;
 public class NLMRAnalyzer extends CodeSmellAnalyzer{
 
     private static SootClass runnerClass;
+    public static String runnerSuffix = "$RunnerTMP";
 
     public static void methodsToCheck(String name, String methodName, int lineNumber, ManagerGroup managerGroup, Body b, UnitPatchingChain units, boolean isInstrumenting) {
         checkNLMR(name, methodName, "onTrimMemory", 0, managerGroup.managerNLMR, b, b.getUnits(),"nlmrenter", "nlmrexit", isInstrumenting);
@@ -201,7 +202,7 @@ public class NLMRAnalyzer extends CodeSmellAnalyzer{
 
     public static void buildRunner(SootClass activityClass) {
         //SootClass sootClass = body.getMethod().getDeclaringClass();
-        SootClass sootClass = Scene.v().makeSootClass(activityClass.getName()+"$Runner", Modifier.PUBLIC);
+        SootClass sootClass = Scene.v().makeSootClass(activityClass.getName()+NLMRAnalyzer.runnerSuffix, Modifier.PUBLIC);
         sootClass.setSuperclass(Scene.v().getSootClass("java.lang.Object"));
         sootClass.setApplicationClass();
         SootMethod runMethod = Scene.v().makeSootMethod("run", new ArrayList<Type>(), VoidType.v(), Modifier.PUBLIC);
