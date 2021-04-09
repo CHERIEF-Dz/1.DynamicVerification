@@ -39,7 +39,7 @@ public class OnDrawStructure implements Structure {
 
     @Override
     public void checkStructure() {
-        if (((this.lastEnd -this.lastBegin)/1000000.0) > ((1000)/60.0) || this.nbInstantiations > 0) {
+        if (((this.lastEnd -this.lastBegin)/1000000.0) > ((1000)/60.0) || this.worstInstantations > 0) {
             System.out.println("onDraw defined " + this.structureImplementation.toString() + " has IOD code smell.");
             this.foundCodeSmell();
         }

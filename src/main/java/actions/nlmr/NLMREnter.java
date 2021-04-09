@@ -11,10 +11,9 @@ public class NLMREnter extends ConcreteAction {
         super(location);
     }
 
-    public NLMRStructure execute(String id, long date) {
-        NLMRStructure toReturn = new NLMRStructure(this.location, id);
-        toReturn.begin(date);
-        return toReturn;
+    public void execute(NLMRStructure processStructure, long date) {
+        //NLMRStructure toReturn = new NLMRStructure(this.location, id);
+        processStructure.begin(date);
     }
 
     @Override

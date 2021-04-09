@@ -6,6 +6,7 @@ import actions.nlmr.NLMREnter;
 import actions.nlmr.NLMRExit;
 import staticanalyzis.NLMRAnalyzer;
 import structure.hp.HeavyProcessStructure;
+import structure.iod.OnDrawStructure;
 import structure.nlmr.NLMRStructure;
 
 import java.io.File;
@@ -79,8 +80,10 @@ public class NLMRManager implements Manager{
         this.exits.put(key, exit);
     }
 
+    public void addStructure(String key, NLMRStructure structure) {this.structures.put(key, structure);}
+
     public void executeEnter(String key, String id, long date) {
-        this.structures.put(id, this.enters.get(key).execute(key, date));
+        this.enters.get(key).execute(this.structures.get(id), date);
     }
 
     public void executeExit(String key, String id, long date) {

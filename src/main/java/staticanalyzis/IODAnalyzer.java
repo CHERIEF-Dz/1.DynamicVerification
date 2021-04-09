@@ -6,6 +6,7 @@ import actions.iod.IODNew;
 import manager.IODManager;
 import manager.ManagerGroup;
 import soot.*;
+import structure.iod.OnDrawStructure;
 import utils.CodeLocation;
 
 import java.util.regex.Matcher;
@@ -38,6 +39,7 @@ public class IODAnalyzer extends CodeSmellAnalyzer {
         Matcher m = findPattern(methodName, methodNameNeeded);
         if (m.find()) {
             String key=generateKey(name, methodName);
+            manager.addStructure(name+"$onDraw", new OnDrawStructure(new CodeLocation(name, methodName, lineNumber), name));
             manager.addEnter(key, new IODEnter(new CodeLocation(name, methodName, lineNumber)));
             manager.addExit(key, new IODExit(new CodeLocation(name, methodName, lineNumber)));
         }

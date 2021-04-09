@@ -83,8 +83,11 @@ public class HPManager implements Manager{
         this.exits.put(key, exit);
     }
 
+    public void addStructure(String key, HeavyProcessStructure structure) {this.structures.put(key, structure);}
+
     public void executeEnter(String key, String id, long date) {
-        this.structures.put(id, this.enters.get(key).execute(id, date));
+        //this.structures.put(id, this.enters.get(key).execute(id, date));
+        this.enters.get(key).execute(this.structures.get(id), date);
     }
 
     public void executeExit(String key, String id, long date) {

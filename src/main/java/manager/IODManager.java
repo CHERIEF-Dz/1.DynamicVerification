@@ -7,6 +7,7 @@ import structure.dw.WakeLockStructure;
 import structure.hmu.ArrayMapStructure;
 import structure.hmu.MapStructure;
 import structure.iod.OnDrawStructure;
+import structure.nlmr.NLMRStructure;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -30,6 +31,7 @@ public class IODManager implements Manager{
     public void checkStructures() {
         for (java.util.Map.Entry<String, OnDrawStructure> stringStructureEntry : this.structures.entrySet()) {
             HashMap.Entry<String, OnDrawStructure> pair = (HashMap.Entry) stringStructureEntry;
+            System.out.println("Structure : " + pair.getKey() + " has " + pair.getValue().getWorstInstantations());
             pair.getValue().checkStructure();
         }
     }
@@ -44,8 +46,18 @@ public class IODManager implements Manager{
 
     public void addNew(String key, IODNew newElement) { this.news.put(key, newElement); }
 
+    public void addStructure(String key, OnDrawStructure structure) {this.structures.put(key, structure);}
+
     public void executeEnter(String key, String id, long date) {
-        this.structures.put(id, this.enters.get(key).execute(id, date));
+        //this.structures.put(id, this.enters.get(key).execute(id, date));
+        /*
+        System.out.println("Need : " + key + " and " + id);
+        for (java.util.Map.Entry<String, OnDrawStructure> stringStructureEntry : this.structures.entrySet()) {
+            HashMap.Entry<String, OnDrawStructure> pair = (HashMap.Entry) stringStructureEntry;
+            System.out.println("Structure : " + pair.getKey() + " " + pair.getValue().getId() + " has " + pair.getValue().getWorstInstantations());
+        }
+        */
+        this.enters.get(key).execute(this.structures.get(id), date);
     }
 
     public void executeExit(String key, String id, long date) {

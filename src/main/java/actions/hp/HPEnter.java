@@ -10,10 +10,10 @@ public class HPEnter extends ConcreteAction {
         super(location);
     }
 
-    public HeavyProcessStructure execute(String id, long date) {
-        HeavyProcessStructure toReturn = new HeavyProcessStructure(this.location, id);
-        toReturn.begin(date);
-        return toReturn;
+    public void execute(HeavyProcessStructure structure, long date) {
+        //HeavyProcessStructure toReturn = new HeavyProcessStructure(this.location, id);
+        structure.begin(date);
+        //return toReturn;
     }
 
     @Override

@@ -9,6 +9,7 @@ import manager.ManagerGroup;
 import manager.NLMRManager;
 import soot.*;
 import soot.jimple.*;
+import structure.nlmr.NLMRStructure;
 import utils.CodeLocation;
 
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ public class NLMRAnalyzer extends CodeSmellAnalyzer{
         Matcher m = findPattern(methodName, methodNameNeeded);
         if (m.find()) {
             String key=generateKey(name, methodName).replace("$onTrimMemory","");
+            manager.addStructure(name.replace("$onTrimMemory",""), new NLMRStructure(new CodeLocation(name, methodName, lineNumber), name.replace("$onTrimMemory","")));
             manager.addEnter(key, new NLMREnter(new CodeLocation(name, methodName, lineNumber)));
             manager.addExit(key, new NLMRExit(new CodeLocation(name, methodName, lineNumber)));
             if (isInstrumenting) {
