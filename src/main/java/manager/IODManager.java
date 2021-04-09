@@ -31,7 +31,6 @@ public class IODManager implements Manager{
     public void checkStructures() {
         for (java.util.Map.Entry<String, OnDrawStructure> stringStructureEntry : this.structures.entrySet()) {
             HashMap.Entry<String, OnDrawStructure> pair = (HashMap.Entry) stringStructureEntry;
-            System.out.println("Structure : " + pair.getKey() + " has " + pair.getValue().getWorstInstantations());
             pair.getValue().checkStructure();
         }
     }
