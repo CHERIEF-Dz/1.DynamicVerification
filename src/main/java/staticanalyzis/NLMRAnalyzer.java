@@ -27,8 +27,7 @@ public class NLMRAnalyzer extends CodeSmellAnalyzer{
     }
 
     protected static void checkNLMR(String name, String methodName, String methodNameNeeded, int lineNumber, NLMRManager manager, Body b, UnitPatchingChain units, String prefix, String suffix, boolean isInstrumenting) {
-        Matcher m = findPattern(methodName, methodNameNeeded);
-        if (m.find()) {
+        if (checkMethodName(methodName, methodNameNeeded)) {
             String key=generateKey(name, methodName).replace("$onTrimMemory","");
             manager.addStructure(name.replace("$onTrimMemory",""), new NLMRStructure(new CodeLocation(name, methodName, lineNumber), name.replace("$onTrimMemory","")));
             manager.addEnter(key, new NLMREnter(new CodeLocation(name, methodName, lineNumber)));

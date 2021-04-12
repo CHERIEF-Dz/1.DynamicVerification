@@ -24,8 +24,7 @@ public class HPAnalyzer extends CodeSmellAnalyzer {
     }
 
     protected static void checkHP(String name, String methodName, String methodNameNeeded, int lineNumber, HPManager manager, Body b, UnitPatchingChain units, String prefix, String suffix, boolean isInstrumenting) {
-        Matcher m = findPattern(methodName, methodNameNeeded);
-        if (m.find()) {
+        if (checkMethodName(methodName, methodNameNeeded)) {
             String key=generateKey(name, methodName);
             manager.addStructure(name, new HeavyProcessStructure(new CodeLocation(name, methodName, lineNumber), name));
             manager.addEnter(key, new HPEnter(new CodeLocation(name, methodName, lineNumber)));

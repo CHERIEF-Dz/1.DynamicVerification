@@ -33,6 +33,12 @@ public abstract class CodeSmellAnalyzer implements Analyzer{
         return m;
     }
 
+    protected static boolean checkMethodName(String methodName, String methodNameNeeded) {
+        Pattern pat = Pattern.compile(methodNameNeeded);
+        Matcher m = pat.matcher(methodName);
+        return methodName.length()==methodNameNeeded.length() && m.find();
+    }
+
     protected static List<Unit> buildBeginningPrint(Body b, Local refPrint, Local refBuilder, Local tmpString, String suffix) {
         // insert "refPrint = java.lang.System.out;"
 
@@ -265,8 +271,7 @@ public abstract class CodeSmellAnalyzer implements Analyzer{
     }
 
     protected static void buildMethod(String methodName, String methodNameNeeded, Body b, UnitPatchingChain units, String prefix, String suffix, boolean isInstrumenting) {
-        Matcher m = findPattern(methodName, methodNameNeeded);
-        if (m.find()) {
+        if (checkMethodName(methodName, methodNameNeeded)) {
             if (isInstrumenting) {
                 buildInstrumentationMethod(units, b, prefix, suffix);
             }
