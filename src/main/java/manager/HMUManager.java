@@ -75,6 +75,13 @@ public class HMUManager implements Manager{
     }
 
     public void executeImplementation(String key, String id) {
+        /*
+        System.out.println("Need : " + key + " and " + id);
+        for (java.util.Map.Entry<String, MapStructure> stringStructureEntry : this.structures.entrySet()) {
+            HashMap.Entry<String, MapStructure> pair = (HashMap.Entry) stringStructureEntry;
+            System.out.println("Structure : " + pair.getKey() + " " + pair.getValue().getId());
+        }
+        */
         this.structures.put(id, this.implementations.get(key).execute(id));
     }
 
