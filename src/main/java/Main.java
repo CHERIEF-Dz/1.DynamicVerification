@@ -80,27 +80,6 @@ public class Main {
                         //HMUManager managerHMU = managerGroup.managerHMU;
                         managerGroup.execute(key, fileName, lineNumber, code, id);
                         //managerHMU.execute(key, fileName, lineNumber, code, id);
-                        /*
-                        if ("hmuimpl".equals(result[3])) {
-                            managerHMU.executeImplementation(key, id);
-                        } else if ("hmuadd".equals(result[3])) {
-                            //System.out.println("Addition line !");
-                            managerHMU.executeAddition(key, id);
-                        } else if ("hmudel".equals(result[3])) {
-                            managerHMU.executeDeletion(key, id);
-                        } else if ("hmucln".equals(result[3])) {
-                            managerHMU.executeClean(key, id);
-                        } else if ("dwacq".equals(result[3])) {
-                            managerGroup.managerDW.executeAcquire(key, id);
-                        } else if ("dwrel".equals(result[3])) {
-                            managerGroup.managerDW.executeRelease(key, id);
-                        } else if ("iodenter".equals(result[3])) {
-                            managerGroup.managerIOD.executeEnter(key, fileName, Long.valueOf(id));
-                        } else if ("iodexit".equals(result[3])) {
-                            managerGroup.managerIOD.executeExit(key, fileName, Long.valueOf(id));
-                        } else if ("iodnew".equals(result[3])) {
-                            managerGroup.managerIOD.executeNew(key, fileName);
-                        }*/
                     }
                 }
                 else {

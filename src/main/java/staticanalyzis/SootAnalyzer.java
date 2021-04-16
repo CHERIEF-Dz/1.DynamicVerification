@@ -63,7 +63,6 @@ public class SootAnalyzer {
                     HPAnalyzer.methodsToCheck(name, methodName, 0, managerGroup, body, body.getUnits(), isInstrumenting);
                     NLMRAnalyzer.methodsToCheck(name, methodName, 0, managerGroup, body, body.getUnits(), isInstrumenting);
 
-
                     //Check lines
 
                     UnitPatchingChain chain = body.getUnits();
