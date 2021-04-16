@@ -62,11 +62,11 @@ public class HPManager implements Manager{
     public void execute(String key, String fileName, String lineNumber, String code, String id) {
         if ("hasenter".equals(code)) {
             //key = key.replace("$onPostExecute", "").replace("$onPreExecute","").replace("onProgressUpdate", "");
-            fileName = fileName.replace("$onPostExecute", "").replace("$onPreExecute","").replace("onProgressUpdate", "");
+            fileName = fileName.replace("$onPostExecute", "").replace("$onPreExecute","").replace("$onProgressUpdate", "");
             executeEnter(key, fileName, Long.parseLong(id));
         } else if ("hasexit".equals(code)) {
             //key = key.replace("$onPostExecute", "").replace("$onPreExecute","").replace("onProgressUpdate", "");
-            fileName = fileName.replace("$onPostExecute", "").replace("$onPreExecute","").replace("onProgressUpdate", "");
+            fileName = fileName.replace("$onPostExecute", "").replace("$onPreExecute","").replace("$onProgressUpdate", "");
             executeExit(key, fileName, Long.parseLong(id));
         } else if ("hbrenter".equals(code)) {
             executeEnter(key, fileName.replace("$onReceive",""), Long.parseLong(id));
