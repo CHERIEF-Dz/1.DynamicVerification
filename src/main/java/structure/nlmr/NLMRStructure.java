@@ -33,7 +33,7 @@ public class NLMRStructure implements Structure {
 
     @Override
     public void checkStructure() {
-        if (this.betterMemory > 1024) {
+        if (this.betterMemory < 1024) {
             this.foundCodeSmell();
         }
     }
