@@ -23,12 +23,12 @@ public class ManagerGroup {
         this.managerNLMR.checkStructures();
     }
 
-    public void generateCSV(String outputPath) {
-        this.managerDW.generateCSV(outputPath);
-        this.managerHMU.generateCSV(outputPath);
-        this.managerIOD.generateCSV(outputPath);
-        this.managerHP.generateCSV(outputPath);
-        this.managerNLMR.generateCSV(outputPath);
+    public void generateCSV(String outputPath, String apkName, String packageName) {
+        this.managerDW.generateCSV(outputPath, apkName, packageName);
+        this.managerHMU.generateCSV(outputPath, apkName, packageName);
+        this.managerIOD.generateCSV(outputPath, apkName, packageName);
+        this.managerHP.generateCSV(outputPath, apkName, packageName);
+        this.managerNLMR.generateCSV(outputPath, apkName, packageName);
     }
 
     public void execute(String key, String fileName, String lineNumber, String code, String id) {

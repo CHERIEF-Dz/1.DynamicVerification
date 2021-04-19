@@ -37,7 +37,6 @@ public class IODAnalyzer extends CodeSmellAnalyzer {
 
     protected static void checkIOD(String name, String methodName, String methodNameNeeded, int lineNumber, IODManager manager, Body b, UnitPatchingChain units, boolean isInstrumenting) {
         if (checkMethodName(methodName, methodNameNeeded)) {
-            System.out.println("Find : " + methodName + " vs " + methodNameNeeded);
             String key=generateKey(name, methodName);
             manager.addStructure(name+"$onDraw", new OnDrawStructure(new CodeLocation(name, methodName, lineNumber), name));
             manager.addEnter(key, new IODEnter(new CodeLocation(name, methodName, lineNumber)));

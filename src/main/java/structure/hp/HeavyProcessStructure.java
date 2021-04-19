@@ -34,7 +34,7 @@ public class HeavyProcessStructure implements Structure {
 
     @Override
     public void checkStructure() {
-        if (((this.lastEnd -this.lastBegin)/1000000.0) > (5000)) {
+        if (this.worstTime > (100)) {
             this.foundCodeSmell();
         }
     }

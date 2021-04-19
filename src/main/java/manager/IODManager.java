@@ -68,7 +68,7 @@ public class IODManager implements Manager{
     }
 
     @Override
-    public void generateCSV(String outputPath) {
+    public void generateCSV(String outputPath, String apkName, String packageName) {
         File directory = new File(outputPath);
         if (! directory.exists()){
             directory.mkdir();
@@ -83,7 +83,7 @@ public class IODManager implements Manager{
                     String fileName = pair.getValue().getLocation().getFileName();
                     String methodName = pair.getValue().getLocation().getMethodName();
                     OnDrawStructure structure =  pair.getValue();
-                    writer.write("apk,package,"+fileName+","+methodName+ ","+structure.getAverageTime()+","+structure.getWorstTime()+","+structure.getAverageInstantiations()+","+structure.getWorstInstantations()+"\n");
+                    writer.write(apkName+ ","+ packageName +","+fileName+","+methodName+ ","+structure.getAverageTime()+","+structure.getWorstTime()+","+structure.getAverageInstantiations()+","+structure.getWorstInstantations()+"\n");
                 }
             }
         } catch (FileNotFoundException e) {

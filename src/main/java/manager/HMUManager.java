@@ -105,7 +105,7 @@ public class HMUManager implements Manager{
     }
 
     @Override
-    public void generateCSV(String outputPath) {
+    public void generateCSV(String outputPath, String apkName, String packageName) {
         File directory = new File(outputPath);
         if (! directory.exists()){
             directory.mkdir();
@@ -129,7 +129,7 @@ public class HMUManager implements Manager{
                             structureType = "ArrayMap";
                         }
                     }
-                    writer.write("apk,package,"+fileName+","+methodName+","+ variableName + "," + structureType + "," + pair.getValue().getMaximumSize()+ "\n");
+                    writer.write(apkName+ ","+ packageName +","+fileName+","+methodName+","+ variableName + "," + structureType + "," + pair.getValue().getMaximumSize()+ "\n");
                 }
             }
         } catch (FileNotFoundException e) {

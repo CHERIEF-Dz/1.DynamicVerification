@@ -31,7 +31,7 @@ public class HPManager implements Manager{
     }
 
     @Override
-    public void generateCSV(String outputPath) {
+    public void generateCSV(String outputPath, String apkName, String packageName) {
         File directory = new File(outputPath);
         if (! directory.exists()){
             directory.mkdir();
@@ -45,7 +45,7 @@ public class HPManager implements Manager{
                 if (pair.getValue().hasCodeSmell()) {
                     String fileName = pair.getValue().getLocation().getFileName();
                     String methodName = pair.getValue().getLocation().getMethodName();
-                    writer.write("apk,package,"+fileName+","+methodName+ ","+pair.getValue().getAverageTime()+","+pair.getValue().getWorstTime()+"\n");
+                    writer.write(apkName+ ","+ packageName +","+fileName+","+methodName+ ","+pair.getValue().getAverageTime()+","+pair.getValue().getWorstTime()+"\n");
                 }
             }
         } catch (FileNotFoundException e) {

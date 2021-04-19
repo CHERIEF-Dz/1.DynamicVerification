@@ -1,12 +1,15 @@
 package staticanalyzis;
 
 import manager.ManagerGroup;
+import org.xmlpull.v1.XmlPullParserException;
 import ppg.code.Code;
 import soot.*;
 import soot.javaToJimple.AnonClassInitMethodSource;
 import soot.jimple.*;
+import soot.jimple.infoflow.android.manifest.ProcessManifest;
 import soot.options.Options;
 
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
 
@@ -42,8 +45,11 @@ public class SootAnalyzer {
         System.setOut(originalStream);
     }
 
-    public void analyze(ManagerGroup managerGroup, boolean isInstrumenting, String pack) {
+    public void analyze(ManagerGroup managerGroup, boolean isInstrumenting) throws IOException, XmlPullParserException {
         setupSoot();
+        final ProcessManifest processManifest = new ProcessManifest(apkPath);
+        String pack = processManifest.getPackageName();
+        System.out.println("Package : " + pack);
 
         PackManager.v().getPack("jtp").add(new Transform("jtp.myInstrumenter", new BodyTransformer() {
             @Override
@@ -73,6 +79,11 @@ public class SootAnalyzer {
                         HMUAnalyzer.checkLine(line, name, methodName, 0, managerGroup, body, u, body.getUnits(), isInstrumenting);
                         IODAnalyzer.checkLine(line, name, methodName, 0, managerGroup, body, u, body.getUnits(), isInstrumenting);
                     }
+                    /*
+                    if (body.getMethod().getName().equals("initializeStructures") && body.getMethod().getDeclaringClass().getName().contains("StructuresManager")) {
+                        System.out.println(body.toString());
+                    }
+                    */
                 }
             }
         }));

@@ -1,5 +1,7 @@
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.*;
+import org.xmlpull.v1.XmlPullParserException;
+import soot.jimple.infoflow.android.manifest.ProcessManifest;
 import staticanalyzis.SootAnalyzer;
 import manager.HMUManager;
 import manager.ManagerGroup;
@@ -41,21 +43,21 @@ public class Main {
             else if (res.getString("sub_command").equals("analyse")) {
                 managerGroup = sootAnalyzer(res.getString("androidJars"), res.getString("apk"), "", res.getString("package"),false);
                 String tracePath = res.getString("trace");
-                sootanalyzeTrace(managerGroup, tracePath, res.getString("output"));
+                sootanalyzeTrace(managerGroup, tracePath, res.getString("output"), res.getString("apk"));
             }
-        } catch (ArgumentParserException e) {
-            parser.handleError(e);
+        } catch (ArgumentParserException | XmlPullParserException e) {
+            parser.handleError((ArgumentParserException) e);
         }
     }
 
-    public static ManagerGroup sootAnalyzer(String platformPath, String apkPath, String outputPath, String pack, boolean isInstrumenting) {
+    public static ManagerGroup sootAnalyzer(String platformPath, String apkPath, String outputPath, String pack, boolean isInstrumenting) throws IOException, XmlPullParserException {
         ManagerGroup managerGroup = new ManagerGroup();
         SootAnalyzer test = new SootAnalyzer(platformPath, apkPath, outputPath);
-        test.analyze(managerGroup, isInstrumenting, pack);
+        test.analyze(managerGroup, isInstrumenting);
         return managerGroup;
     }
 
-    public static void sootanalyzeTrace(ManagerGroup managerGroup, String tracePath, String outputPath) {
+    public static void sootanalyzeTrace(ManagerGroup managerGroup, String tracePath, String outputPath, String apkName) throws IOException, XmlPullParserException {
         BufferedReader reader;
         int traceNumberLine=1;
         String timeStamp1 = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
@@ -93,7 +95,9 @@ public class Main {
             e.printStackTrace();
         }
         managerGroup.checkStructures();
-        managerGroup.generateCSV(outputPath);
+        final ProcessManifest processManifest = new ProcessManifest(apkName);
+        String packageName = processManifest.getPackageName();
+        managerGroup.generateCSV(outputPath, apkName, packageName);
         //System.out.println(managerGroup.managerHMU.getBreakpoints());
         String timeStamp2 = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
         //System.out.println("Fin analyse : " + timeStamp2);

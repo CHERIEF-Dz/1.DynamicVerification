@@ -48,7 +48,7 @@ public class DWManager implements Manager {
         }
     }
 
-    public void generateCSV(String outputPath) {
+    public void generateCSV(String outputPath, String apkName, String packageName) {
 
         File directory = new File(outputPath);
         if (! directory.exists()){
@@ -63,7 +63,7 @@ public class DWManager implements Manager {
                 if (pair.getValue().hasCodeSmell()) {
                     String fileName = pair.getValue().getLocation().getFileName();
                     String methodName = pair.getValue().getLocation().getMethodName();
-                    writer.write("apk,package,"+fileName+","+methodName+"\n");
+                    writer.write(apkName+ ","+ packageName +","+fileName+","+methodName+"\n");
                 }
             }
         } catch (FileNotFoundException e) {
