@@ -15,6 +15,7 @@ public class OnDrawStructure implements Structure {
     private long averageInstantiations;
     private long worstInstantations;
     private int nbCalls;
+    private boolean hasBeenExecuted;
 
     public OnDrawStructure(CodeLocation implementation, String id) {
         this.structureImplementation = implementation;
@@ -26,6 +27,7 @@ public class OnDrawStructure implements Structure {
         this.averageTime=0;
         this.averageInstantiations=0;
         this.worstInstantations=0;
+        this.hasBeenExecuted=false;
     }
     @Override
     public void foundCodeSmell() {
@@ -39,7 +41,7 @@ public class OnDrawStructure implements Structure {
 
     @Override
     public void checkStructure() {
-        if (this.worstTime > ((1000)/60.0) || this.worstInstantations > 0) {
+        if ((this.worstTime > ((1000)/60.0) || this.worstInstantations > 0)  && this.hasBeenExecuted) {
             System.out.println("onDraw defined " + this.structureImplementation.toString() + " has IOD code smell.");
             this.foundCodeSmell();
         }
@@ -57,6 +59,7 @@ public class OnDrawStructure implements Structure {
     public void begin(long date) {
         this.lastBegin = date;
         this.nbInstantiations=0;
+        this.hasBeenExecuted=true;
     }
 
     public void end(long date) {

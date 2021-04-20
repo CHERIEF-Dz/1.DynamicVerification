@@ -11,6 +11,7 @@ public class NLMRStructure implements Structure {
     private long averageMemory;
     private long betterMemory;
     private int nbCalls;
+    private boolean hasBeenExecuted;
 
     public NLMRStructure(CodeLocation implementation, String id) {
         this.structureImplementation = implementation;
@@ -19,6 +20,7 @@ public class NLMRStructure implements Structure {
         this.betterMemory=0;
         this.nbCalls=0;
         this.averageMemory=0;
+        this.hasBeenExecuted=false;
     }
 
     @Override
@@ -33,7 +35,7 @@ public class NLMRStructure implements Structure {
 
     @Override
     public void checkStructure() {
-        if (this.betterMemory < 1024) {
+        if (this.betterMemory < 1024 && this.hasBeenExecuted) {
             this.foundCodeSmell();
         }
     }
@@ -53,6 +55,7 @@ public class NLMRStructure implements Structure {
 
     public void begin(long memory) {
         this.lastBegin = memory;
+        this.hasBeenExecuted=true;
     }
 
     public void end(long memory) {
