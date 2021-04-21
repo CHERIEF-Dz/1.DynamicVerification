@@ -111,15 +111,38 @@ public class HMUManager implements Manager{
             directory.mkdir();
         }
 
+        HashMap<String, MapStructure> selectedMaps = new HashMap<String, MapStructure>();
+        HashMap<String, Integer> selectedMapsValues = new HashMap<String, Integer>();
+
+        for (java.util.Map.Entry<String, MapStructure> stringStructureEntry : this.structures.entrySet()) {
+            HashMap.Entry<String, MapStructure> pair = (HashMap.Entry) stringStructureEntry;
+            if (pair.getValue().hasCodeSmell()) {
+                String fileName = pair.getValue().getLocation().getFileName();
+                String methodName = pair.getValue().getLocation().getMethodName();
+                String selectionKey = fileName + "/" + packageName + "/" + methodName;
+                if (selectedMaps.containsKey(selectionKey)) {
+                    if (selectedMapsValues.get(selectionKey) < pair.getValue().getMaximumSize()) {
+                        selectedMaps.put(selectionKey, pair.getValue());
+                        selectedMapsValues.put(selectionKey, pair.getValue().getMaximumSize());
+                    }
+                }
+                else {
+                    selectedMaps.put(selectionKey, pair.getValue());
+                    selectedMapsValues.put(selectionKey, pair.getValue().getMaximumSize());
+                }
+            }
+        }
+
         File csvOutputFile = new File(outputPath+"test_HMU.csv");
         try (PrintWriter writer = new PrintWriter(csvOutputFile)) {
-            writer.write("apk,package,file,method,variable Name,structure Type,maximumSize\n");
-            for (java.util.Map.Entry<String, MapStructure> stringStructureEntry : this.structures.entrySet()) {
+            writer.write("apk,package,file,method,structure Type,maximumSize\n");
+            //for (java.util.Map.Entry<String, MapStructure> stringStructureEntry : this.structures.entrySet()) {
+            for (java.util.Map.Entry<String, MapStructure> stringStructureEntry : selectedMaps.entrySet()) {
                 HashMap.Entry<String, MapStructure> pair = (HashMap.Entry) stringStructureEntry;
                 if (pair.getValue().hasCodeSmell()) {
                     String fileName = pair.getValue().getLocation().getFileName();
                     String methodName = pair.getValue().getLocation().getMethodName();
-                    String variableName = pair.getValue().getName();
+                    //String variableName = pair.getValue().getName();
                     String structureType = "HashMap";
                     if (pair.getValue() instanceof ArrayMapStructure) {
                         if (((ArrayMapStructure) pair.getValue()).isSimple) {
@@ -129,7 +152,7 @@ public class HMUManager implements Manager{
                             structureType = "ArrayMap";
                         }
                     }
-                    writer.write(apkName+ ","+ packageName +","+fileName+","+methodName+","+ variableName + "," + structureType + "," + pair.getValue().getMaximumSize()+ "\n");
+                    writer.write(apkName+ ","+ packageName +","+fileName+","+methodName+ "," + structureType + "," + pair.getValue().getMaximumSize()+ "\n");
                 }
             }
         } catch (FileNotFoundException e) {

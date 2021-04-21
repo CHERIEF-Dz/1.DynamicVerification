@@ -42,7 +42,7 @@ public class OnDrawStructure implements Structure {
     @Override
     public void checkStructure() {
         if ((this.worstTime > ((1000)/60.0) || this.worstInstantations > 0)  && this.hasBeenExecuted) {
-            System.out.println("onDraw defined " + this.structureImplementation.toString() + " has IOD code smell.");
+            //System.out.println("onDraw defined " + this.structureImplementation.toString() + " has IOD code smell.");
             this.foundCodeSmell();
         }
     }
