@@ -1,10 +1,7 @@
 package staticanalyzis;
 
-import actions.hp.HPEnter;
-import actions.hp.HPExit;
-import actions.nlmr.NLMREnter;
-import actions.nlmr.NLMRExit;
-import manager.HPManager;
+import events.nlmr.NLMREnter;
+import events.nlmr.NLMRExit;
 import manager.ManagerGroup;
 import manager.NLMRManager;
 import soot.*;
@@ -15,7 +12,6 @@ import utils.CodeLocation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
 
 public class NLMRAnalyzer extends CodeSmellAnalyzer{
 
@@ -24,12 +20,13 @@ public class NLMRAnalyzer extends CodeSmellAnalyzer{
 
     public static void methodsToCheck(String name, String methodName, int lineNumber, ManagerGroup managerGroup, Body b, UnitPatchingChain units, boolean isInstrumenting) {
         checkNLMR(name, methodName, "onTrimMemory", 0, managerGroup.managerNLMR, b, b.getUnits(),"nlmrenter", "nlmrexit", isInstrumenting);
+        checkNLMR(name, methodName, "onLowMemory", 0, managerGroup.managerNLMR, b, b.getUnits(),"nlmrenter", "nlmrexit", isInstrumenting);
     }
 
     protected static void checkNLMR(String name, String methodName, String methodNameNeeded, int lineNumber, NLMRManager manager, Body b, UnitPatchingChain units, String prefix, String suffix, boolean isInstrumenting) {
         if (checkMethodName(methodName, methodNameNeeded)) {
-            String key=generateKey(name, methodName).replace("$onTrimMemory","");
-            manager.addStructure(name.replace("$onTrimMemory",""), new NLMRStructure(new CodeLocation(name, methodName, lineNumber), name.replace("$onTrimMemory","")));
+            String key=generateKey(name, methodName).replace("$"+methodNameNeeded,"");
+            manager.addStructure(name.replace("$"+methodNameNeeded,""), new NLMRStructure(new CodeLocation(name, methodName, lineNumber), name.replace("$"+methodNameNeeded,"")));
             manager.addEnter(key, new NLMREnter(new CodeLocation(name, methodName, lineNumber)));
             manager.addExit(key, new NLMRExit(new CodeLocation(name, methodName, lineNumber)));
             if (isInstrumenting) {

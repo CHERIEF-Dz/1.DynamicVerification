@@ -1,11 +1,10 @@
-package actions.hmu;
+package events.hmu;
 
-import actions.ConcreteAction;
-import structure.Structure;
+import events.ConcreteEvent;
 import structure.hmu.MapStructure;
 import utils.CodeLocation;
 
-public class HMUAddition extends ConcreteAction {
+public class HMUAddition extends ConcreteEvent {
 
     private boolean alreadyWarned;
     private String variableName;

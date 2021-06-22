@@ -1,16 +1,13 @@
 package staticanalyzis;
 
-import actions.hp.HPEnter;
-import actions.hp.HPExit;
+import events.hp.HPEnter;
+import events.hp.HPExit;
 import manager.HPManager;
 import manager.ManagerGroup;
 import soot.Body;
 import soot.UnitPatchingChain;
 import structure.hp.HeavyProcessStructure;
-import structure.iod.OnDrawStructure;
 import utils.CodeLocation;
-
-import java.util.regex.Matcher;
 
 public class HPAnalyzer extends CodeSmellAnalyzer {
 

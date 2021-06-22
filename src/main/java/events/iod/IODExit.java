@@ -1,11 +1,10 @@
-package actions.iod;
+package events.iod;
 
-import actions.ConcreteAction;
-import structure.dw.WakeLockStructure;
+import events.ConcreteEvent;
 import structure.iod.OnDrawStructure;
 import utils.CodeLocation;
 
-public class IODExit extends ConcreteAction {
+public class IODExit extends ConcreteEvent {
     public IODExit(CodeLocation location) {
         super(location);
     }

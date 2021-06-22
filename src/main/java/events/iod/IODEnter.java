@@ -1,10 +1,10 @@
-package actions.iod;
+package events.iod;
 
-import actions.ConcreteAction;
+import events.ConcreteEvent;
 import structure.iod.OnDrawStructure;
 import utils.CodeLocation;
 
-public class IODEnter extends ConcreteAction {
+public class IODEnter extends ConcreteEvent {
     public IODEnter(CodeLocation location) {
         super(location);
     }

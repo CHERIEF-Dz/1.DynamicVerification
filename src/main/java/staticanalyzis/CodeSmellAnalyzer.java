@@ -1,11 +1,7 @@
 package staticanalyzis;
 
-import actions.iod.IODEnter;
-import actions.iod.IODExit;
-import manager.IODManager;
 import soot.*;
 import soot.jimple.*;
-import utils.CodeLocation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -90,17 +86,7 @@ public abstract class CodeSmellAnalyzer implements Analyzer{
         return generatedUnits;
     }
 
-    protected static void buildInstrumentation(String structureLocalName, UnitPatchingChain units, Unit u, Body b, String suffix) {
-        //Add Print
-        Local refPrint = addTmpRef(b, "refPrint", RefType.v("java.io.PrintStream"));
-        Local refBuilder = addTmpRef(b, "refBuilder", RefType.v("java.lang.StringBuilder"));
-        Local refIdentity = addTmpRef(b, "refIdentity", IntType.v());
-        Local tmpString = addTmpRef(b, "tmpString", RefType.v("java.lang.String"));
-
-        List<Unit> generatedUnits = new ArrayList<>();
-
-        generatedUnits = buildBeginningPrint(b, refPrint, refBuilder, tmpString, suffix);
-
+    protected static List<Unit> buildIdentity(List<Unit> generatedUnits, Body b, String structureLocalName, Local refIdentity, Local refBuilder) {
         //Get Identity
         Local structureLocal = null;
         Iterator<Local> localIterator = b.getLocals().iterator();
@@ -122,6 +108,21 @@ public abstract class CodeSmellAnalyzer implements Analyzer{
         InvokeStmt invokeAppend2 = Jimple.v().newInvokeStmt(
                 Jimple.v().newVirtualInvokeExpr(refBuilder, appendMethod2.makeRef(), refIdentity));
         generatedUnits.add(invokeAppend2);
+        return generatedUnits;
+    }
+
+    protected static void buildInstrumentation(String structureLocalName, UnitPatchingChain units, Unit u, Body b, String suffix) {
+        //Add Print
+        Local refPrint = addTmpRef(b, "refPrint", RefType.v("java.io.PrintStream"));
+        Local refBuilder = addTmpRef(b, "refBuilder", RefType.v("java.lang.StringBuilder"));
+        Local refIdentity = addTmpRef(b, "refIdentity", IntType.v());
+        Local tmpString = addTmpRef(b, "tmpString", RefType.v("java.lang.String"));
+
+        List<Unit> generatedUnits = new ArrayList<>();
+
+        generatedUnits = buildBeginningPrint(b, refPrint, refBuilder, tmpString, suffix);
+
+        generatedUnits = buildIdentity(generatedUnits, b, structureLocalName, refIdentity, refBuilder);
 
         generatedUnits = buildEndingPrint(generatedUnits, refPrint, refBuilder, tmpString);
 

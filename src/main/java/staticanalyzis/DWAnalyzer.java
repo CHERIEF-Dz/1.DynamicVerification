@@ -1,7 +1,7 @@
 package staticanalyzis;
 
-import actions.dw.DWAcquire;
-import actions.dw.DWRelease;
+import events.dw.DWAcquire;
+import events.dw.DWRelease;
 import manager.DWManager;
 import manager.ManagerGroup;
 import soot.Body;
@@ -10,7 +10,6 @@ import soot.UnitPatchingChain;
 import utils.CodeLocation;
 
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public final class DWAnalyzer extends CodeSmellAnalyzer{
 

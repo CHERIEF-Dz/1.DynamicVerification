@@ -1,10 +1,10 @@
-package actions.dw;
+package events.dw;
 
-import actions.ConcreteAction;
+import events.ConcreteEvent;
 import structure.dw.WakeLockStructure;
 import utils.CodeLocation;
 
-public class DWRelease extends ConcreteAction {
+public class DWRelease extends ConcreteEvent {
     private String variableName;
     public DWRelease(CodeLocation location, String variableName) {
         super(location);

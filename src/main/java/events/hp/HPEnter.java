@@ -1,10 +1,10 @@
-package actions.hp;
+package events.hp;
 
-import actions.ConcreteAction;
+import events.ConcreteEvent;
 import structure.hp.HeavyProcessStructure;
 import utils.CodeLocation;
 
-public class HPEnter extends ConcreteAction {
+public class HPEnter extends ConcreteEvent {
 
     public HPEnter(CodeLocation location) {
         super(location);

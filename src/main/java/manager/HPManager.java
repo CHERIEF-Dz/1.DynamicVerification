@@ -1,13 +1,10 @@
 package manager;
 
-import actions.hp.HPEnter;
-import actions.hp.HPExit;
+import events.hp.HPEnter;
+import events.hp.HPExit;
 import structure.hp.HeavyProcessStructure;
-import structure.iod.OnDrawStructure;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.HashMap;
 
 public class HPManager implements Manager{
@@ -31,13 +28,23 @@ public class HPManager implements Manager{
     }
 
     @Override
-    public void generateCSV(String outputPath, String apkName, String packageName) {
+    public void generateCSV(String outputPath, String apkName, String packageName, boolean returnAllInstances) throws IOException {
         File directory = new File(outputPath);
         if (! directory.exists()){
             directory.mkdir();
         }
 
-        File csvOutputFile = new File(outputPath+"test_HP.csv");
+        //Print for coverage
+        if (returnAllInstances) {
+            File coverageOutputfile = new File(outputPath + "coverage.csv");
+            try (PrintWriter writer = new PrintWriter(new FileWriter(coverageOutputfile, true))) {
+                writer.write("Number of HP methods," + this.enters.size() + "\n");
+            } catch (FileNotFoundException e) {
+                // Do something
+            }
+        }
+
+        File csvOutputFile = new File(outputPath+"results_HP.csv");
         try (PrintWriter writer = new PrintWriter(csvOutputFile)) {
             writer.write("apk,package,file,method,average executing time,worst executing time\n");
             for (java.util.Map.Entry<String, HeavyProcessStructure> stringStructureEntry : this.structures.entrySet()) {
@@ -51,11 +58,21 @@ public class HPManager implements Manager{
         } catch (FileNotFoundException e) {
             // Do something
         }
-    }
 
-    @Override
-    public String getBreakpoints() {
-        return null;
+        if (returnAllInstances) {
+            File csvOutputFileAll = new File(outputPath + "results_HP_all.csv");
+            try (PrintWriter writer = new PrintWriter(csvOutputFileAll)) {
+                writer.write("apk,package,file,method,average executing time,worst executing time\n");
+                for (java.util.Map.Entry<String, HeavyProcessStructure> stringStructureEntry : this.structures.entrySet()) {
+                    HashMap.Entry<String, HeavyProcessStructure> pair = (HashMap.Entry) stringStructureEntry;
+                    String fileName = pair.getValue().getLocation().getFileName();
+                    String methodName = pair.getValue().getLocation().getMethodName();
+                    writer.write(apkName + "," + packageName + "," + fileName + "," + methodName + "," + pair.getValue().getAverageTime() + "," + pair.getValue().getWorstTime() + "\n");
+                }
+            } catch (FileNotFoundException e) {
+                // Do something
+            }
+        }
     }
 
     @Override

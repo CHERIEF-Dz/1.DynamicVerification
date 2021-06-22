@@ -1,17 +1,18 @@
-package actions.nlmr;
+package events.nlmr;
 
-import actions.ConcreteAction;
-import structure.hp.HeavyProcessStructure;
+import events.ConcreteEvent;
 import structure.nlmr.NLMRStructure;
 import utils.CodeLocation;
 
-public class NLMRExit extends ConcreteAction {
-    public NLMRExit(CodeLocation location) {
+public class NLMREnter extends ConcreteEvent {
+
+    public NLMREnter(CodeLocation location) {
         super(location);
     }
 
     public void execute(NLMRStructure processStructure, long date) {
-        processStructure.end(date);
+        //NLMRStructure toReturn = new NLMRStructure(this.location, id);
+        processStructure.begin(date);
     }
 
     @Override

@@ -1,11 +1,10 @@
-package actions.hp;
+package events.hp;
 
-import actions.ConcreteAction;
+import events.ConcreteEvent;
 import structure.hp.HeavyProcessStructure;
-import structure.iod.OnDrawStructure;
 import utils.CodeLocation;
 
-public class HPExit extends ConcreteAction {
+public class HPExit extends ConcreteEvent {
     public HPExit(CodeLocation location) {
         super(location);
     }

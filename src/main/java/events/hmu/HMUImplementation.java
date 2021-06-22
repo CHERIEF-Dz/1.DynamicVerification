@@ -1,12 +1,12 @@
-package actions.hmu;
+package events.hmu;
 
-import actions.ConcreteAction;
+import events.ConcreteEvent;
 import structure.hmu.ArrayMapStructure;
 import structure.hmu.HashMapStructure;
 import structure.hmu.MapStructure;
 import utils.CodeLocation;
 
-public class HMUImplementation extends ConcreteAction {
+public class HMUImplementation extends ConcreteEvent {
 
     private String type;
     private String variableName;

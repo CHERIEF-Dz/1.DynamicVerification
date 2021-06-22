@@ -1,14 +1,10 @@
 package manager;
 
-import actions.dw.DWAcquire;
-import actions.dw.DWRelease;
-import actions.hmu.HMUImplementation;
+import events.dw.DWAcquire;
+import events.dw.DWRelease;
 import structure.dw.WakeLockStructure;
-import structure.hmu.MapStructure;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.HashMap;
 
 public class DWManager implements Manager {
@@ -48,14 +44,25 @@ public class DWManager implements Manager {
         }
     }
 
-    public void generateCSV(String outputPath, String apkName, String packageName) {
+    public void generateCSV(String outputPath, String apkName, String packageName, boolean returnAllInstances) throws IOException {
 
         File directory = new File(outputPath);
         if (! directory.exists()){
             directory.mkdir();
         }
 
-        File csvOutputFile = new File(outputPath+"test_DW.csv");
+        //Print for coverage
+        if (returnAllInstances) {
+            File coverageOutputfile = new File(outputPath + "coverage.csv");
+            try (PrintWriter writer = new PrintWriter(new FileWriter(coverageOutputfile, true))) {
+                writer.write("Number of DW Acquires," + this.acquires.size() + "\n");
+                writer.write("Number of DW Releases," + this.releases.size() + "\n");
+            } catch (FileNotFoundException e) {
+                // Do something
+            }
+        }
+
+        File csvOutputFile = new File(outputPath+"results_DW.csv");
         try (PrintWriter writer = new PrintWriter(csvOutputFile)) {
             writer.write("apk, package, file, method\n");
             for (java.util.Map.Entry<String, WakeLockStructure> stringStructureEntry : this.structures.entrySet()) {
@@ -69,12 +76,21 @@ public class DWManager implements Manager {
         } catch (FileNotFoundException e) {
             // Do something
         }
-    }
 
-    @Override
-    public String getBreakpoints() {
-        //Todo
-        return null;
+        if (returnAllInstances) {
+            File csvOutputFileAll = new File(outputPath + "results_DW_all.csv");
+            try (PrintWriter writer = new PrintWriter(csvOutputFileAll)) {
+                writer.write("apk, package, file, method\n");
+                for (java.util.Map.Entry<String, WakeLockStructure> stringStructureEntry : this.structures.entrySet()) {
+                    HashMap.Entry<String, WakeLockStructure> pair = (HashMap.Entry) stringStructureEntry;
+                    String fileName = pair.getValue().getLocation().getFileName();
+                    String methodName = pair.getValue().getLocation().getMethodName();
+                    writer.write(apkName + "," + packageName + "," + fileName + "," + methodName + "\n");
+                }
+            } catch (FileNotFoundException e) {
+                // Do something
+            }
+        }
     }
 
     @Override

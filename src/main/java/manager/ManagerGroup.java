@@ -1,5 +1,7 @@
 package manager;
 
+import java.io.*;
+
 public class ManagerGroup {
     public HMUManager managerHMU;
     public DWManager managerDW;
@@ -23,12 +25,22 @@ public class ManagerGroup {
         this.managerNLMR.checkStructures();
     }
 
-    public void generateCSV(String outputPath, String apkName, String packageName) {
-        this.managerDW.generateCSV(outputPath, apkName, packageName);
-        this.managerHMU.generateCSV(outputPath, apkName, packageName);
-        this.managerIOD.generateCSV(outputPath, apkName, packageName);
-        this.managerHP.generateCSV(outputPath, apkName, packageName);
-        this.managerNLMR.generateCSV(outputPath, apkName, packageName);
+    public void generateCSV(String outputPath, String apkName, String packageName, boolean returnAllInstances) throws IOException {
+        //Print for Coverage
+        if (returnAllInstances) {
+            File coverageOutputfile = new File(outputPath + "coverage.csv");
+            try (PrintWriter writer = new PrintWriter(coverageOutputfile)) {
+                writer.write("");
+            } catch (FileNotFoundException e) {
+                // Do something
+            }
+        }
+
+        this.managerDW.generateCSV(outputPath, apkName, packageName, returnAllInstances);
+        this.managerHMU.generateCSV(outputPath, apkName, packageName, returnAllInstances);
+        this.managerIOD.generateCSV(outputPath, apkName, packageName, returnAllInstances);
+        this.managerHP.generateCSV(outputPath, apkName, packageName, returnAllInstances);
+        this.managerNLMR.generateCSV(outputPath, apkName, packageName, returnAllInstances);
     }
 
     public void execute(String key, String fileName, String lineNumber, String code, String id) {

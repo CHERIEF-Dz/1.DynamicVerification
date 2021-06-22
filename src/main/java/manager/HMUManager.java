@@ -1,16 +1,13 @@
 package manager;
 
-import actions.hmu.HMUAddition;
-import actions.hmu.HMUClean;
-import actions.hmu.HMUDeletion;
-import actions.hmu.HMUImplementation;
+import events.hmu.HMUAddition;
+import events.hmu.HMUClean;
+import events.hmu.HMUDeletion;
+import events.hmu.HMUImplementation;
 import structure.hmu.ArrayMapStructure;
-import structure.hmu.HashMapStructure;
 import structure.hmu.MapStructure;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -105,11 +102,25 @@ public class HMUManager implements Manager{
     }
 
     @Override
-    public void generateCSV(String outputPath, String apkName, String packageName) {
+    public void generateCSV(String outputPath, String apkName, String packageName, boolean returnAllInstances) throws IOException {
         File directory = new File(outputPath);
         if (! directory.exists()){
             directory.mkdir();
         }
+
+        //Print for coverage
+        if (returnAllInstances) {
+            File coverageOutputfile = new File(outputPath + "coverage.csv");
+            try (PrintWriter writer = new PrintWriter(new FileWriter(coverageOutputfile, true))) {
+                writer.write("Number of HMU Implementations," + this.implementations.size() + "\n");
+                writer.write("Number of HMU Additions," + this.additions.size() + "\n");
+                writer.write("Number of HMU Deletions," + this.deletions.size() + "\n");
+                writer.write("Number of HMU Cleans," + this.cleans.size() + "\n");
+            } catch (FileNotFoundException e) {
+                // Do something
+            }
+        }
+
 
         HashMap<String, MapStructure> selectedMaps = new HashMap<String, MapStructure>();
         HashMap<String, Integer> selectedMapsValues = new HashMap<String, Integer>();
@@ -133,16 +144,14 @@ public class HMUManager implements Manager{
             }
         }
 
-        File csvOutputFile = new File(outputPath+"test_HMU.csv");
+        File csvOutputFile = new File(outputPath+"results_HMU.csv");
         try (PrintWriter writer = new PrintWriter(csvOutputFile)) {
             writer.write("apk,package,file,method,structure Type,maximumSize\n");
-            //for (java.util.Map.Entry<String, MapStructure> stringStructureEntry : this.structures.entrySet()) {
             for (java.util.Map.Entry<String, MapStructure> stringStructureEntry : selectedMaps.entrySet()) {
                 HashMap.Entry<String, MapStructure> pair = (HashMap.Entry) stringStructureEntry;
                 if (pair.getValue().hasCodeSmell()) {
                     String fileName = pair.getValue().getLocation().getFileName();
                     String methodName = pair.getValue().getLocation().getMethodName();
-                    //String variableName = pair.getValue().getName();
                     String structureType = "HashMap";
                     if (pair.getValue() instanceof ArrayMapStructure) {
                         if (((ArrayMapStructure) pair.getValue()).isSimple) {
@@ -157,6 +166,29 @@ public class HMUManager implements Manager{
             }
         } catch (FileNotFoundException e) {
             // Do something
+        }
+
+        if (returnAllInstances) {
+            File csvOutputFileAll = new File(outputPath + "results_HMU_all.csv");
+            try (PrintWriter writer = new PrintWriter(csvOutputFileAll)) {
+                writer.write("apk,package,file,method,structure Type,maximumSize\n");
+                for (java.util.Map.Entry<String, MapStructure> stringStructureEntry : selectedMaps.entrySet()) {
+                    HashMap.Entry<String, MapStructure> pair = (HashMap.Entry) stringStructureEntry;
+                    String fileName = pair.getValue().getLocation().getFileName();
+                    String methodName = pair.getValue().getLocation().getMethodName();
+                    String structureType = "HashMap";
+                    if (pair.getValue() instanceof ArrayMapStructure) {
+                        if (((ArrayMapStructure) pair.getValue()).isSimple) {
+                            structureType = "SimpleArrayMap";
+                        } else {
+                            structureType = "ArrayMap";
+                        }
+                    }
+                    writer.write(apkName + "," + packageName + "," + fileName + "," + methodName + "," + structureType + "," + pair.getValue().getMaximumSize() + "\n");
+                }
+            } catch (FileNotFoundException e) {
+                // Do something
+            }
         }
     }
 }

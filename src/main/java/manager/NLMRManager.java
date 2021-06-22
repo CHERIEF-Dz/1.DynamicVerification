@@ -1,17 +1,11 @@
 package manager;
 
-import actions.hp.HPEnter;
-import actions.hp.HPExit;
-import actions.nlmr.NLMREnter;
-import actions.nlmr.NLMRExit;
+import events.nlmr.NLMREnter;
+import events.nlmr.NLMRExit;
 import staticanalyzis.NLMRAnalyzer;
-import structure.hp.HeavyProcessStructure;
-import structure.iod.OnDrawStructure;
 import structure.nlmr.NLMRStructure;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.HashMap;
 
 public class NLMRManager implements Manager{
@@ -34,13 +28,24 @@ public class NLMRManager implements Manager{
     }
 
     @Override
-    public void generateCSV(String outputPath, String apkName, String packageName) {
+    public void generateCSV(String outputPath, String apkName, String packageName, boolean returnAllInstances) throws IOException {
         File directory = new File(outputPath);
         if (! directory.exists()){
             directory.mkdir();
         }
 
-        File csvOutputFile = new File(outputPath+"test_NLMR.csv");
+        if (returnAllInstances) {
+            //Print for coverage
+            File coverageOutputfile = new File(outputPath + "coverage.csv");
+            try (PrintWriter writer = new PrintWriter(new FileWriter(coverageOutputfile, true))) {
+                writer.write("Number of NLMR methods," + this.enters.size() + "\n");
+            } catch (FileNotFoundException e) {
+                // Do something
+            }
+        }
+
+
+        File csvOutputFile = new File(outputPath+"results_NLMR.csv");
         try (PrintWriter writer = new PrintWriter(csvOutputFile)) {
             writer.write("apk,package,file,method,average Memory released,maximum memory released\n");
             for (java.util.Map.Entry<String, NLMRStructure> stringStructureEntry : this.structures.entrySet()) {
@@ -54,11 +59,21 @@ public class NLMRManager implements Manager{
         } catch (FileNotFoundException e) {
             // Do something
         }
-    }
 
-    @Override
-    public String getBreakpoints() {
-        return null;
+        if (returnAllInstances) {
+            File csvOutputFileAll = new File(outputPath + "results_NLMR_all.csv");
+            try (PrintWriter writer = new PrintWriter(csvOutputFileAll)) {
+                writer.write("apk,package,file,method,average Memory released,maximum memory released\n");
+                for (java.util.Map.Entry<String, NLMRStructure> stringStructureEntry : this.structures.entrySet()) {
+                    HashMap.Entry<String, NLMRStructure> pair = (HashMap.Entry) stringStructureEntry;
+                    String fileName = pair.getValue().getLocation().getFileName();
+                    String methodName = pair.getValue().getLocation().getMethodName();
+                    writer.write(apkName + "," + packageName + "," + fileName + "," + methodName + "," + pair.getValue().getBetterMemory() + "," + pair.getValue().getAverageMemory() + "\n");
+                }
+            } catch (FileNotFoundException e) {
+                // Do something
+            }
+        }
     }
 
     @Override

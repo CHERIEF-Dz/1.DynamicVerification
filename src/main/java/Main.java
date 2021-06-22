@@ -20,18 +20,19 @@ public class Main {
     public static void main(String[] args) throws IOException {
         ArgumentParser parser = ArgumentParsers.newFor("ddcf").build().description("A dynamic analysis tool to detect Android Code smells");
         Subparsers subparsers = parser.addSubparsers().dest("sub_command");;
-        Subparser analyseParser = subparsers.addParser("instrumentation").help("Instrumentalize an app");
+        Subparser instrumentationParser = subparsers.addParser("instrumentation").help("Instrumentalize an app");
+        instrumentationParser.addArgument("apk").required(true).help("Path of the APK to analyze");
+        instrumentationParser.addArgument("-a", "--androidJars").required(true).help("Path to android platforms jars");
+        instrumentationParser.addArgument("-o", "--output").required(true).help("Path to the folder where the instrumented APK output is generated");
+        instrumentationParser.addArgument("-p", "--package").required(true).help("Main package of the app");
+
+        Subparser analyseParser = subparsers.addParser("analyse").help("Analyse the execution trace of an app");
         analyseParser.addArgument("apk").required(true).help("Path of the APK to analyze");
         analyseParser.addArgument("-a", "--androidJars").required(true).help("Path to android platforms jars");
-        analyseParser.addArgument("-o", "--output").required(true).help("Path to the folder where the instrumented APK output is generated");
-        analyseParser.addArgument("-p", "--package").required(true).help("Main package of the app");
-
-        Subparser queryParser = subparsers.addParser("analyse").help("Analyse the execution trace of an app");
-        queryParser.addArgument("apk").required(true).help("Path of the APK to analyze");
-        queryParser.addArgument("-a", "--androidJars").required(true).help("Path to android platforms jars");
-        queryParser.addArgument("-t", "--trace").required(true).help("Path to the execution trace");
-        queryParser.addArgument("-o", "--output").required(true).help("Path to the folder for the .csv results of the detection");
-        queryParser.addArgument("-p", "--package").required(true).help("Main package of the app");
+        analyseParser.addArgument("-t", "--trace").required(true).help("Path to the execution trace");
+        analyseParser.addArgument("-o", "--output").required(true).help("Path to the folder for the .csv results of the detection");
+        analyseParser.addArgument("-p", "--package").required(false).help("Main package of the app");
+        analyseParser.addArgument("-ai", "--allInstances").type(Boolean.class).setDefault(false).help("Returning the instances associated to code smells, even if it is not one");
 
         ManagerGroup managerGroup;
         try {
@@ -43,7 +44,7 @@ public class Main {
             else if (res.getString("sub_command").equals("analyse")) {
                 managerGroup = sootAnalyzer(res.getString("androidJars"), res.getString("apk"), "", res.getString("package"),false);
                 String tracePath = res.getString("trace");
-                sootanalyzeTrace(managerGroup, tracePath, res.getString("output"), res.getString("apk"));
+                sootanalyzeTrace(managerGroup, tracePath, res.getString("output"), res.getString("apk"), res.getBoolean("allInstances"));
             }
         } catch (ArgumentParserException | XmlPullParserException e) {
             parser.handleError((ArgumentParserException) e);
@@ -57,38 +58,27 @@ public class Main {
         return managerGroup;
     }
 
-    public static void sootanalyzeTrace(ManagerGroup managerGroup, String tracePath, String outputPath, String apkName) throws IOException, XmlPullParserException {
+    public static void sootanalyzeTrace(ManagerGroup managerGroup, String tracePath, String outputPath, String apkName, boolean returnAllInstances) throws IOException, XmlPullParserException {
         BufferedReader reader;
-        int traceNumberLine=1;
-        String timeStamp1 = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
-        //System.out.println("Début analyse : " + timeStamp1);
         try {
             reader = new BufferedReader(new FileReader(
                     tracePath));
             String line = reader.readLine();
             while (line != null) {
-                //System.out.println(line);
                 if (line.contains("dynver")) {
                     String[] result = line.substring(line.indexOf("dynver")).split(":");
-                    if (result.length == 5) {
-                        //System.out.println("[TOCHECK]" + traceNumberLine + " " + line);
+                    if (result.length >= 5) {
                         String fileName = result[1];
                         String lineNumber = result[2];
                         String code = result[3];
                         String id = result[4];
                         String key = fileName + ":" + lineNumber;
-                        //System.out.println("Key : " + key);
-                        //HMU
-                        //HMUManager managerHMU = managerGroup.managerHMU;
                         managerGroup.execute(key, fileName, lineNumber, code, id);
-                        //managerHMU.execute(key, fileName, lineNumber, code, id);
                     }
                 }
                 else {
-                    //System.out.println("[AVOID]" + traceNumberLine + " " + line);
                 }
                 line = reader.readLine();
-                traceNumberLine++;
             }
             reader.close();
         } catch (IOException e) {
@@ -97,10 +87,7 @@ public class Main {
         managerGroup.checkStructures();
         final ProcessManifest processManifest = new ProcessManifest(apkName);
         String packageName = processManifest.getPackageName();
-        managerGroup.generateCSV(outputPath, apkName, packageName);
-        //System.out.println(managerGroup.managerHMU.getBreakpoints());
-        String timeStamp2 = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
-        //System.out.println("Fin analyse : " + timeStamp2);
+        managerGroup.generateCSV(outputPath, apkName, packageName, returnAllInstances);
     }
 
 }

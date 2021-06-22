@@ -41,6 +41,8 @@ public class SootAnalyzer {
         Scene.v().addBasicClass("android.os.Handler",SootClass.SIGNATURES);
         Scene.v().addBasicClass("java.lang.Runtime", SootClass.SIGNATURES);
         Scene.v().addBasicClass("java.lang.System",SootClass.SIGNATURES);
+        Scene.v().addBasicClass("androidx.collection.ArrayMap",SootClass.SIGNATURES);
+        Scene.v().addBasicClass("androidx.collection.SimpleArrayMap",SootClass.SIGNATURES);
         Scene.v().loadNecessaryClasses();
         System.setOut(originalStream);
     }
@@ -56,19 +58,13 @@ public class SootAnalyzer {
             protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
 
                 if (body.getMethod().getDeclaringClass().getName().startsWith(pack)) {
-                    //System.out.println("Beginning Class : " + body.getMethod().getDeclaringClass() + " and Method " + body.getMethod());
-
-                    //CodeSmellAnalyzer.keyCpt=0;
                     String name = body.getMethod().getDeclaringClass().getName()+".java";
                     String methodName = body.getMethod().getName();
-                    //Check methods
-                    //System.out.println(body.getMethod().getDeclaringClass().getName());
-                    //System.out.println(body.getMethod().getName());
 
+                    //Check methods
                     IODAnalyzer.methodsToCheck(name, methodName, 0, managerGroup, body, body.getUnits(), isInstrumenting);
                     HPAnalyzer.methodsToCheck(name, methodName, 0, managerGroup, body, body.getUnits(), isInstrumenting);
                     NLMRAnalyzer.methodsToCheck(name, methodName, 0, managerGroup, body, body.getUnits(), isInstrumenting);
-
                     //Check lines
 
                     UnitPatchingChain chain = body.getUnits();
@@ -79,11 +75,7 @@ public class SootAnalyzer {
                         HMUAnalyzer.checkLine(line, name, methodName, 0, managerGroup, body, u, body.getUnits(), isInstrumenting);
                         IODAnalyzer.checkLine(line, name, methodName, 0, managerGroup, body, u, body.getUnits(), isInstrumenting);
                     }
-                    /*
-                    if (body.getMethod().getName().equals("initializeStructures") && body.getMethod().getDeclaringClass().getName().contains("StructuresManager")) {
-                        System.out.println(body.toString());
-                    }
-                    */
+
                 }
             }
         }));

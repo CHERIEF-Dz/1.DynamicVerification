@@ -1,11 +1,10 @@
-package actions.hmu;
+package events.hmu;
 
-import actions.ConcreteAction;
-import structure.Structure;
+import events.ConcreteEvent;
 import structure.hmu.MapStructure;
 import utils.CodeLocation;
 
-public class HMUClean extends ConcreteAction {
+public class HMUClean extends ConcreteEvent {
 
     private String variableName;
 
