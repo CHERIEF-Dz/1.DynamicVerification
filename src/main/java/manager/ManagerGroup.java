@@ -34,6 +34,12 @@ public class ManagerGroup {
             } catch (FileNotFoundException e) {
                 // Do something
             }
+            File executionOutputfile = new File(outputPath + "execution.csv");
+            try (PrintWriter writer = new PrintWriter(executionOutputfile)) {
+                writer.write("");
+            } catch (FileNotFoundException e) {
+                // Do something
+            }
         }
 
         this.managerDW.generateCSV(outputPath, apkName, packageName, returnAllInstances);

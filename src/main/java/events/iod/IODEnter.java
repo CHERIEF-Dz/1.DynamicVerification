@@ -10,6 +10,7 @@ public class IODEnter extends ConcreteEvent {
     }
 
     public void execute(OnDrawStructure structure, long date) {
+        this.isExecuted=true;
         //OnDrawStructure toReturn = new OnDrawStructure(this.location, id);
         structure.begin(date);
         //return toReturn;

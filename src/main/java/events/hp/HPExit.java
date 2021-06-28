@@ -10,6 +10,7 @@ public class HPExit extends ConcreteEvent {
     }
 
     public void execute(HeavyProcessStructure processStructure, long date) {
+        this.isExecuted=true;
         processStructure.end(date);
     }
 

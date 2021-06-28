@@ -1,5 +1,7 @@
 package manager;
 
+import events.dw.DWAcquire;
+import events.dw.DWRelease;
 import events.hmu.HMUAddition;
 import events.hmu.HMUClean;
 import events.hmu.HMUDeletion;
@@ -116,6 +118,40 @@ public class HMUManager implements Manager{
                 writer.write("Number of HMU Additions," + this.additions.size() + "\n");
                 writer.write("Number of HMU Deletions," + this.deletions.size() + "\n");
                 writer.write("Number of HMU Cleans," + this.cleans.size() + "\n");
+            } catch (FileNotFoundException e) {
+                // Do something
+            }
+
+            File executionOutputFile = new File(outputPath + "execution.csv");
+            try (PrintWriter writer = new PrintWriter(new FileWriter(executionOutputFile, true))) {
+                int executionSumImplementation=0;
+                for (Map.Entry<String, HMUImplementation> executioncountEntry : this.implementations.entrySet()) {
+                    if (executioncountEntry.getValue().isExecuted) {
+                        executionSumImplementation++;
+                    }
+                }
+                int executionSumAddition=0;
+                for (Map.Entry<String, HMUAddition> executioncountEntry : this.additions.entrySet()) {
+                    if (executioncountEntry.getValue().isExecuted) {
+                        executionSumAddition++;
+                    }
+                }
+                int executionSumDeletion=0;
+                for (Map.Entry<String, HMUDeletion> executioncountEntry : this.deletions.entrySet()) {
+                    if (executioncountEntry.getValue().isExecuted) {
+                        executionSumDeletion++;
+                    }
+                }
+                int executionSumClean=0;
+                for (Map.Entry<String, HMUClean> executioncountEntry : this.cleans.entrySet()) {
+                    if (executioncountEntry.getValue().isExecuted) {
+                        executionSumClean++;
+                    }
+                }
+                writer.write("Number of HMU Implementations," + executionSumImplementation + "\n");
+                writer.write("Number of HMU Additions," + executionSumAddition + "\n");
+                writer.write("Number of HMU Deletions," + executionSumDeletion + "\n");
+                writer.write("Number of HMU Cleans," + executionSumClean + "\n");
             } catch (FileNotFoundException e) {
                 // Do something
             }

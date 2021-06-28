@@ -11,6 +11,7 @@ public class NLMREnter extends ConcreteEvent {
     }
 
     public void execute(NLMRStructure processStructure, long date) {
+        this.isExecuted=true;
         //NLMRStructure toReturn = new NLMRStructure(this.location, id);
         processStructure.begin(date);
     }

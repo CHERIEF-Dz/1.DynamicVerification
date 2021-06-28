@@ -10,6 +10,7 @@ public class IODExit extends ConcreteEvent {
     }
 
     public void execute(OnDrawStructure onDrawMethod, long date) {
+        this.isExecuted=true;
         onDrawMethod.end(date);
     }
 

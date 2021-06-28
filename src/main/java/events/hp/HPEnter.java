@@ -11,6 +11,7 @@ public class HPEnter extends ConcreteEvent {
     }
 
     public void execute(HeavyProcessStructure structure, long date) {
+        this.isExecuted=true;
         //HeavyProcessStructure toReturn = new HeavyProcessStructure(this.location, id);
         structure.begin(date);
         //return toReturn;

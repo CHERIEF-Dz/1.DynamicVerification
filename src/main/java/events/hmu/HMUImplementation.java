@@ -18,6 +18,7 @@ public class HMUImplementation extends ConcreteEvent {
     }
 
     public MapStructure execute(String id) {
+        this.isExecuted=true;
         //System.out.println("Test[Impl] : " + this.location.toString());
         MapStructure toReturn = null;
         if ("HashMap".equals(type)) {

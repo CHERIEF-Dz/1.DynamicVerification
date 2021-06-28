@@ -10,6 +10,8 @@ public class NLMRExit extends ConcreteEvent {
     }
 
     public void execute(NLMRStructure processStructure, long date) {
+
+        this.isExecuted=true;
         processStructure.end(date);
     }
 

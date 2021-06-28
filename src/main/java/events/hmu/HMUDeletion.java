@@ -14,6 +14,7 @@ public class HMUDeletion extends ConcreteEvent {
     }
 
     public void execute(MapStructure linkedStructure) {
+        this.isExecuted=true;
         linkedStructure.deleteElement();
     }
 

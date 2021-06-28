@@ -1,5 +1,6 @@
 package manager;
 
+import events.hp.HPEnter;
 import events.iod.IODEnter;
 import events.iod.IODExit;
 import events.iod.IODNew;
@@ -7,6 +8,7 @@ import structure.iod.OnDrawStructure;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.Map;
 
 public class IODManager implements Manager{
     private HashMap<String, IODEnter> enters; // Key = CodeLocation
@@ -73,6 +75,20 @@ public class IODManager implements Manager{
             File coverageOutputfile = new File(outputPath + "coverage.csv");
             try (PrintWriter writer = new PrintWriter(new FileWriter(coverageOutputfile, true))) {
                 writer.write("Number of IOD methods," + this.enters.size() + "\n");
+            } catch (FileNotFoundException e) {
+                // Do something
+            }
+
+            File executionOutputFile = new File(outputPath + "execution.csv");
+            try (PrintWriter writer = new PrintWriter(new FileWriter(executionOutputFile, true))) {
+                int executionSumMethod=0;
+                for (Map.Entry<String, IODEnter> executioncountEntry : this.enters.entrySet()) {
+                    if (executioncountEntry.getValue().isExecuted) {
+                        executionSumMethod++;
+                    }
+                }
+
+                writer.write("Number of IOD methods," + executionSumMethod + "\n");
             } catch (FileNotFoundException e) {
                 // Do something
             }

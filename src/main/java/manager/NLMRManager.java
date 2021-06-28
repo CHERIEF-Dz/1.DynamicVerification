@@ -1,5 +1,6 @@
 package manager;
 
+import events.hp.HPEnter;
 import events.nlmr.NLMREnter;
 import events.nlmr.NLMRExit;
 import staticanalyzis.NLMRAnalyzer;
@@ -7,6 +8,7 @@ import structure.nlmr.NLMRStructure;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.Map;
 
 public class NLMRManager implements Manager{
     private HashMap<String, NLMREnter> enters; // Key = CodeLocation
@@ -39,6 +41,20 @@ public class NLMRManager implements Manager{
             File coverageOutputfile = new File(outputPath + "coverage.csv");
             try (PrintWriter writer = new PrintWriter(new FileWriter(coverageOutputfile, true))) {
                 writer.write("Number of NLMR methods," + this.enters.size() + "\n");
+            } catch (FileNotFoundException e) {
+                // Do something
+            }
+
+            File executionOutputFile = new File(outputPath + "execution.csv");
+            try (PrintWriter writer = new PrintWriter(new FileWriter(executionOutputFile, true))) {
+                int executionSumMethod=0;
+                for (Map.Entry<String, NLMREnter> executioncountEntry : this.enters.entrySet()) {
+                    if (executioncountEntry.getValue().isExecuted) {
+                        executionSumMethod++;
+                    }
+                }
+
+                writer.write("Number of NLMR methods," + executionSumMethod + "\n");
             } catch (FileNotFoundException e) {
                 // Do something
             }

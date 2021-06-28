@@ -16,6 +16,7 @@ public class HMUAddition extends ConcreteEvent {
     }
 
     public void execute(MapStructure linkedStructure) {
+        this.isExecuted=true;
         //System.out.println("Test[Add] : " + this.location.toString());
         linkedStructure.addElement();
         if (linkedStructure.hasCodeSmell() && !alreadyWarned && this.location.getLine() != 0) {

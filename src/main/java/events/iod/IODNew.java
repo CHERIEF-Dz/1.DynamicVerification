@@ -11,6 +11,8 @@ public class IODNew  extends ConcreteEvent {
     }
 
     public void execute(OnDrawStructure onDrawMethod) {
+
+        this.isExecuted=true;
         onDrawMethod.newInstance();
     }
 

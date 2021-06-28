@@ -12,6 +12,7 @@ public class DWAcquire extends ConcreteEvent {
     }
 
     public WakeLockStructure execute(String id) {
+        this.isExecuted=true;
         WakeLockStructure toReturn = new WakeLockStructure(this.location, id);
         toReturn.acquire();
         return toReturn;

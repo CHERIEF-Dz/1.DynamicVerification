@@ -1,11 +1,13 @@
 package manager;
 
+import events.ConcreteEvent;
 import events.dw.DWAcquire;
 import events.dw.DWRelease;
 import structure.dw.WakeLockStructure;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.Map;
 
 public class DWManager implements Manager {
     private HashMap<String, DWAcquire> acquires;
@@ -57,6 +59,26 @@ public class DWManager implements Manager {
             try (PrintWriter writer = new PrintWriter(new FileWriter(coverageOutputfile, true))) {
                 writer.write("Number of DW Acquires," + this.acquires.size() + "\n");
                 writer.write("Number of DW Releases," + this.releases.size() + "\n");
+            } catch (FileNotFoundException e) {
+                // Do something
+            }
+
+            File executionOutputFile = new File(outputPath + "execution.csv");
+            try (PrintWriter writer = new PrintWriter(new FileWriter(executionOutputFile, true))) {
+                int executionSumAcquire=0;
+                for (Map.Entry<String, DWAcquire> executioncountEntry : this.acquires.entrySet()) {
+                    if (executioncountEntry.getValue().isExecuted) {
+                        executionSumAcquire++;
+                    }
+                }
+                int executionSumRelease=0;
+                for (Map.Entry<String, DWRelease> executioncountEntry : this.releases.entrySet()) {
+                    if (executioncountEntry.getValue().isExecuted) {
+                        executionSumRelease++;
+                    }
+                }
+                writer.write("Number of DW Acquires," + executionSumAcquire + "\n");
+                writer.write("Number of DW Releases," + executionSumRelease + "\n");
             } catch (FileNotFoundException e) {
                 // Do something
             }

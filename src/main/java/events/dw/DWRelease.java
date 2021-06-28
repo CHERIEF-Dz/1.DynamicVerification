@@ -12,6 +12,7 @@ public class DWRelease extends ConcreteEvent {
     }
 
     public void execute(WakeLockStructure lockAcquired) {
+        this.isExecuted=true;
         lockAcquired.release();
     }
 
