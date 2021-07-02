@@ -114,6 +114,19 @@ public final class HMUAnalyzer extends CodeSmellAnalyzer {
         InvokeStmt invokeAppend = Jimple.v().newInvokeStmt(
                 Jimple.v().newVirtualInvokeExpr(refBuilder, appendMethod.makeRef(), refSize));
         generatedUnits.add(invokeAppend);
+
+        //Virtual call Append
+        SootMethod appendMethod2 = Scene.v().getSootClass("java.lang.StringBuilder").getMethod("java.lang.StringBuilder append(java.lang.String)");
+        InvokeStmt invokeAppend2 = Jimple.v().newInvokeStmt(
+                Jimple.v().newVirtualInvokeExpr(refBuilder, appendMethod2.makeRef(), StringConstant.v(":")));
+        generatedUnits.add(invokeAppend2);
+
+        //Append Type
+        SootMethod appendType = Scene.v().getSootClass("java.lang.StringBuilder").getMethod("java.lang.StringBuilder append(java.lang.String)");
+        InvokeStmt invokeAppendType = Jimple.v().newInvokeStmt(
+                Jimple.v().newVirtualInvokeExpr(refBuilder, appendType.makeRef(), StringConstant.v(type)));
+        generatedUnits.add(invokeAppendType);
+
         return generatedUnits;
     }
 
