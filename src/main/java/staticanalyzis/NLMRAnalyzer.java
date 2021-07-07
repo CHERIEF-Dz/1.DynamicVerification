@@ -19,8 +19,8 @@ public class NLMRAnalyzer extends CodeSmellAnalyzer{
     public static String runnerSuffix = "$RunnerTMP";
 
     public static void methodsToCheck(String name, String methodName, int lineNumber, ManagerGroup managerGroup, Body b, UnitPatchingChain units, boolean isInstrumenting) {
-        checkNLMR(name, methodName, "onTrimMemory", 0, managerGroup.managerNLMR, b, b.getUnits(),"nlmrenter", "nlmrexit", isInstrumenting);
-        checkNLMR(name, methodName, "onLowMemory", 0, managerGroup.managerNLMR, b, b.getUnits(),"nlmrenter", "nlmrexit", isInstrumenting);
+        checkNLMR(name, methodName, "onTrimMemory", lineNumber, managerGroup.managerNLMR, b, b.getUnits(),"nlmrenter", "nlmrexit", isInstrumenting);
+        checkNLMR(name, methodName, "onLowMemory", lineNumber, managerGroup.managerNLMR, b, b.getUnits(),"nlmrenter", "nlmrexit", isInstrumenting);
     }
 
     protected static void checkNLMR(String name, String methodName, String methodNameNeeded, int lineNumber, NLMRManager manager, Body b, UnitPatchingChain units, String prefix, String suffix, boolean isInstrumenting) {

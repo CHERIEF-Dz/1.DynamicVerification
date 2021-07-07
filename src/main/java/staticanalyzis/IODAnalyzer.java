@@ -14,7 +14,7 @@ import java.util.regex.Matcher;
 public class IODAnalyzer extends CodeSmellAnalyzer {
 
     public static void checkLine(String line, String name, String methodName, int lineNumber, ManagerGroup managerGroup, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting) {
-        checkNew(line, name, methodName,0, managerGroup.managerIOD, b, u, b.getUnits(), isInstrumenting);
+        checkNew(line, name, methodName,lineNumber, managerGroup.managerIOD, b, u, b.getUnits(), isInstrumenting);
     }
 
     public static void checkNew(String line, String name, String methodName, int lineNumber, IODManager manager, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting) {
@@ -32,7 +32,7 @@ public class IODAnalyzer extends CodeSmellAnalyzer {
     }
 
     public static void methodsToCheck(String name, String methodName, int lineNumber, ManagerGroup managerGroup, Body b, UnitPatchingChain units, boolean isInstrumenting) {
-        checkIOD(name, methodName, "onDraw", 0, managerGroup.managerIOD, b, b.getUnits(),isInstrumenting);
+        checkIOD(name, methodName, "onDraw", lineNumber, managerGroup.managerIOD, b, b.getUnits(),isInstrumenting);
     }
 
     protected static void checkIOD(String name, String methodName, String methodNameNeeded, int lineNumber, IODManager manager, Body b, UnitPatchingChain units, boolean isInstrumenting) {

@@ -12,11 +12,11 @@ import utils.CodeLocation;
 public class HPAnalyzer extends CodeSmellAnalyzer {
 
     public static void methodsToCheck(String name, String methodName, int lineNumber, ManagerGroup managerGroup, Body b, UnitPatchingChain units, boolean isInstrumenting) {
-        checkHP(name, methodName, "onStartCommand", 0, managerGroup.managerHP, b, b.getUnits(),"hssenter:", "hssexit:", isInstrumenting);
-        checkHP(name, methodName, "onReceive", 0, managerGroup.managerHP, b, b.getUnits(),"hbrenter:", "hbrexit:", isInstrumenting);
-        checkHP(name, methodName, "onPostExecute", 0, managerGroup.managerHP, b, b.getUnits(),"hasenter:", "hasexit:", isInstrumenting);
-        checkHP(name, methodName, "onPreExecute", 0, managerGroup.managerHP, b, b.getUnits(),"hasenter:", "hasexit:", isInstrumenting);
-        checkHP(name, methodName, "onProgressUpdate", 0, managerGroup.managerHP, b, b.getUnits(),"hasenter:", "hasexit:", isInstrumenting);
+        checkHP(name, methodName, "onStartCommand", lineNumber, managerGroup.managerHP, b, b.getUnits(),"hssenter:", "hssexit:", isInstrumenting);
+        checkHP(name, methodName, "onReceive", lineNumber, managerGroup.managerHP, b, b.getUnits(),"hbrenter:", "hbrexit:", isInstrumenting);
+        checkHP(name, methodName, "onPostExecute", lineNumber, managerGroup.managerHP, b, b.getUnits(),"hasenter:", "hasexit:", isInstrumenting);
+        checkHP(name, methodName, "onPreExecute", lineNumber, managerGroup.managerHP, b, b.getUnits(),"hasenter:", "hasexit:", isInstrumenting);
+        checkHP(name, methodName, "onProgressUpdate", lineNumber, managerGroup.managerHP, b, b.getUnits(),"hasenter:", "hasexit:", isInstrumenting);
 
     }
 

@@ -54,6 +54,7 @@ public class HMUManager implements Manager{
     @Override
     public void execute(String key, String fileName, String lineNumber, String code, String id) {
         if ("hmuimpl".equals(code)) {
+            System.out.println("Key : " + key);
             executeImplementation(key, id);
         } else if ("hmuadd".equals(code)) {
             //System.out.println("Addition line !");
@@ -74,13 +75,6 @@ public class HMUManager implements Manager{
     }
 
     public void executeImplementation(String key, String id) {
-        /*
-        System.out.println("Need : " + key + " and " + id);
-        for (java.util.Map.Entry<String, MapStructure> stringStructureEntry : this.structures.entrySet()) {
-            HashMap.Entry<String, MapStructure> pair = (HashMap.Entry) stringStructureEntry;
-            System.out.println("Structure : " + pair.getKey() + " " + pair.getValue().getId());
-        }
-        */
         this.structures.put(id, this.implementations.get(key).execute(id));
     }
 
@@ -163,10 +157,10 @@ public class HMUManager implements Manager{
 
         for (java.util.Map.Entry<String, MapStructure> stringStructureEntry : this.structures.entrySet()) {
             HashMap.Entry<String, MapStructure> pair = (HashMap.Entry) stringStructureEntry;
-            if (pair.getValue().hasCodeSmell()) {
                 String fileName = pair.getValue().getLocation().getFileName();
+                String keyNumber = Integer.toString(pair.getValue().getLocation().getLine());
                 String methodName = pair.getValue().getLocation().getMethodName();
-                String selectionKey = fileName + "/" + packageName + "/" + methodName;
+                String selectionKey = fileName + "/" + packageName + "/" + methodName+"/"+keyNumber;
                 if (selectedMaps.containsKey(selectionKey)) {
                     if (selectedMapsValues.get(selectionKey) < pair.getValue().getMaximumSize()) {
                         selectedMaps.put(selectionKey, pair.getValue());
@@ -177,7 +171,6 @@ public class HMUManager implements Manager{
                     selectedMaps.put(selectionKey, pair.getValue());
                     selectedMapsValues.put(selectionKey, pair.getValue().getMaximumSize());
                 }
-            }
         }
 
         File csvOutputFile = new File(outputPath+"results_HMU.csv");
@@ -210,6 +203,7 @@ public class HMUManager implements Manager{
                 writer.write("apk,package,file,method,structure Type,maximumSize\n");
                 for (java.util.Map.Entry<String, MapStructure> stringStructureEntry : selectedMaps.entrySet()) {
                     HashMap.Entry<String, MapStructure> pair = (HashMap.Entry) stringStructureEntry;
+                    System.out.println("HashMap : " + pair.getValue().getLocation().toString());
                     String fileName = pair.getValue().getLocation().getFileName();
                     String methodName = pair.getValue().getLocation().getMethodName();
                     String structureType = "HashMap";
