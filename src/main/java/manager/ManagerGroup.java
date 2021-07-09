@@ -62,7 +62,7 @@ public class ManagerGroup {
     public void beepBeep(Fork codesmellsFork) {
         managerDW.beepBeepBranch(codesmellsFork, 0);
         managerNLMR.beepBeepBranch(codesmellsFork, 1);
-        //managerHP.beepBeepBranch(codesmellsFork, 2);
+        managerHP.beepBeepBranch(codesmellsFork, 2);
         managerIOD.beepBeepBranch(codesmellsFork, 5);
         managerHMU.beepBeepBranch(codesmellsFork, 6);
     }

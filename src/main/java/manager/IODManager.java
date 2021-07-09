@@ -190,8 +190,8 @@ public class IODManager implements Manager{
             ApplyFunction checkValues = new ApplyFunction(
                     new FunctionTree(Numbers.isGreaterOrEqual,
                             new FunctionTree(Numbers.subtraction,
-                                    new FunctionTree(new NthElement(3), StreamVariable.X),
-                                    new FunctionTree(new NthElement(3), StreamVariable.Y)),
+                                    new FunctionTree(new NthElement(3), StreamVariable.Y),
+                                    new FunctionTree(new NthElement(3), StreamVariable.X)),
                             new Constant(16666666.6667)));
             connect(filterEnter, OUTPUT, checkValues, 0);
             connect(filterExit, OUTPUT, checkValues, 1);
@@ -280,9 +280,13 @@ public class IODManager implements Manager{
         KeepLast lastSlice = new KeepLast();
         connect(slicer, lastSlice);
 
-        HashMap<String, Boolean> slicedHashMap = null;
+        HashMap<String, Boolean> slicedHashMap = new HashMap<>();
         Pullable p3 = lastSlice.getPullableOutput();
-        slicedHashMap = (HashMap)p3.pull();
+        try  {
+            slicedHashMap = (HashMap)p3.pull();
+        } catch (NullPointerException e) {
+
+        }
 
         System.out.println("IOD : ");
 

@@ -222,9 +222,13 @@ public class NLMRManager implements Manager{
         KeepLast lastSlice = new KeepLast();
         connect(slicer, lastSlice);
 
-        HashMap<String, Boolean> slicedHashMap = null;
+        HashMap<String, Boolean> slicedHashMap = new HashMap<>();
         Pullable p3 = lastSlice.getPullableOutput();
-        slicedHashMap = (HashMap)p3.pull();
+        try  {
+            slicedHashMap = (HashMap)p3.pull();
+        } catch (NullPointerException e) {
+
+        }
 
         System.out.println("NLMR : ");
 
