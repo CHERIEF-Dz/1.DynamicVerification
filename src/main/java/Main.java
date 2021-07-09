@@ -1,6 +1,14 @@
+import ca.uqac.lif.cep.Connector;
+import ca.uqac.lif.cep.Processor;
+import ca.uqac.lif.cep.functions.ApplyFunction;
+import ca.uqac.lif.cep.io.ReadLines;
+import ca.uqac.lif.cep.tmf.Fork;
+import ca.uqac.lif.cep.util.FindPattern;
+import ca.uqac.lif.cep.util.Strings;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.*;
 import org.xmlpull.v1.XmlPullParserException;
+import soot.SootMethod;
 import soot.jimple.infoflow.android.manifest.ProcessManifest;
 import staticanalyzis.SootAnalyzer;
 import manager.HMUManager;
@@ -9,6 +17,7 @@ import manager.ManagerGroup;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -33,18 +42,24 @@ public class Main {
         analyseParser.addArgument("-o", "--output").required(true).help("Path to the folder for the .csv results of the detection");
         analyseParser.addArgument("-p", "--package").required(false).help("Main package of the app");
         analyseParser.addArgument("-ai", "--allInstances").type(Boolean.class).setDefault(false).help("Returning the instances associated to code smells, even if it is not one");
+        analyseParser.addArgument("-bb", "--beepbeep").type(Boolean.class).setDefault(false).help("Using of BeepBeep to analyze the trace");
 
         ManagerGroup managerGroup;
         try {
             Namespace res = parser.parseArgs(args);
             //System.out.println();
             if (res.getString("sub_command").equals("instrumentation")) {
-                managerGroup = sootAnalyzer(res.getString("androidJars"), res.getString("apk"), res.getString("output"), res.getString("package"), true);
+                sootAnalyzer(res.getString("androidJars"), res.getString("apk"), res.getString("output"), res.getString("package"), true);
             }
             else if (res.getString("sub_command").equals("analyse")) {
-                managerGroup = sootAnalyzer(res.getString("androidJars"), res.getString("apk"), "", res.getString("package"),false);
                 String tracePath = res.getString("trace");
-                sootanalyzeTrace(managerGroup, tracePath, res.getString("output"), res.getString("apk"), res.getBoolean("allInstances"));
+                if (res.getBoolean("beepbeep")) {
+                    managerGroup = new ManagerGroup();
+                    beepBeepAnalyzeTrace(managerGroup, tracePath);
+                } else {
+                    managerGroup = sootAnalyzer(res.getString("androidJars"), res.getString("apk"), "", res.getString("package"),false);
+                    sootanalyzeTrace(managerGroup, tracePath, res.getString("output"), res.getString("apk"), res.getBoolean("allInstances"));
+                }
             }
         } catch (ArgumentParserException | XmlPullParserException e) {
             parser.handleError((ArgumentParserException) e);
@@ -88,6 +103,18 @@ public class Main {
         final ProcessManifest processManifest = new ProcessManifest(apkName);
         String packageName = processManifest.getPackageName();
         managerGroup.generateCSV(outputPath, apkName, packageName, returnAllInstances);
+    }
+
+    public static void beepBeepAnalyzeTrace(ManagerGroup managerGroup, String tracePath) {
+        InputStream is = Main.class.getResourceAsStream(tracePath);
+        ReadLines reader = new ReadLines(is);
+        ApplyFunction cast = new ApplyFunction(Strings.toString);
+        Connector.connect(new Processor[]{reader, cast});
+        FindPattern removeDynver = new FindPattern("dynver:([^:]*:[^:]*:[^:]*:[^:]*.*)");
+        Connector.connect(new Processor[]{cast, removeDynver});
+        Fork codesmellsFork = new Fork(7);
+        Connector.connect(new Processor[]{removeDynver, codesmellsFork});
+        managerGroup.beepBeep(codesmellsFork);
     }
 
 }

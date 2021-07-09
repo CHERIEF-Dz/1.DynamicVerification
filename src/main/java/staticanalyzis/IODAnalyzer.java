@@ -19,8 +19,8 @@ public class IODAnalyzer extends CodeSmellAnalyzer {
 
     public static void checkNew(String line, String name, String methodName, int lineNumber, IODManager manager, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting) {
         Matcher m = findPattern(line, "<init>");
-        Matcher m2 = findPattern(methodName, "onDraw");
-        if (m2.find() && m.find()) {
+        //Matcher m2 = findPattern(methodName, "onDraw");
+        if (checkMethodName(methodName,"onDraw") && m.find()) {
             String variableName=m.group(0).split("\\.")[0];
             if (!getStructureInstanceLocalName(line).equals("refBuilder")) {
                 manager.addNew(generateKey(name, methodName), new IODNew(new CodeLocation(name, methodName, lineNumber)));

@@ -1,5 +1,7 @@
 package manager;
 
+import ca.uqac.lif.cep.tmf.Fork;
+
 import java.io.*;
 
 public class ManagerGroup {
@@ -55,5 +57,13 @@ public class ManagerGroup {
         managerIOD.execute(key, fileName, lineNumber, code, id);
         managerHP.execute(key, fileName, lineNumber, code, id);
         managerNLMR.execute(key, fileName, lineNumber, code, id);
+    }
+
+    public void beepBeep(Fork codesmellsFork) {
+        managerDW.beepBeepBranch(codesmellsFork, 0);
+        managerNLMR.beepBeepBranch(codesmellsFork, 1);
+        //managerHP.beepBeepBranch(codesmellsFork, 2);
+        managerIOD.beepBeepBranch(codesmellsFork, 5);
+        managerHMU.beepBeepBranch(codesmellsFork, 6);
     }
 }

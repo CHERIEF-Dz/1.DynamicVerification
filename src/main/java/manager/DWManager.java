@@ -1,13 +1,24 @@
 package manager;
 
+import ca.uqac.lif.cep.GroupProcessor;
+import ca.uqac.lif.cep.Pullable;
+import ca.uqac.lif.cep.functions.*;
+import ca.uqac.lif.cep.ltl.Eventually;
+import ca.uqac.lif.cep.ltl.Globally;
+import ca.uqac.lif.cep.tmf.*;
+import ca.uqac.lif.cep.util.*;
 import events.ConcreteEvent;
 import events.dw.DWAcquire;
 import events.dw.DWRelease;
 import structure.dw.WakeLockStructure;
+import utils.BeepBeepUtils;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+
+import static ca.uqac.lif.cep.Connector.*;
 
 public class DWManager implements Manager {
     private HashMap<String, DWAcquire> acquires;
@@ -122,5 +133,130 @@ public class DWManager implements Manager {
         } else if ("dwrel".equals(code)) {
             executeRelease(key, id);
         }
+    }
+
+    @Override
+    public void beepBeepBranch(Fork codesmellsFork, int arity) {
+
+        Filter filter = BeepBeepUtils.codesmellConditions(codesmellsFork, arity, new String[]{":dwacq:", ":dwrel:"});
+        Fork forkDwDetection = new Fork(3);
+        connect(filter, OUTPUT, forkDwDetection, INPUT);
+
+        FindPattern getLocationPart = new FindPattern("([^:]*:[^:]*):[^:]*:[^:]*");
+        connect(forkDwDetection, 1, getLocationPart, INPUT);
+
+
+        FindPattern getIDPart = new FindPattern("[^:]*:[^:]*:[^:]*:([^:]*)");
+        connect(forkDwDetection, 2, getIDPart, INPUT);
+
+
+        Maps.PutInto locationMap = new Maps.PutInto();
+        connect(getIDPart, 0, locationMap, 0);
+        connect(getLocationPart, OUTPUT, locationMap, 1);
+
+        KeepLast lastLocation = new KeepLast();
+        connect(locationMap, lastLocation);
+
+
+        GroupProcessor dwDetector = new GroupProcessor(1, 1);
+        {
+            ApplyFunction getEvent = new ApplyFunction(new NthElement(2));
+
+
+            Fork forkLTL = new Fork(3);
+            connect(getEvent, OUTPUT, forkLTL, INPUT);
+
+            ApplyFunction neg = new ApplyFunction(
+                    new FunctionTree(Booleans.not,
+                            new FunctionTree(Equals.instance,
+                                    StreamVariable.X, new Constant("dwrel"))));
+            connect(forkLTL, 0, neg, 0);
+
+            Globally mediumG = new Globally();
+            connect(neg, mediumG);
+
+            ApplyFunctionPartial andFunction = new ApplyFunctionPartial(
+                    new FunctionTree(Booleans.and,
+                            new FunctionTree(Equals.instance,
+                                    StreamVariable.X, new Constant("dwacq")),
+                            StreamVariable.Y));
+            connect(forkLTL, 1, andFunction, 0);
+            connect(mediumG, OUTPUT, andFunction, 1);
+
+            ApplyFunction negAnd = new ApplyFunction(
+                    new FunctionTree(Booleans.not, StreamVariable.X)
+            );
+            connect(andFunction, negAnd);
+
+            Eventually finalEventually = new Eventually();
+            connect(negAnd,finalEventually);
+
+            ApplyFunction negEventually = new ApplyFunction(
+                    new FunctionTree(Booleans.not, StreamVariable.X)
+            );
+            connect(finalEventually, negEventually);
+
+            ApplyFunction acquireTruefier = new ApplyFunction(
+                    new FunctionTree(Equals.instance,
+                            StreamVariable.X, new Constant("dwacq")));
+            connect(forkLTL, 2, acquireTruefier, 0);
+
+            Fork forkTruefier = new Fork(2);
+            connect(acquireTruefier, forkTruefier);
+            Filter filterTruefier = new Filter();
+            connect(forkTruefier, 0, filterTruefier, LEFT);
+            connect(forkTruefier, 1, filterTruefier, RIGHT);
+
+            Multiplex outputMultiplex = new Multiplex(2);
+            connect(filterTruefier, OUTPUT, outputMultiplex, 0);
+            connect(negEventually, OUTPUT, outputMultiplex, 1);
+
+
+            dwDetector.addProcessor(getEvent);
+            dwDetector.addProcessor(forkLTL);
+            dwDetector.addProcessor(neg);
+            dwDetector.addProcessor(mediumG);
+            dwDetector.addProcessor(andFunction);
+            dwDetector.addProcessor(negAnd);
+            dwDetector.addProcessor(finalEventually);
+            dwDetector.addProcessor(negEventually);
+
+            dwDetector.addProcessor(acquireTruefier);
+            dwDetector.addProcessor(forkTruefier);
+            dwDetector.addProcessor(filterTruefier);
+            dwDetector.addProcessor(outputMultiplex);
+
+            dwDetector.associateInput(INPUT, getEvent, INPUT);
+            dwDetector.associateOutput(OUTPUT, outputMultiplex, OUTPUT);
+        }
+
+        ApplyFunction splitter = new ApplyFunction(new Strings.SplitString(":"));
+        connect(forkDwDetection, 0, splitter, INPUT);
+
+        Slice slicer = new Slice(new NthElement(3), dwDetector);
+        connect(splitter, OUTPUT, slicer, 0);
+
+        KeepLast lastSlice = new KeepLast();
+        connect(slicer, lastSlice);
+
+        HashMap<String, String> locationHashMap = null;
+        Pullable p1 = lastLocation.getPullableOutput();
+        locationHashMap = (HashMap)p1.pull();
+
+        HashMap<String, Boolean> slicedHashMap = null;
+        Pullable p3 = lastSlice.getPullableOutput();
+        slicedHashMap = (HashMap)p3.pull();
+
+
+        System.out.println("DW : ");
+        Iterator it2 = slicedHashMap.entrySet().iterator();
+        while (it2.hasNext()) {
+            Map.Entry pair = (Map.Entry)it2.next();
+            //System.out.println(pair.getKey().getClass() + " " + pair.getKey() + " = " + pair.getValue());
+            if ((Boolean)pair.getValue()) {
+                System.out.println(locationHashMap.get(Integer.toString((Integer) pair.getKey())) + " is a code smell");
+            }
+        }
+
     }
 }

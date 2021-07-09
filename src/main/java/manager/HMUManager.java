@@ -1,5 +1,15 @@
 package manager;
 
+import ca.uqac.lif.cep.GroupProcessor;
+import ca.uqac.lif.cep.Pullable;
+import ca.uqac.lif.cep.functions.ApplyFunction;
+import ca.uqac.lif.cep.functions.Constant;
+import ca.uqac.lif.cep.functions.FunctionTree;
+import ca.uqac.lif.cep.functions.StreamVariable;
+import ca.uqac.lif.cep.ltl.Eventually;
+import ca.uqac.lif.cep.ltl.Globally;
+import ca.uqac.lif.cep.tmf.*;
+import ca.uqac.lif.cep.util.*;
 import events.dw.DWAcquire;
 import events.dw.DWRelease;
 import events.hmu.HMUAddition;
@@ -8,10 +18,14 @@ import events.hmu.HMUDeletion;
 import events.hmu.HMUImplementation;
 import structure.hmu.ArrayMapStructure;
 import structure.hmu.MapStructure;
+import utils.BeepBeepUtils;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+
+import static ca.uqac.lif.cep.Connector.*;
 
 public class HMUManager implements Manager{
     private HashMap<String, HMUImplementation> implementations; // Key = CodeLocation
@@ -54,7 +68,6 @@ public class HMUManager implements Manager{
     @Override
     public void execute(String key, String fileName, String lineNumber, String code, String id) {
         if ("hmuimpl".equals(code)) {
-            System.out.println("Key : " + key);
             executeImplementation(key, id);
         } else if ("hmuadd".equals(code)) {
             //System.out.println("Addition line !");
@@ -203,7 +216,6 @@ public class HMUManager implements Manager{
                 writer.write("apk,package,file,method,structure Type,maximumSize\n");
                 for (java.util.Map.Entry<String, MapStructure> stringStructureEntry : selectedMaps.entrySet()) {
                     HashMap.Entry<String, MapStructure> pair = (HashMap.Entry) stringStructureEntry;
-                    System.out.println("HashMap : " + pair.getValue().getLocation().toString());
                     String fileName = pair.getValue().getLocation().getFileName();
                     String methodName = pair.getValue().getLocation().getMethodName();
                     String structureType = "HashMap";
@@ -220,5 +232,154 @@ public class HMUManager implements Manager{
                 // Do something
             }
         }
+    }
+
+    @Override
+    public void beepBeepBranch(Fork codesmellsFork, int arity) {
+
+        Filter filter = BeepBeepUtils.codesmellConditions(codesmellsFork, arity, new String[]{":hmuadd:", ":hmudel:", ":hmucln", ":hmuimpl:"});
+        Fork forkDwDetection = new Fork(3);
+        connect(filter, OUTPUT, forkDwDetection, INPUT);
+
+        FindPattern getLocationPart = new FindPattern("([^:]*:[^:]*):[^:]*:[^:]*");
+        connect(forkDwDetection, 1, getLocationPart, INPUT);
+
+
+        FindPattern getIDPart = new FindPattern("[^:]*:[^:]*:[^:]*:([^:]*)");
+        connect(forkDwDetection, 2, getIDPart, INPUT);
+
+
+        Maps.PutInto locationMap = new Maps.PutInto();
+        connect(getIDPart, 0, locationMap, 0);
+        connect(getLocationPart, OUTPUT, locationMap, 1);
+
+        KeepLast lastLocation = new KeepLast();
+        connect(locationMap, lastLocation);
+
+
+        GroupProcessor hmuDetector = new GroupProcessor(1, 1);
+        {
+            Fork forkLTL = new Fork(6);
+
+
+            ApplyFunction checkType = new ApplyFunction(
+                    new FunctionTree(Equals.instance,
+                            new FunctionTree(new NthElement(5), StreamVariable.X), new Constant("HashMap")));
+            connect(forkLTL, 0, checkType, INPUT);
+
+            ApplyFunction equalImpl = new ApplyFunction(
+                    new FunctionTree(Equals.instance,
+                            new FunctionTree(new NthElement(2), StreamVariable.X), new Constant("hmuimpl")));
+            connect(forkLTL, 1, equalImpl, INPUT);
+
+            Filter filterTruefier = new Filter();
+            connect(checkType, OUTPUT, filterTruefier, LEFT);
+            connect(equalImpl, OUTPUT, filterTruefier, RIGHT);
+
+
+
+
+
+            ApplyFunction equalHashMap = new ApplyFunction(
+                    new FunctionTree(Equals.instance,
+                            new FunctionTree(new NthElement(5), StreamVariable.X), new Constant("HashMap")));
+            connect(forkLTL, 2, equalHashMap, 0);
+
+            Filter filterHashMap = new Filter();
+            connect(forkLTL, 3, filterHashMap, LEFT);
+            connect(equalHashMap, 0, filterHashMap, RIGHT);
+
+            ApplyFunction checkHashMapSize = new ApplyFunction(
+                    new FunctionTree(Numbers.isLessOrEqual,
+                            new FunctionTree(new NthElement(4), StreamVariable.X),
+                            new Constant(500)));
+            connect(filterHashMap, OUTPUT, checkHashMapSize, 0);
+
+            Globally bigG = new Globally();
+            connect(checkHashMapSize, bigG);
+
+            ApplyFunction equalArrayMap = new ApplyFunction(
+                    new FunctionTree(Booleans.or,
+                            new FunctionTree(Equals.instance,
+                                    new FunctionTree(new NthElement(5), StreamVariable.X),
+                                    new Constant("ArrayMap")),
+                            new FunctionTree(Equals.instance,
+                                    new FunctionTree(new NthElement(5), StreamVariable.X),
+                                    new Constant("SimpleArrayMap"))));
+            connect(forkLTL, 4, equalArrayMap, 0);
+
+            Filter filterArrayMap = new Filter();
+            connect(forkLTL, 5, filterArrayMap, LEFT);
+            connect(equalArrayMap, 0, filterArrayMap, RIGHT);
+
+            ApplyFunction checkArrayMapSize = new ApplyFunction(
+                    new FunctionTree(Numbers.isGreaterOrEqual,
+                            new FunctionTree(new NthElement(4), StreamVariable.X),
+                            new Constant(500)));
+            connect(filterArrayMap, OUTPUT, checkArrayMapSize, 0);
+
+            Eventually bigF = new Eventually();
+            connect(checkArrayMapSize, bigF);
+
+            Multiplex outputMultiplex = new Multiplex(3);
+            connect(filterTruefier, OUTPUT, outputMultiplex, 0);
+            //connect(bigDisjunction, OUTPUT, outputMultiplex, 1);
+            connect(bigF, OUTPUT, outputMultiplex, 1);
+            connect(bigG, OUTPUT, outputMultiplex, 2);
+
+
+            hmuDetector.addProcessor(forkLTL);
+
+            hmuDetector.addProcessor(equalImpl);
+            hmuDetector.addProcessor(checkType);
+            hmuDetector.addProcessor(filterTruefier);
+
+
+            hmuDetector.addProcessor(equalHashMap);
+            hmuDetector.addProcessor(filterHashMap);
+            hmuDetector.addProcessor(checkHashMapSize);
+            hmuDetector.addProcessor(bigG);
+
+
+            hmuDetector.addProcessor(equalArrayMap);
+            hmuDetector.addProcessor(filterArrayMap);
+            hmuDetector.addProcessor(checkArrayMapSize);
+            hmuDetector.addProcessor(bigF);
+
+            //hmuDetector.addProcessor(bigDisjunction);
+            hmuDetector.addProcessor(outputMultiplex);
+
+            hmuDetector.associateInput(INPUT, forkLTL, INPUT);
+            hmuDetector.associateOutput(OUTPUT, outputMultiplex, OUTPUT);
+        }
+
+        ApplyFunction splitter = new ApplyFunction(new Strings.SplitString(":"));
+        connect(forkDwDetection, 0, splitter, INPUT);
+
+        Slice slicer = new Slice(new NthElement(3), hmuDetector);
+        connect(splitter, OUTPUT, slicer, 0);
+
+        KeepLast lastSlice = new KeepLast();
+        connect(slicer, lastSlice);
+
+        HashMap<String, String> locationHashMap = null;
+        Pullable p1 = lastLocation.getPullableOutput();
+        locationHashMap = (HashMap)p1.pull();
+
+        HashMap<String, Boolean> slicedHashMap = null;
+        Pullable p3 = lastSlice.getPullableOutput();
+        slicedHashMap = (HashMap)p3.pull();
+
+
+        System.out.println("HMU : ");
+        Iterator it2 = slicedHashMap.entrySet().iterator();
+        while (it2.hasNext()) {
+            Map.Entry pair = (Map.Entry)it2.next();
+            //System.out.println(locationHashMap.get(Integer.toString((Integer) pair.getKey())) + " " + pair.getKey() + " = " + pair.getValue());
+            if ((Boolean)pair.getValue()) {
+                System.out.println(locationHashMap.get(Integer.toString((Integer) pair.getKey())) + " is a code smell");
+            }
+        }
+
     }
 }

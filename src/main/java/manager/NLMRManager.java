@@ -1,14 +1,31 @@
 package manager;
 
+import ca.uqac.lif.cep.GroupProcessor;
+import ca.uqac.lif.cep.Pullable;
+import ca.uqac.lif.cep.functions.ApplyFunction;
+import ca.uqac.lif.cep.functions.Constant;
+import ca.uqac.lif.cep.functions.FunctionTree;
+import ca.uqac.lif.cep.functions.StreamVariable;
+import ca.uqac.lif.cep.ltl.Eventually;
+import ca.uqac.lif.cep.tmf.Filter;
+import ca.uqac.lif.cep.tmf.Fork;
+import ca.uqac.lif.cep.tmf.KeepLast;
+import ca.uqac.lif.cep.tmf.Slice;
+import ca.uqac.lif.cep.util.*;
 import events.hp.HPEnter;
 import events.nlmr.NLMREnter;
 import events.nlmr.NLMRExit;
 import staticanalyzis.NLMRAnalyzer;
 import structure.nlmr.NLMRStructure;
+import utils.BeepBeepUtils;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+
+import static ca.uqac.lif.cep.Connector.*;
+import static ca.uqac.lif.cep.Connector.connect;
 
 public class NLMRManager implements Manager{
     private HashMap<String, NLMREnter> enters; // Key = CodeLocation
@@ -119,5 +136,104 @@ public class NLMRManager implements Manager{
 
     public void executeExit(String key, String id, long date) {
         this.exits.get(key).execute(this.structures.get(id), date);
+    }
+
+    @Override
+    public void beepBeepBranch(Fork codesmellsFork, int arity) {
+
+        Filter filter = BeepBeepUtils.codesmellConditions(codesmellsFork, arity, new String[]{":nlmrenter:", ":nlmrexit:"});
+
+        GroupProcessor NLMRDetector = new GroupProcessor(1, 1);
+        {
+            Fork forkLTL = new Fork(5);
+
+            ApplyFunction equalEnter = new ApplyFunction(
+                    new FunctionTree(Equals.instance,
+                            new FunctionTree(new NthElement(2), StreamVariable.X), new Constant("nlmrenter")));
+            connect(forkLTL, 0, equalEnter, 0);
+
+            Filter filterEnter = new Filter();
+            connect(forkLTL, 1, filterEnter, LEFT);
+            connect(equalEnter, OUTPUT, filterEnter, RIGHT);
+
+            ApplyFunction equalExit = new ApplyFunction(
+                    new FunctionTree(Equals.instance,
+                            new FunctionTree(new NthElement(2), StreamVariable.X),
+                            new Constant("nlmrexit")));
+            connect(forkLTL, 2, equalExit, 0);
+
+            Fork forkExit = new Fork(2);
+            connect(equalExit, OUTPUT, forkExit, INPUT);
+
+            Filter filterExit = new Filter();
+            connect(forkLTL, 3, filterExit, LEFT);
+            connect(forkExit, 0, filterExit, RIGHT);
+
+            ApplyFunction checkValues = new ApplyFunction(
+                    new FunctionTree(Numbers.isLessThan,
+                            new FunctionTree(Numbers.subtraction,
+                                    new FunctionTree(new NthElement(3), StreamVariable.X),
+                                    new FunctionTree(new NthElement(3), StreamVariable.Y)),
+                            new Constant(1024)));
+            connect(filterEnter, OUTPUT, checkValues, 0);
+            connect(filterExit, OUTPUT, checkValues, 1);
+
+            Eventually mediumF = new Eventually();
+            connect(forkExit, 1, mediumF, INPUT);
+
+            ApplyFunction mediumConjunction = new ApplyFunction(
+                    new FunctionTree(Booleans.and,
+                            new FunctionTree(Equals.instance,
+                                    new FunctionTree(new NthElement(2), StreamVariable.X),
+                                    new Constant("nlmrenter")),
+                            StreamVariable.Y));
+            connect(forkLTL, 4, mediumConjunction, 0);
+            connect(mediumF, OUTPUT, mediumConjunction, 1);
+
+            ApplyFunction bigConjunction = new ApplyFunction(
+                    new FunctionTree(Booleans.and, StreamVariable.X, StreamVariable.Y));
+            connect(mediumConjunction, OUTPUT, bigConjunction, 0);
+            connect(checkValues, OUTPUT, bigConjunction, 1);
+
+            Eventually bigF = new Eventually();
+            connect(bigConjunction, OUTPUT, bigF, INPUT);
+
+            NLMRDetector.addProcessor(forkLTL);
+            NLMRDetector.addProcessor(equalEnter);
+            NLMRDetector.addProcessor(filterEnter);
+            NLMRDetector.addProcessor(equalExit);
+            NLMRDetector.addProcessor(forkExit);
+            NLMRDetector.addProcessor(filterExit);
+            NLMRDetector.addProcessor(checkValues);
+            NLMRDetector.addProcessor(mediumF);
+            NLMRDetector.addProcessor(mediumConjunction);
+            NLMRDetector.addProcessor(bigF);
+            NLMRDetector.addProcessor(bigConjunction);
+            NLMRDetector.associateInput(INPUT, forkLTL, INPUT);
+            NLMRDetector.associateOutput(OUTPUT, bigF, OUTPUT);
+        }
+
+        ApplyFunction splitter = new ApplyFunction(new Strings.SplitString(":"));
+        connect(filter, OUTPUT, splitter, INPUT);
+
+        Slice slicer = new Slice(new NthElement(0), NLMRDetector);
+        connect(splitter, OUTPUT, slicer, 0);
+
+        KeepLast lastSlice = new KeepLast();
+        connect(slicer, lastSlice);
+
+        HashMap<String, Boolean> slicedHashMap = null;
+        Pullable p3 = lastSlice.getPullableOutput();
+        slicedHashMap = (HashMap)p3.pull();
+
+        System.out.println("NLMR : ");
+
+        Iterator it2 = slicedHashMap.entrySet().iterator();
+        while (it2.hasNext()) {
+            Map.Entry pair = (Map.Entry)it2.next();
+            if ((Boolean)pair.getValue()) {
+                System.out.println(pair.getKey() + " is a code smell");
+            }
+        }
     }
 }

@@ -1,14 +1,29 @@
 package manager;
 
+import ca.uqac.lif.cep.GroupProcessor;
+import ca.uqac.lif.cep.Pullable;
+import ca.uqac.lif.cep.functions.*;
+import ca.uqac.lif.cep.ltl.Eventually;
+import ca.uqac.lif.cep.ltl.Until;
+import ca.uqac.lif.cep.tmf.Filter;
+import ca.uqac.lif.cep.tmf.Fork;
+import ca.uqac.lif.cep.tmf.KeepLast;
+import ca.uqac.lif.cep.tmf.Slice;
+import ca.uqac.lif.cep.util.*;
 import events.hp.HPEnter;
 import events.iod.IODEnter;
 import events.iod.IODExit;
 import events.iod.IODNew;
 import structure.iod.OnDrawStructure;
+import utils.BeepBeepUtils;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+
+import static ca.uqac.lif.cep.Connector.*;
+import static ca.uqac.lif.cep.Connector.connect;
 
 public class IODManager implements Manager{
     private HashMap<String, IODEnter> enters; // Key = CodeLocation
@@ -135,6 +150,149 @@ public class IODManager implements Manager{
             executeExit(key, fileName, Long.parseLong(id));
         } else if ("iodnew".equals(code)) {
             executeNew(key, fileName);
+        }
+    }
+
+    @Override
+    public void beepBeepBranch(Fork codesmellsFork, int arity) {
+
+        Filter filter = BeepBeepUtils.codesmellConditions(codesmellsFork, arity, new String[]{":iodenter:", ":iodexit:", ":iodnew:"});
+
+        GroupProcessor IODDetector = new GroupProcessor(1, 1);
+        {
+            Fork forkLTL = new Fork(6);
+
+            ApplyFunction equalEnter = new ApplyFunction(
+                    new FunctionTree(Equals.instance,
+                            new FunctionTree(new NthElement(2), StreamVariable.X), new Constant("iodenter")));
+            connect(forkLTL, 0, equalEnter, 0);
+
+            Fork forkEnter = new Fork(2);
+            connect(equalEnter, OUTPUT, forkEnter, INPUT);
+
+            Filter filterEnter = new Filter();
+            connect(forkLTL, 1, filterEnter, LEFT);
+            connect(forkEnter, 0, filterEnter, RIGHT);
+
+            ApplyFunction equalExit = new ApplyFunction(
+                    new FunctionTree(Equals.instance,
+                            new FunctionTree(new NthElement(2), StreamVariable.X),
+                            new Constant("iodexit")));
+            connect(forkLTL, 2, equalExit, 0);
+
+            Fork forkExit = new Fork(3);
+            connect(equalExit, OUTPUT, forkExit, INPUT);
+
+            Filter filterExit = new Filter();
+            connect(forkLTL, 3, filterExit, LEFT);
+            connect(forkExit, 0, filterExit, RIGHT);
+
+            ApplyFunction checkValues = new ApplyFunction(
+                    new FunctionTree(Numbers.isGreaterOrEqual,
+                            new FunctionTree(Numbers.subtraction,
+                                    new FunctionTree(new NthElement(3), StreamVariable.X),
+                                    new FunctionTree(new NthElement(3), StreamVariable.Y)),
+                            new Constant(16666666.6667)));
+            connect(filterEnter, OUTPUT, checkValues, 0);
+            connect(filterExit, OUTPUT, checkValues, 1);
+
+            Eventually mediumF = new Eventually();
+            connect(forkExit, 1, mediumF, INPUT);
+
+            ApplyFunction mediumConjunction = new ApplyFunction(
+                    new FunctionTree(Booleans.and,
+                            new FunctionTree(Equals.instance,
+                                    new FunctionTree(new NthElement(2), StreamVariable.X),
+                                    new Constant("iodenter")),
+                            StreamVariable.Y));
+            connect(forkLTL, 4, mediumConjunction, 0);
+            connect(mediumF, OUTPUT, mediumConjunction, 1);
+
+            ApplyFunction bigConjunction = new ApplyFunction(
+                    new FunctionTree(Booleans.and, StreamVariable.X, StreamVariable.Y));
+            connect(mediumConjunction, OUTPUT, bigConjunction, 0);
+            connect(checkValues, OUTPUT, bigConjunction, 1);
+
+            Eventually bigF = new Eventually();
+            connect(bigConjunction, OUTPUT, bigF, INPUT);
+
+            ApplyFunction equalNew = new ApplyFunction(
+                    new FunctionTree(Booleans.not, new FunctionTree(
+                            Equals.instance, new FunctionTree(
+                            new NthElement(2), StreamVariable.X),
+                            new Constant("iodnew"))));
+            connect(forkLTL, 5, equalNew, 0);
+
+            Until mediumUntil = new Until();
+            connect(equalNew, OUTPUT, mediumUntil, LEFT);
+            connect(forkExit, 2, mediumUntil, RIGHT);
+
+            ApplyFunction notUntil = new ApplyFunction(
+                    new FunctionTree(Booleans.not,
+                            StreamVariable.X));
+            connect(mediumUntil, OUTPUT, notUntil, INPUT);
+
+            ApplyFunction secondConjunction = new ApplyFunction(
+                    new FunctionTree(Booleans.and,
+                            StreamVariable.X,
+                            StreamVariable.Y));
+            connect(forkEnter, 1, secondConjunction, 0);
+            connect(notUntil, OUTPUT, secondConjunction, 1);
+
+            Eventually secondBigF = new Eventually();
+            connect(secondConjunction, secondBigF);
+
+            ApplyFunctionPartial bigDisjunction = new ApplyFunctionPartial(
+                    new FunctionTree(Booleans.or,
+                            StreamVariable.X,
+                            StreamVariable.Y));
+            connect(bigF, OUTPUT, bigDisjunction, 0);
+            connect(secondBigF, OUTPUT, bigDisjunction, 1);
+
+            IODDetector.addProcessor(forkLTL);
+            IODDetector.addProcessor(equalEnter);
+            IODDetector.addProcessor(forkEnter);
+            IODDetector.addProcessor(filterEnter);
+            IODDetector.addProcessor(equalExit);
+            IODDetector.addProcessor(forkExit);
+            IODDetector.addProcessor(filterExit);
+            IODDetector.addProcessor(checkValues);
+            IODDetector.addProcessor(mediumF);
+            IODDetector.addProcessor(mediumConjunction);
+            IODDetector.addProcessor(bigF);
+            IODDetector.addProcessor(bigConjunction);
+            IODDetector.addProcessor(equalNew);
+            IODDetector.addProcessor(mediumUntil);
+            IODDetector.addProcessor(notUntil);
+            IODDetector.addProcessor(secondConjunction);
+            IODDetector.addProcessor(secondBigF);
+            IODDetector.addProcessor(bigDisjunction);
+            IODDetector.associateInput(INPUT, forkLTL, INPUT);
+            IODDetector.associateOutput(OUTPUT, bigDisjunction, OUTPUT);
+        }
+
+        ApplyFunction splitter = new ApplyFunction(new Strings.SplitString(":"));
+        connect(filter, OUTPUT, splitter, INPUT);
+
+        Slice slicer = new Slice(new NthElement(0), IODDetector);
+        connect(splitter, OUTPUT, slicer, 0);
+
+        KeepLast lastSlice = new KeepLast();
+        connect(slicer, lastSlice);
+
+        HashMap<String, Boolean> slicedHashMap = null;
+        Pullable p3 = lastSlice.getPullableOutput();
+        slicedHashMap = (HashMap)p3.pull();
+
+        System.out.println("IOD : ");
+
+        Iterator it2 = slicedHashMap.entrySet().iterator();
+        while (it2.hasNext()) {
+            Map.Entry pair = (Map.Entry)it2.next();
+            //System.out.println(pair.getKey() + " = " + pair.getValue());
+            if ((Boolean)pair.getValue()) {
+                System.out.println(pair.getKey() + " is a code smell");
+            }
         }
     }
 }
