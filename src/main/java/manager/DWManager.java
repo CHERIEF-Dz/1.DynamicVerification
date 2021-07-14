@@ -12,11 +12,15 @@ import events.dw.DWAcquire;
 import events.dw.DWRelease;
 import structure.dw.WakeLockStructure;
 import utils.BeepBeepUtils;
+import utils.CodeLocation;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static ca.uqac.lif.cep.Connector.*;
 
@@ -258,6 +262,20 @@ public class DWManager implements Manager {
             Map.Entry pair = (Map.Entry)it2.next();
             //System.out.println(pair.getKey().getClass() + " " + pair.getKey() + " = " + pair.getValue());
             if ((Boolean)pair.getValue()) {
+                String[] locationSplit = locationHashMap.get(Integer.toString((Integer) pair.getKey())).split(":");
+                Pattern pat = Pattern.compile("(.+\\.java)\\$(.*)");
+                Matcher m = pat.matcher(locationSplit[0]);
+                String fileName="";
+                String methodName="";
+                if (m.find()) {
+                    fileName = m.group(1);
+                    methodName = m.group(2);
+                }
+                int lineNumber = Integer.parseInt(locationSplit[1]);
+                CodeLocation location = new CodeLocation(fileName, methodName, lineNumber);
+                WakeLockStructure structure = new WakeLockStructure(location, Integer.toString((Integer) pair.getKey()));
+                structure.foundCodeSmell();
+                structures.put(Integer.toString((Integer) pair.getKey()), structure);
                 System.out.println(locationHashMap.get(Integer.toString((Integer) pair.getKey())) + " is a code smell");
             }
         }

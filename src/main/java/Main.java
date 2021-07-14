@@ -55,7 +55,7 @@ public class Main {
                 String tracePath = res.getString("trace");
                 if (res.getBoolean("beepbeep")) {
                     managerGroup = new ManagerGroup();
-                    beepBeepAnalyzeTrace(managerGroup, tracePath);
+                    beepBeepAnalyzeTrace(managerGroup, tracePath, res.getString("output"), res.getString("apk"));
                 } else {
                     managerGroup = sootAnalyzer(res.getString("androidJars"), res.getString("apk"), "", res.getString("package"),false);
                     sootanalyzeTrace(managerGroup, tracePath, res.getString("output"), res.getString("apk"), res.getBoolean("allInstances"));
@@ -105,7 +105,7 @@ public class Main {
         managerGroup.generateCSV(outputPath, apkName, packageName, returnAllInstances);
     }
 
-    public static void beepBeepAnalyzeTrace(ManagerGroup managerGroup, String tracePath) {
+    public static void beepBeepAnalyzeTrace(ManagerGroup managerGroup, String tracePath, String outputPath, String apkName) throws IOException, XmlPullParserException {
         InputStream is = Main.class.getResourceAsStream(tracePath);
         ReadLines reader = new ReadLines(is);
         ApplyFunction cast = new ApplyFunction(Strings.toString);
@@ -115,6 +115,10 @@ public class Main {
         Fork codesmellsFork = new Fork(7);
         Connector.connect(new Processor[]{removeDynver, codesmellsFork});
         managerGroup.beepBeep(codesmellsFork);
+
+        final ProcessManifest processManifest = new ProcessManifest(apkName);
+        String packageName = processManifest.getPackageName();
+        managerGroup.generateCSV(outputPath, apkName, packageName, false);
     }
 
 }

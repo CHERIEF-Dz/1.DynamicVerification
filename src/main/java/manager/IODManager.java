@@ -14,13 +14,17 @@ import events.hp.HPEnter;
 import events.iod.IODEnter;
 import events.iod.IODExit;
 import events.iod.IODNew;
+import structure.hp.HeavyProcessStructure;
 import structure.iod.OnDrawStructure;
 import utils.BeepBeepUtils;
+import utils.CodeLocation;
 
 import java.io.*;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static ca.uqac.lif.cep.Connector.*;
 import static ca.uqac.lif.cep.Connector.connect;
@@ -295,6 +299,20 @@ public class IODManager implements Manager{
             Map.Entry pair = (Map.Entry)it2.next();
             //System.out.println(pair.getKey() + " = " + pair.getValue());
             if ((Boolean)pair.getValue()) {
+                String locationSplit = ((String)pair.getKey());
+                Pattern pat = Pattern.compile("(.+\\.java)\\$(.*)");
+                Matcher m = pat.matcher(locationSplit);
+                String fileName="";
+                String methodName="";
+                if (m.find()) {
+                    fileName = m.group(1);
+                    methodName = m.group(2);
+                }
+                int lineNumber = 0;
+                CodeLocation location = new CodeLocation(fileName, methodName, lineNumber);
+                OnDrawStructure structure = new OnDrawStructure(location, ((String)pair.getKey()));
+                structure.foundCodeSmell();
+                structures.put(((String)pair.getKey()), structure);
                 System.out.println(pair.getKey() + " is a code smell");
             }
         }
