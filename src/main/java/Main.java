@@ -20,11 +20,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.List;
 
 
 public class Main {
-
-
 
     public static void main(String[] args) throws IOException {
         ArgumentParser parser = ArgumentParsers.newFor("ddcf").build().description("A dynamic analysis tool to detect Android Code smells");
@@ -38,7 +37,7 @@ public class Main {
         Subparser analyseParser = subparsers.addParser("analyse").help("Analyse the execution trace of an app");
         analyseParser.addArgument("apk").required(true).help("Path of the APK to analyze");
         analyseParser.addArgument("-a", "--androidJars").required(true).help("Path to android platforms jars");
-        analyseParser.addArgument("-t", "--trace").required(true).help("Path to the execution trace");
+        analyseParser.addArgument("-t", "--trace").required(true).nargs("+").help("Path to the execution trace");
         analyseParser.addArgument("-o", "--output").required(true).help("Path to the folder for the .csv results of the detection");
         analyseParser.addArgument("-p", "--package").required(false).help("Main package of the app");
         analyseParser.addArgument("-ai", "--allInstances").type(Boolean.class).setDefault(false).help("Returning the instances associated to code smells, even if it is not one");
@@ -52,7 +51,8 @@ public class Main {
                 sootAnalyzer(res.getString("androidJars"), res.getString("apk"), res.getString("output"), res.getString("package"), true);
             }
             else if (res.getString("sub_command").equals("analyse")) {
-                String tracePath = res.getString("trace");
+                List<String> tracesPath = res.getList("trace");
+                String tracePath = tracesPath.get(0);
                 if (res.getBoolean("beepbeep")) {
                     managerGroup = new ManagerGroup();
                     beepBeepAnalyzeTrace(managerGroup, tracePath, res.getString("output"), res.getString("apk"));

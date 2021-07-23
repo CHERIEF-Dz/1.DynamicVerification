@@ -245,8 +245,11 @@ public class DWManager implements Manager {
 
         HashMap<String, String> locationHashMap = null;
         Pullable p1 = lastLocation.getPullableOutput();
-        locationHashMap = (HashMap)p1.pull();
+        try {
+            locationHashMap = (HashMap) p1.pull();
+        } catch (NullPointerException e) {
 
+        }
         HashMap<String, Boolean> slicedHashMap = new HashMap<>();
         Pullable p3 = lastSlice.getPullableOutput();
         try  {

@@ -20,6 +20,7 @@ import utils.BeepBeepUtils;
 import utils.CodeLocation;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -185,11 +186,12 @@ public class IODManager implements Manager{
             connect(forkLTL, 2, equalExit, 0);
 
             Fork forkExit = new Fork(3);
-            connect(equalExit, OUTPUT, forkExit, INPUT);
+            connect(equalExit, forkExit);
 
             Filter filterExit = new Filter();
             connect(forkLTL, 3, filterExit, LEFT);
             connect(forkExit, 0, filterExit, RIGHT);
+            //connect(equalExit, 0, filterExit, RIGHT);
 
             ApplyFunction checkValues = new ApplyFunction(
                     new FunctionTree(Numbers.isGreaterOrEqual,
@@ -298,6 +300,8 @@ public class IODManager implements Manager{
         while (it2.hasNext()) {
             Map.Entry pair = (Map.Entry)it2.next();
             //System.out.println(pair.getKey() + " = " + pair.getValue());
+            //System.out.println(pair.getKey() + " = " + Arrays.toString((Object[]) pair.getValue()));
+
             if ((Boolean)pair.getValue()) {
                 String locationSplit = ((String)pair.getKey());
                 Pattern pat = Pattern.compile("(.+\\.java)\\$(.*)");
@@ -315,6 +319,7 @@ public class IODManager implements Manager{
                 structures.put(((String)pair.getKey()), structure);
                 System.out.println(pair.getKey() + " is a code smell");
             }
+
         }
     }
 }
