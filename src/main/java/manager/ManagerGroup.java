@@ -1,6 +1,7 @@
 package manager;
 
 import ca.uqac.lif.cep.tmf.Fork;
+import structure.dw.WakeLockStructure;
 
 import java.io.*;
 
@@ -65,5 +66,13 @@ public class ManagerGroup {
         managerHP.beepBeepBranch(codesmellsFork, 2);
         managerIOD.beepBeepBranch(codesmellsFork, 5);
         managerHMU.beepBeepBranch(codesmellsFork, 6);
+    }
+
+    public void mergeManager(ManagerGroup otherManagerGroup) {
+        managerDW.mergeManager(otherManagerGroup.managerDW);
+        managerNLMR.mergeManager(otherManagerGroup.managerNLMR);
+        managerHP.mergeManager(otherManagerGroup.managerHP);
+        managerIOD.mergeManager(otherManagerGroup.managerIOD);
+        managerHMU.mergeManager(otherManagerGroup.managerHMU);
     }
 }

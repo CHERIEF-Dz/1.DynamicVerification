@@ -284,4 +284,18 @@ public class DWManager implements Manager {
         }
 
     }
+
+    public void mergeManager(DWManager otherManager) {
+        for (java.util.Map.Entry<String, WakeLockStructure> otherEntry : otherManager.structures.entrySet()) {
+            if (this.structures.containsKey(otherEntry.getKey())) {
+                WakeLockStructure thisStructure = this.structures.get(otherEntry.getKey());
+                if (!thisStructure.hasCodeSmell() && otherEntry.getValue().hasCodeSmell()) {
+                    this.structures.put(otherEntry.getKey(), otherEntry.getValue());
+                }
+            }
+            else {
+                this.structures.put(otherEntry.getKey(), otherEntry.getValue());
+            }
+        }
+    }
 }

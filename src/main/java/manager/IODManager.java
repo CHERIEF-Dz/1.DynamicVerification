@@ -322,4 +322,18 @@ public class IODManager implements Manager{
 
         }
     }
+
+    public void mergeManager(IODManager otherManager) {
+        for (java.util.Map.Entry<String, OnDrawStructure> otherEntry : otherManager.structures.entrySet()) {
+            if (this.structures.containsKey(otherEntry.getKey())) {
+                OnDrawStructure thisStructure = this.structures.get(otherEntry.getKey());
+                if (!thisStructure.hasCodeSmell() && otherEntry.getValue().hasCodeSmell()) {
+                    this.structures.put(otherEntry.getKey(), otherEntry.getValue());
+                }
+            }
+            else {
+                this.structures.put(otherEntry.getKey(), otherEntry.getValue());
+            }
+        }
+    }
 }

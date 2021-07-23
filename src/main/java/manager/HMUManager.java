@@ -18,6 +18,7 @@ import events.hmu.HMUDeletion;
 import events.hmu.HMUImplementation;
 import structure.dw.WakeLockStructure;
 import structure.hmu.ArrayMapStructure;
+import structure.hmu.HashMapStructure;
 import structure.hmu.MapStructure;
 import utils.BeepBeepUtils;
 import utils.CodeLocation;
@@ -55,19 +56,6 @@ public class HMUManager implements Manager{
     public void addAddition(String key, HMUAddition addition) {
         //System.out.println(addition.generateBreakPoint());
         this.additions.put(key, addition);
-    }
-
-    public String getBreakpoints() {
-        String tags = "";
-        for (Map.Entry<String, HMUImplementation> implementationStructureEntry : this.implementations.entrySet()) {
-            HashMap.Entry<String, HMUImplementation> pair = (HashMap.Entry) implementationStructureEntry;
-            tags+=pair.getValue().generateBreakPoint()+"\n";
-        }
-        for (Map.Entry<String, HMUAddition> additionStructureEntry : this.additions.entrySet()) {
-            HashMap.Entry<String, HMUAddition> pair = (HashMap.Entry) additionStructureEntry;
-            tags+=pair.getValue().generateBreakPoint()+"\n";
-        }
-        return tags;
     }
 
     @Override
@@ -407,5 +395,19 @@ public class HMUManager implements Manager{
             }
         }
 
+    }
+
+    public void mergeManager(HMUManager otherManager) {
+        for (Map.Entry<String, MapStructure> otherEntry : otherManager.structures.entrySet()) {
+            if (this.structures.containsKey(otherEntry.getKey())) {
+                MapStructure thisStructure = this.structures.get(otherEntry.getKey());
+                if (!thisStructure.hasCodeSmell() && otherEntry.getValue().hasCodeSmell()) {
+                    this.structures.put(otherEntry.getKey(), otherEntry.getValue());
+                }
+            }
+            else {
+                this.structures.put(otherEntry.getKey(), otherEntry.getValue());
+            }
+        }
     }
 }

@@ -43,7 +43,7 @@ public class Main {
         analyseParser.addArgument("-ai", "--allInstances").type(Boolean.class).setDefault(false).help("Returning the instances associated to code smells, even if it is not one");
         analyseParser.addArgument("-bb", "--beepbeep").type(Boolean.class).setDefault(false).help("Using of BeepBeep to analyze the trace");
 
-        ManagerGroup managerGroup;
+
         try {
             Namespace res = parser.parseArgs(args);
             //System.out.println();
@@ -52,14 +52,27 @@ public class Main {
             }
             else if (res.getString("sub_command").equals("analyse")) {
                 List<String> tracesPath = res.getList("trace");
-                String tracePath = tracesPath.get(0);
-                if (res.getBoolean("beepbeep")) {
-                    managerGroup = new ManagerGroup();
-                    beepBeepAnalyzeTrace(managerGroup, tracePath, res.getString("output"), res.getString("apk"));
-                } else {
-                    managerGroup = sootAnalyzer(res.getString("androidJars"), res.getString("apk"), "", res.getString("package"),false);
-                    sootanalyzeTrace(managerGroup, tracePath, res.getString("output"), res.getString("apk"), res.getBoolean("allInstances"));
+                ManagerGroup managerGroup = null;
+                ManagerGroup LastManagerGroup= null;
+                String apkName = res.getString("apk");
+                String outputPath = res.getString("output");
+                boolean returnAllInstances = res.getBoolean("allInstances");
+                for (String tracePath : tracesPath) {
+                    if (res.getBoolean("beepbeep")) {
+                        managerGroup = new ManagerGroup();
+                        beepBeepAnalyzeTrace(managerGroup, tracePath);
+                    } else {
+                        managerGroup = sootAnalyzer(res.getString("androidJars"), res.getString("apk"), "", res.getString("package"),false);
+                        sootanalyzeTrace(managerGroup, tracePath);
+                    }
+                    if (LastManagerGroup != null) {
+                        managerGroup.mergeManager(LastManagerGroup);
+                    }
+                    LastManagerGroup = managerGroup;
                 }
+                final ProcessManifest processManifest = new ProcessManifest(apkName);
+                String packageName = processManifest.getPackageName();
+                managerGroup.generateCSV(outputPath, apkName, packageName, returnAllInstances);
             }
         } catch (ArgumentParserException | XmlPullParserException e) {
             parser.handleError((ArgumentParserException) e);
@@ -73,7 +86,7 @@ public class Main {
         return managerGroup;
     }
 
-    public static void sootanalyzeTrace(ManagerGroup managerGroup, String tracePath, String outputPath, String apkName, boolean returnAllInstances) throws IOException, XmlPullParserException {
+    public static void sootanalyzeTrace(ManagerGroup managerGroup, String tracePath) throws XmlPullParserException {
         BufferedReader reader;
         try {
             reader = new BufferedReader(new FileReader(
@@ -100,12 +113,9 @@ public class Main {
             e.printStackTrace();
         }
         managerGroup.checkStructures();
-        final ProcessManifest processManifest = new ProcessManifest(apkName);
-        String packageName = processManifest.getPackageName();
-        managerGroup.generateCSV(outputPath, apkName, packageName, returnAllInstances);
     }
 
-    public static void beepBeepAnalyzeTrace(ManagerGroup managerGroup, String tracePath, String outputPath, String apkName) throws IOException, XmlPullParserException {
+    public static void beepBeepAnalyzeTrace(ManagerGroup managerGroup, String tracePath) throws XmlPullParserException {
         InputStream is = Main.class.getResourceAsStream(tracePath);
         ReadLines reader = new ReadLines(is);
         ApplyFunction cast = new ApplyFunction(Strings.toString);
@@ -115,10 +125,6 @@ public class Main {
         Fork codesmellsFork = new Fork(7);
         Connector.connect(new Processor[]{removeDynver, codesmellsFork});
         managerGroup.beepBeep(codesmellsFork);
-
-        final ProcessManifest processManifest = new ProcessManifest(apkName);
-        String packageName = processManifest.getPackageName();
-        managerGroup.generateCSV(outputPath, apkName, packageName, false);
     }
 
 }

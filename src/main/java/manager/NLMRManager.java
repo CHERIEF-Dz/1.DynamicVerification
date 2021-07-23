@@ -258,4 +258,18 @@ public class NLMRManager implements Manager{
             }
         }
     }
+
+    public void mergeManager(NLMRManager otherManager) {
+        for (java.util.Map.Entry<String, NLMRStructure> otherEntry : otherManager.structures.entrySet()) {
+            if (this.structures.containsKey(otherEntry.getKey())) {
+                NLMRStructure thisStructure = this.structures.get(otherEntry.getKey());
+                if (!thisStructure.hasCodeSmell() && otherEntry.getValue().hasCodeSmell()) {
+                    this.structures.put(otherEntry.getKey(), otherEntry.getValue());
+                }
+            }
+            else {
+                this.structures.put(otherEntry.getKey(), otherEntry.getValue());
+            }
+        }
+    }
 }
