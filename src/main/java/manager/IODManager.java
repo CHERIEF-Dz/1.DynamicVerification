@@ -11,6 +11,7 @@ import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Slice;
 import ca.uqac.lif.cep.util.*;
 import events.hp.HPEnter;
+import events.hp.HPExit;
 import events.iod.IODEnter;
 import events.iod.IODExit;
 import events.iod.IODNew;
@@ -335,5 +336,15 @@ public class IODManager implements Manager{
                 this.structures.put(otherEntry.getKey(), otherEntry.getValue());
             }
         }
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        IODManager newManager = new IODManager();
+        newManager.enters = (HashMap<String, IODEnter>) this.enters.clone();
+        newManager.exits = (HashMap<String, IODExit>) this.exits.clone();
+        newManager.news = (HashMap<String, IODNew>) this.news.clone();
+        newManager.structures = (HashMap<String, OnDrawStructure>) this.structures.clone();
+        return newManager;
     }
 }

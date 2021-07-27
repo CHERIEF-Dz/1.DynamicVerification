@@ -272,4 +272,17 @@ public class NLMRManager implements Manager{
             }
         }
     }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        //Object result = super.clone();
+        //return result;
+
+        NLMRManager newManager = new NLMRManager();
+        newManager.enters = (HashMap<String, NLMREnter>) this.enters.clone();
+        newManager.exits = (HashMap<String, NLMRExit>) this.exits.clone();
+        newManager.structures = (HashMap<String, NLMRStructure>) this.structures.clone();
+        return newManager;
+
+    }
 }

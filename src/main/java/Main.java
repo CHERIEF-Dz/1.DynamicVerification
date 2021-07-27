@@ -52,18 +52,31 @@ public class Main {
             }
             else if (res.getString("sub_command").equals("analyse")) {
                 List<String> tracesPath = res.getList("trace");
+                ManagerGroup baseManagerGroup = null;
                 ManagerGroup managerGroup = null;
                 ManagerGroup LastManagerGroup= null;
                 String apkName = res.getString("apk");
                 String outputPath = res.getString("output");
                 boolean returnAllInstances = res.getBoolean("allInstances");
+
+                if (res.getBoolean("beepbeep")) {
+                    baseManagerGroup = new ManagerGroup();
+                } else {
+                    baseManagerGroup = sootAnalyzer(res.getString("androidJars"), res.getString("apk"), "", res.getString("package"),false);
+                }
+
                 for (String tracePath : tracesPath) {
-                    if (res.getBoolean("beepbeep")) {
-                        managerGroup = new ManagerGroup();
-                        beepBeepAnalyzeTrace(managerGroup, tracePath);
-                    } else {
-                        managerGroup = sootAnalyzer(res.getString("androidJars"), res.getString("apk"), "", res.getString("package"),false);
-                        sootanalyzeTrace(managerGroup, tracePath);
+                    try {
+                        if (res.getBoolean("beepbeep")) {
+                            managerGroup = baseManagerGroup.clone();
+                            beepBeepAnalyzeTrace(managerGroup, tracePath);
+                        } else {
+                            managerGroup = baseManagerGroup.clone();
+                            sootanalyzeTrace(managerGroup, tracePath);
+                        }
+                    }
+                    catch (CloneNotSupportedException e) {
+                        e.printStackTrace();
                     }
                     if (LastManagerGroup != null) {
                         managerGroup.mergeManager(LastManagerGroup);

@@ -5,7 +5,7 @@ import structure.dw.WakeLockStructure;
 
 import java.io.*;
 
-public class ManagerGroup {
+public class ManagerGroup implements Cloneable{
     public HMUManager managerHMU;
     public DWManager managerDW;
     public IODManager managerIOD;
@@ -75,4 +75,15 @@ public class ManagerGroup {
         managerIOD.mergeManager(otherManagerGroup.managerIOD);
         managerHMU.mergeManager(otherManagerGroup.managerHMU);
     }
+
+    public ManagerGroup clone() throws CloneNotSupportedException {
+        ManagerGroup newManagerGroup = new ManagerGroup();
+        newManagerGroup.managerDW = (DWManager) this.managerDW.clone();
+        newManagerGroup.managerNLMR = (NLMRManager) this.managerNLMR.clone();
+        newManagerGroup.managerHP = (HPManager) this.managerHP.clone();
+        newManagerGroup.managerIOD = (IODManager) this.managerIOD.clone();
+        newManagerGroup.managerHMU = (HMUManager) this.managerHMU.clone();
+        return newManagerGroup;
+    }
+
 }

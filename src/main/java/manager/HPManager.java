@@ -16,8 +16,11 @@ import events.dw.DWAcquire;
 import events.dw.DWRelease;
 import events.hp.HPEnter;
 import events.hp.HPExit;
+import events.nlmr.NLMREnter;
+import events.nlmr.NLMRExit;
 import structure.dw.WakeLockStructure;
 import structure.hp.HeavyProcessStructure;
+import structure.nlmr.NLMRStructure;
 import utils.BeepBeepUtils;
 import utils.CodeLocation;
 
@@ -300,5 +303,15 @@ public class HPManager implements Manager{
                 this.structures.put(otherEntry.getKey(), otherEntry.getValue());
             }
         }
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+
+        HPManager newManager = new HPManager();
+        newManager.enters = (HashMap<String, HPEnter>) this.enters.clone();
+        newManager.exits = (HashMap<String, HPExit>) this.exits.clone();
+        newManager.structures = (HashMap<String, HeavyProcessStructure>) this.structures.clone();
+        return newManager;
     }
 }

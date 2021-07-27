@@ -16,10 +16,14 @@ import events.hmu.HMUAddition;
 import events.hmu.HMUClean;
 import events.hmu.HMUDeletion;
 import events.hmu.HMUImplementation;
+import events.iod.IODEnter;
+import events.iod.IODExit;
+import events.iod.IODNew;
 import structure.dw.WakeLockStructure;
 import structure.hmu.ArrayMapStructure;
 import structure.hmu.HashMapStructure;
 import structure.hmu.MapStructure;
+import structure.iod.OnDrawStructure;
 import utils.BeepBeepUtils;
 import utils.CodeLocation;
 
@@ -409,5 +413,16 @@ public class HMUManager implements Manager{
                 this.structures.put(otherEntry.getKey(), otherEntry.getValue());
             }
         }
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        HMUManager newManager = new HMUManager();
+        newManager.additions = (HashMap<String, HMUAddition>) this.additions.clone();
+        newManager.deletions = (HashMap<String, HMUDeletion>) this.deletions.clone();
+        newManager.cleans = (HashMap<String, HMUClean>) this.cleans.clone();
+        newManager.implementations = (HashMap<String, HMUImplementation>) this.implementations.clone();
+        newManager.structures = (HashMap<String, MapStructure>) this.structures.clone();
+        return newManager;
     }
 }

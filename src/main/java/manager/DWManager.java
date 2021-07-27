@@ -10,7 +10,12 @@ import ca.uqac.lif.cep.util.*;
 import events.ConcreteEvent;
 import events.dw.DWAcquire;
 import events.dw.DWRelease;
+import events.hmu.HMUAddition;
+import events.hmu.HMUClean;
+import events.hmu.HMUDeletion;
+import events.hmu.HMUImplementation;
 import structure.dw.WakeLockStructure;
+import structure.hmu.MapStructure;
 import utils.BeepBeepUtils;
 import utils.CodeLocation;
 
@@ -24,7 +29,7 @@ import java.util.regex.Pattern;
 
 import static ca.uqac.lif.cep.Connector.*;
 
-public class DWManager implements Manager {
+public class DWManager implements Manager, Cloneable {
     private HashMap<String, DWAcquire> acquires;
     private HashMap<String, DWRelease> releases;
     private HashMap<String, WakeLockStructure> structures;
@@ -297,5 +302,14 @@ public class DWManager implements Manager {
                 this.structures.put(otherEntry.getKey(), otherEntry.getValue());
             }
         }
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        DWManager newManager = new DWManager();
+        newManager.acquires = (HashMap<String, DWAcquire>) this.acquires.clone();
+        newManager.releases = (HashMap<String, DWRelease>) this.releases.clone();
+        newManager.structures = (HashMap<String, WakeLockStructure>) this.structures.clone();
+        return newManager;
     }
 }
