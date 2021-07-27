@@ -14,10 +14,7 @@ import staticanalyzis.SootAnalyzer;
 import manager.HMUManager;
 import manager.ManagerGroup;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
@@ -128,15 +125,15 @@ public class Main {
         managerGroup.checkStructures();
     }
 
-    public static void beepBeepAnalyzeTrace(ManagerGroup managerGroup, String tracePath) throws XmlPullParserException {
-        InputStream is = Main.class.getResourceAsStream(tracePath);
+    public static void beepBeepAnalyzeTrace(ManagerGroup managerGroup, String tracePath) throws XmlPullParserException, FileNotFoundException {
+        InputStream is = new FileInputStream(tracePath);
         ReadLines reader = new ReadLines(is);
         ApplyFunction cast = new ApplyFunction(Strings.toString);
-        Connector.connect(new Processor[]{reader, cast});
+        Connector.connect(reader, cast);
         FindPattern removeDynver = new FindPattern("dynver:([^:]*:[^:]*:[^:]*:[^:]*.*)");
-        Connector.connect(new Processor[]{cast, removeDynver});
+        Connector.connect(cast, removeDynver);
         Fork codesmellsFork = new Fork(7);
-        Connector.connect(new Processor[]{removeDynver, codesmellsFork});
+        Connector.connect(removeDynver, codesmellsFork);
         managerGroup.beepBeep(codesmellsFork);
     }
 

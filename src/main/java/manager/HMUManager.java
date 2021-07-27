@@ -376,11 +376,14 @@ public class HMUManager implements Manager{
 
 
         System.out.println("HMU : ");
+        //System.out.println(locationHashMap.toString());
+        //System.out.println(slicedHashMap.toString());
         Iterator it2 = slicedHashMap.entrySet().iterator();
         while (it2.hasNext()) {
             Map.Entry pair = (Map.Entry)it2.next();
             //System.out.println(locationHashMap.get(Integer.toString((Integer) pair.getKey())) + " " + pair.getKey() + " = " + pair.getValue());
             if ((Boolean)pair.getValue()) {
+                //System.out.println(Integer.toString((Integer) pair.getKey()));
                 String[] locationSplit = locationHashMap.get(Integer.toString((Integer) pair.getKey())).split(":");
                 Pattern pat = Pattern.compile("(.+\\.java)\\$(.*)");
                 Matcher m = pat.matcher(locationSplit[0]);
