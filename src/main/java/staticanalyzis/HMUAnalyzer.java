@@ -23,33 +23,34 @@ public final class HMUAnalyzer extends CodeSmellAnalyzer {
     public static void checkLine(String line, String name, String methodName, int lineNumber, ManagerGroup managerGroup, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting) {
 
         String type="";
-        Matcher m = findPattern(line, "(?<=(HashMap))");
+        Matcher m = findPattern(line, "(?<=(java.util.HashMap))");
         if (m.find()) {
             type="HashMap";
         }
         else {
-            m = findPattern(line, "(?<=(SimpleArrayMap))");
+            m = findPattern(line, "(?<=(androidx.collection.SimpleArrayMap))");
             if (m.find()) {
                 type="SimpleArrayMap";
             }
             else {
-                m = findPattern(line, "(?<=(ArrayMap))");
+                m = findPattern(line, "(?<=(androidx.collection.ArrayMap))");
                 if (m.find()) {
                     type="ArrayMap";
                 }
             }
         }
 
-
-        checkHMUInst(line, name, methodName,lineNumber, managerGroup.managerHMU, b, u, b.getUnits(), isInstrumenting, type);
-        checkHMUAdd(line, name, methodName,lineNumber, managerGroup.managerHMU, b, u, b.getUnits(), isInstrumenting, type);
-        checkHMUDel(line, name, methodName, lineNumber, managerGroup.managerHMU, b, u, b.getUnits(), isInstrumenting, type);
-        checkHMUClean(line, name, methodName, lineNumber, managerGroup.managerHMU, b, u, b.getUnits(), isInstrumenting, type);
+        if (!type.equals("")) {
+            checkHMUInst(line, name, methodName, lineNumber, managerGroup.managerHMU, b, u, b.getUnits(), isInstrumenting, type);
+            checkHMUAdd(line, name, methodName, lineNumber, managerGroup.managerHMU, b, u, b.getUnits(), isInstrumenting, type);
+            checkHMUDel(line, name, methodName, lineNumber, managerGroup.managerHMU, b, u, b.getUnits(), isInstrumenting, type);
+            checkHMUClean(line, name, methodName, lineNumber, managerGroup.managerHMU, b, u, b.getUnits(), isInstrumenting, type);
+        }
     }
 
     private static void checkHMUInst(String line, String name, String methodName, int lineNumber, HMUManager manager, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting, String type) {
 
-        Matcher m = findPattern(line, "(?<=(HashMap))(.*)(?=void <init>\\()");
+        Matcher m = findPattern(line, "(?<=(java.util.HashMap))(.*)(?=void <init>\\()");
         if (m.find()) {
             String variableName=m.group(0).split("=")[0].replaceAll("\\s","");
             manager.addImplementation(generateKey(name, methodName), new HMUImplementation(new CodeLocation(name, methodName, getKey(name, methodName)), "HashMap", variableName));
@@ -58,7 +59,7 @@ public final class HMUAnalyzer extends CodeSmellAnalyzer {
             }
         }
         else {
-            m = findPattern(line, "(?<=(SimpleArrayMap))(.*)(?=void <init>\\()");
+            m = findPattern(line, "(?<=(androidx.collection.SimpleArrayMap))(.*)(?=void <init>\\()");
             if (m.find()) {
                 String variableName=m.group(0).split("=")[0].replaceAll("\\s","");
                 manager.addImplementation(generateKey(name, methodName), new HMUImplementation(new CodeLocation(name, methodName, getKey(name, methodName)), "SimpleArrayMap", variableName));
@@ -67,7 +68,7 @@ public final class HMUAnalyzer extends CodeSmellAnalyzer {
                 }
             }
             else {
-                m = findPattern(line, "(?<=(ArrayMap))(.*)(?=void <init>\\()");
+                m = findPattern(line, "(?<=(androidx.collection.ArrayMap))(.*)(?=void <init>\\()");
                 if (m.find()) {
                     String variableName=m.group(0).split("=")[0].replaceAll("\\s","");
                     manager.addImplementation(generateKey(name, methodName), new HMUImplementation(new CodeLocation(name, methodName, getKey(name, methodName)), "ArrayMap", variableName));
@@ -157,7 +158,7 @@ public final class HMUAnalyzer extends CodeSmellAnalyzer {
 
 
     public static void checkHMUAdd(String line, String name, String methodName, int lineNumber, HMUManager manager, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting, String type) {
-        Matcher m = findPattern(line, "(?<=(HashMap|ArrayMap|SimpleArrayMap))(.*)(?=put\\()");
+        Matcher m = findPattern(line, "(?<=(java.util.HashMap|androidx.collection.ArrayMap|androidx.collection.SimpleArrayMap))(.*)(?=put\\()");
         if (m.find()) {
             String variableName=m.group(0).split("\\.")[0];
             manager.addAddition(generateKey(name, methodName), new HMUAddition(new CodeLocation(name, methodName, getKey(name, methodName)), variableName));
@@ -169,7 +170,7 @@ public final class HMUAnalyzer extends CodeSmellAnalyzer {
     }
 
     public static void checkHMUDel(String line, String name, String methodName, int lineNumber, HMUManager manager, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting, String type) {
-        Matcher m = findPattern(line, "(?<=(HashMap|ArrayMap|SimpleArrayMap))(.*)(?=remove\\()");
+        Matcher m = findPattern(line, "(?<=(java.util.HashMap|androidx.collection.ArrayMap|androidx.collection.SimpleArrayMap))(.*)(?=remove\\()");
         if (m.find()) {
             String variableName=m.group(0).split("\\.")[0];
             manager.addDeletion(generateKey(name, methodName), new HMUDeletion(new CodeLocation(name, methodName, getKey(name, methodName)), variableName));
@@ -180,7 +181,7 @@ public final class HMUAnalyzer extends CodeSmellAnalyzer {
     }
 
     private static void checkHMUClean(String line, String name, String methodName, int lineNumber, HMUManager manager, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting, String type) {
-        Matcher m = findPattern(line, "(?<=(HashMap|ArrayMap|SimpleArrayMap))(.*)(?=clear\\()");
+        Matcher m = findPattern(line, "(?<=(java.util.HashMap|androidx.collection.ArrayMap|androidx.collection.SimpleArrayMap))(.*)(?=clear\\()");
         if (m.find()) {
             String variableName=m.group(0).split("\\.")[0];
             manager.addClean(generateKey(name, methodName), new HMUClean(new CodeLocation(name, methodName, getKey(name, methodName)), variableName));

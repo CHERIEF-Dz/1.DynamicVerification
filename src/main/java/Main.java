@@ -29,7 +29,7 @@ public class Main {
         instrumentationParser.addArgument("apk").required(true).help("Path of the APK to analyze");
         instrumentationParser.addArgument("-a", "--androidJars").required(true).help("Path to android platforms jars");
         instrumentationParser.addArgument("-o", "--output").required(true).help("Path to the folder where the instrumented APK output is generated");
-        instrumentationParser.addArgument("-p", "--package").required(true).help("Main package of the app");
+        instrumentationParser.addArgument("-p", "--package").required(false).help("Main package of the app");
 
         Subparser analyseParser = subparsers.addParser("analyse").help("Analyse the execution trace of an app");
         analyseParser.addArgument("apk").required(true).help("Path of the APK to analyze");
