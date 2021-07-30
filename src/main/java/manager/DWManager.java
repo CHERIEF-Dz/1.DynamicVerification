@@ -129,12 +129,12 @@ public class DWManager implements Manager, Cloneable {
         if (returnAllInstances) {
             File csvOutputFileAll = new File(outputPath + "results_DW_all.csv");
             try (PrintWriter writer = new PrintWriter(csvOutputFileAll)) {
-                writer.write("apk, package, file, method\n");
+                writer.write("apk, package, file, method,code smell\n");
                 for (java.util.Map.Entry<String, WakeLockStructure> stringStructureEntry : selectedMaps.entrySet()) {
                     HashMap.Entry<String, WakeLockStructure> pair = (HashMap.Entry) stringStructureEntry;
                     String fileName = pair.getValue().getLocation().getFileName();
                     String methodName = pair.getValue().getLocation().getMethodName();
-                    writer.write(apkName + "," + packageName + "," + fileName + "," + methodName + "\n");
+                    writer.write(apkName + "," + packageName + "," + fileName + "," + methodName + "," + pair.getValue().hasCodeSmell() + "\n");
                 }
             } catch (FileNotFoundException e) {
                 // Do something

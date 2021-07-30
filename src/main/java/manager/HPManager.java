@@ -97,12 +97,12 @@ public class HPManager implements Manager{
         if (returnAllInstances) {
             File csvOutputFileAll = new File(outputPath + "results_HP_all.csv");
             try (PrintWriter writer = new PrintWriter(csvOutputFileAll)) {
-                writer.write("apk,package,file,method,average executing time,worst executing time\n");
+                writer.write("apk,package,file,method,average executing time,worst executing time,code smell\n");
                 for (java.util.Map.Entry<String, HeavyProcessStructure> stringStructureEntry : this.structures.entrySet()) {
                     HashMap.Entry<String, HeavyProcessStructure> pair = (HashMap.Entry) stringStructureEntry;
                     String fileName = pair.getValue().getLocation().getFileName();
                     String methodName = pair.getValue().getLocation().getMethodName();
-                    writer.write(apkName + "," + packageName + "," + fileName + "," + methodName + "," + pair.getValue().getAverageTime() + "," + pair.getValue().getWorstTime() + "\n");
+                    writer.write(apkName + "," + packageName + "," + fileName + "," + methodName + "," + pair.getValue().getAverageTime() + "," + pair.getValue().getWorstTime() + "," + pair.getValue().hasCodeSmell() + "\n");
                 }
             } catch (FileNotFoundException e) {
                 // Do something

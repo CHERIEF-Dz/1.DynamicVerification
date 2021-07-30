@@ -130,13 +130,13 @@ public class IODManager implements Manager{
         if (returnAllInstances) {
             File csvOutputFileAll = new File(outputPath + "results_IOD_all.csv");
             try (PrintWriter writer = new PrintWriter(csvOutputFileAll)) {
-                writer.write("apk,package,file,method,average executing time,worst executing time,average number of instantiations,worst number of instantiations \n");
+                writer.write("apk,package,file,method,average executing time,worst executing time,average number of instantiations,worst number of instantiations,code smell \n");
                 for (java.util.Map.Entry<String, OnDrawStructure> stringStructureEntry : this.structures.entrySet()) {
                     HashMap.Entry<String, OnDrawStructure> pair = (HashMap.Entry) stringStructureEntry;
                     String fileName = pair.getValue().getLocation().getFileName();
                     String methodName = pair.getValue().getLocation().getMethodName();
                     OnDrawStructure structure = pair.getValue();
-                    writer.write(apkName + "," + packageName + "," + fileName + "," + methodName + "," + structure.getAverageTime() + "," + structure.getWorstTime() + "," + structure.getAverageInstantiations() + "," + structure.getWorstInstantations() + "\n");
+                    writer.write(apkName + "," + packageName + "," + fileName + "," + methodName + "," + structure.getAverageTime() + "," + structure.getWorstTime() + "," + structure.getAverageInstantiations() + "," + structure.getWorstInstantations() + "," + pair.getValue().hasCodeSmell() + "\n");
                 }
             } catch (FileNotFoundException e) {
                 // Do something

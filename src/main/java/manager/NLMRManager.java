@@ -98,12 +98,12 @@ public class NLMRManager implements Manager{
         if (returnAllInstances) {
             File csvOutputFileAll = new File(outputPath + "results_NLMR_all.csv");
             try (PrintWriter writer = new PrintWriter(csvOutputFileAll)) {
-                writer.write("apk,package,file,method,average Memory released,maximum memory released\n");
+                writer.write("apk,package,file,method,average Memory released,maximum memory released,code smell\n");
                 for (java.util.Map.Entry<String, NLMRStructure> stringStructureEntry : this.structures.entrySet()) {
                     HashMap.Entry<String, NLMRStructure> pair = (HashMap.Entry) stringStructureEntry;
                     String fileName = pair.getValue().getLocation().getFileName();
                     String methodName = pair.getValue().getLocation().getMethodName();
-                    writer.write(apkName + "," + packageName + "," + fileName + "," + methodName + "," + pair.getValue().getBetterMemory() + "," + pair.getValue().getAverageMemory() + "\n");
+                    writer.write(apkName + "," + packageName + "," + fileName + "," + methodName + "," + pair.getValue().getBetterMemory() + "," + pair.getValue().getAverageMemory() + "," + pair.getValue().hasCodeSmell() + "\n");
                 }
             } catch (FileNotFoundException e) {
                 // Do something

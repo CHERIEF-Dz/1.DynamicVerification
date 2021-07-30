@@ -200,7 +200,7 @@ public class HMUManager implements Manager{
         if (returnAllInstances) {
             File csvOutputFileAll = new File(outputPath + "results_HMU_all.csv");
             try (PrintWriter writer = new PrintWriter(csvOutputFileAll)) {
-                writer.write("apk,package,file,method,structure Type,maximumSize\n");
+                writer.write("apk,package,file,method,structure Type,maximumSize,code smell\n");
                 for (java.util.Map.Entry<String, MapStructure> stringStructureEntry : selectedMaps.entrySet()) {
                     HashMap.Entry<String, MapStructure> pair = (HashMap.Entry) stringStructureEntry;
                     String fileName = pair.getValue().getLocation().getFileName();
@@ -213,7 +213,7 @@ public class HMUManager implements Manager{
                             structureType = "ArrayMap";
                         }
                     }
-                    writer.write(apkName + "," + packageName + "," + fileName + "," + methodName + "," + structureType + "," + pair.getValue().getMaximumSize() + "\n");
+                    writer.write(apkName + "," + packageName + "," + fileName + "," + methodName + "," + structureType + "," + pair.getValue().getMaximumSize() + "," + pair.getValue().hasCodeSmell() + "\n");
                 }
             } catch (FileNotFoundException e) {
                 // Do something
