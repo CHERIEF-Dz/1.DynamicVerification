@@ -12,12 +12,10 @@ import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Slice;
 import ca.uqac.lif.cep.util.*;
-import events.hp.HPEnter;
 import events.nlmr.NLMREnter;
 import events.nlmr.NLMRExit;
 import staticanalyzis.NLMRAnalyzer;
-import structure.iod.OnDrawStructure;
-import structure.nlmr.NLMRStructure;
+import structure.NLMRStructure;
 import utils.BeepBeepUtils;
 import utils.CodeLocation;
 

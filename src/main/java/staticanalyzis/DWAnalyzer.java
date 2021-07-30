@@ -23,7 +23,7 @@ public final class DWAnalyzer extends CodeSmellAnalyzer{
         if (m.find()) {
             String key=generateKey(name, methodName);
             String variableName=m.group(0).split("\\.")[0];
-            manager.addAcquire(key, new DWAcquire(new CodeLocation(name, methodName, lineNumber), variableName));
+            manager.addAcquire(key, new DWAcquire(new CodeLocation(name, methodName, getKey(name, methodName)), variableName));
 
             if (isInstrumenting) {
                 //System.out.println(b.toString());
@@ -37,7 +37,7 @@ public final class DWAnalyzer extends CodeSmellAnalyzer{
         if (m.find()) {
             String key=generateKey(name, methodName);
             String variableName=m.group(0).split("\\.")[0];
-            manager.addRelease(key, new DWRelease(new CodeLocation(name, methodName, lineNumber), variableName));
+            manager.addRelease(key, new DWRelease(new CodeLocation(name, methodName, getKey(name, methodName)), variableName));
 
             if (isInstrumenting) {
                 buildInstrumentation(getStructureCallerLocalName(line), units, u, b, "dwrel:");

@@ -1,4 +1,4 @@
-package structure.iod;
+package structure;
 
 import structure.Structure;
 import utils.CodeLocation;

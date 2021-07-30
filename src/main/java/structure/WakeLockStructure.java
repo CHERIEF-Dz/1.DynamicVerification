@@ -1,4 +1,4 @@
-package structure.dw;
+package structure;
 
 import structure.Structure;
 import utils.CodeLocation;

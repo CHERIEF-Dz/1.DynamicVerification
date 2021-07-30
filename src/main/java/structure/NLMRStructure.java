@@ -1,26 +1,25 @@
-package structure.hp;
+package structure;
 
 import structure.Structure;
 import utils.CodeLocation;
 
-public class HeavyProcessStructure implements Structure {
-
+public class NLMRStructure implements Structure {
     protected CodeLocation structureImplementation;
     protected String id;
     protected boolean codeSmellFound;
     private long lastBegin, lastEnd;
-    private long averageTime;
-    private long worstTime;
+    private long averageMemory;
+    private long betterMemory;
     private int nbCalls;
     private boolean hasBeenExecuted;
 
-    public HeavyProcessStructure(CodeLocation implementation, String id) {
+    public NLMRStructure(CodeLocation implementation, String id) {
         this.structureImplementation = implementation;
         this.id = id;
         this.codeSmellFound=false;
-        this.worstTime=0;
+        this.betterMemory=0;
         this.nbCalls=0;
-        this.averageTime=0;
+        this.averageMemory=0;
         this.hasBeenExecuted=false;
     }
 
@@ -36,34 +35,35 @@ public class HeavyProcessStructure implements Structure {
 
     @Override
     public void checkStructure() {
-        if (this.worstTime > (100) && this.hasBeenExecuted) {
+        if (this.betterMemory < 1024 && this.hasBeenExecuted) {
             this.foundCodeSmell();
         }
     }
-    public long getAverageTime() {return this.averageTime;}
-
-    public long getWorstTime() {return this.worstTime;}
 
     @Override
     public String getId() {
         return this.id;
     }
 
+    public long getAverageMemory() {return this.averageMemory;}
+
+    public long getBetterMemory() {return this.betterMemory;}
+
     public CodeLocation getLocation() {
         return this.structureImplementation;
     }
 
-    public void begin(long date) {
-        this.lastBegin = date;
+    public void begin(long memory) {
+        this.lastBegin = memory;
         this.hasBeenExecuted=true;
     }
 
-    public void end(long date) {
-        this.lastEnd = date;
-        long elapsedTime = (long) ((this.lastEnd -this.lastBegin)/1000000.0);
-        if (elapsedTime>worstTime)
-            this.worstTime=elapsedTime;
-        this.averageTime=(this.averageTime*this.nbCalls+elapsedTime)/(this.nbCalls+1);
+    public void end(long memory) {
+        this.lastEnd = memory;
+        long consumedMemory = this.lastBegin - this.lastEnd;
+        if (consumedMemory>betterMemory)
+            this.betterMemory=consumedMemory;
+        this.averageMemory=(this.averageMemory*this.nbCalls+consumedMemory)/(this.nbCalls+1);
         this.nbCalls++;
     }
 }

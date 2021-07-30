@@ -1,4 +1,4 @@
-package structure.hmu;
+package structure;
 
 import structure.Structure;
 import utils.CodeLocation;

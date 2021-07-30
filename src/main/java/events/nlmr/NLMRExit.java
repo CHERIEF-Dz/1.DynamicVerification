@@ -1,7 +1,7 @@
 package events.nlmr;
 
 import events.ConcreteEvent;
-import structure.nlmr.NLMRStructure;
+import structure.NLMRStructure;
 import utils.CodeLocation;
 
 public class NLMRExit extends ConcreteEvent {

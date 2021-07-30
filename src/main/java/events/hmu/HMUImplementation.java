@@ -1,9 +1,9 @@
 package events.hmu;
 
 import events.ConcreteEvent;
-import structure.hmu.ArrayMapStructure;
-import structure.hmu.HashMapStructure;
-import structure.hmu.MapStructure;
+import structure.ArrayMapStructure;
+import structure.HashMapStructure;
+import structure.MapStructure;
 import utils.CodeLocation;
 
 public class HMUImplementation extends ConcreteEvent {

@@ -6,7 +6,7 @@ import manager.ManagerGroup;
 import manager.NLMRManager;
 import soot.*;
 import soot.jimple.*;
-import structure.nlmr.NLMRStructure;
+import structure.NLMRStructure;
 import utils.CodeLocation;
 
 import java.util.ArrayList;

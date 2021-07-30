@@ -1,7 +1,6 @@
 package manager;
 
 import ca.uqac.lif.cep.tmf.Fork;
-import structure.dw.WakeLockStructure;
 
 import java.io.*;
 

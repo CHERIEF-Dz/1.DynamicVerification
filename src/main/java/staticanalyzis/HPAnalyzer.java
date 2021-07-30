@@ -6,7 +6,7 @@ import manager.HPManager;
 import manager.ManagerGroup;
 import soot.Body;
 import soot.UnitPatchingChain;
-import structure.hp.HeavyProcessStructure;
+import structure.HeavyProcessStructure;
 import utils.CodeLocation;
 
 public class HPAnalyzer extends CodeSmellAnalyzer {

@@ -12,15 +12,9 @@ import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Slice;
 import ca.uqac.lif.cep.util.*;
-import events.dw.DWAcquire;
-import events.dw.DWRelease;
 import events.hp.HPEnter;
 import events.hp.HPExit;
-import events.nlmr.NLMREnter;
-import events.nlmr.NLMRExit;
-import structure.dw.WakeLockStructure;
-import structure.hp.HeavyProcessStructure;
-import structure.nlmr.NLMRStructure;
+import structure.HeavyProcessStructure;
 import utils.BeepBeepUtils;
 import utils.CodeLocation;
 

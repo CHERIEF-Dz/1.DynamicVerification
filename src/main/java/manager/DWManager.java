@@ -7,20 +7,14 @@ import ca.uqac.lif.cep.ltl.Eventually;
 import ca.uqac.lif.cep.ltl.Globally;
 import ca.uqac.lif.cep.tmf.*;
 import ca.uqac.lif.cep.util.*;
-import events.ConcreteEvent;
 import events.dw.DWAcquire;
 import events.dw.DWRelease;
-import events.hmu.HMUAddition;
-import events.hmu.HMUClean;
-import events.hmu.HMUDeletion;
-import events.hmu.HMUImplementation;
-import structure.dw.WakeLockStructure;
-import structure.hmu.MapStructure;
+import structure.MapStructure;
+import structure.WakeLockStructure;
 import utils.BeepBeepUtils;
 import utils.CodeLocation;
 
 import java.io.*;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -104,10 +98,23 @@ public class DWManager implements Manager, Cloneable {
             }
         }
 
+        HashMap<String, WakeLockStructure> selectedMaps = new HashMap<String, WakeLockStructure>();
+
+        for (java.util.Map.Entry<String, WakeLockStructure> stringStructureEntry : this.structures.entrySet()) {
+            HashMap.Entry<String, WakeLockStructure> pair = (HashMap.Entry) stringStructureEntry;
+            String fileName = pair.getValue().getLocation().getFileName();
+            String keyNumber = Integer.toString(pair.getValue().getLocation().getLine());
+            String methodName = pair.getValue().getLocation().getMethodName();
+            String selectionKey = fileName + "/" + packageName + "/" + methodName+"/"+keyNumber;
+            if (!selectedMaps.containsKey(selectionKey)) {
+                selectedMaps.put(selectionKey, pair.getValue());
+            }
+        }
+
         File csvOutputFile = new File(outputPath+"results_DW.csv");
         try (PrintWriter writer = new PrintWriter(csvOutputFile)) {
             writer.write("apk, package, file, method\n");
-            for (java.util.Map.Entry<String, WakeLockStructure> stringStructureEntry : this.structures.entrySet()) {
+            for (java.util.Map.Entry<String, WakeLockStructure> stringStructureEntry : selectedMaps.entrySet()) {
                 HashMap.Entry<String, WakeLockStructure> pair = (HashMap.Entry) stringStructureEntry;
                 if (pair.getValue().hasCodeSmell()) {
                     String fileName = pair.getValue().getLocation().getFileName();
@@ -123,7 +130,7 @@ public class DWManager implements Manager, Cloneable {
             File csvOutputFileAll = new File(outputPath + "results_DW_all.csv");
             try (PrintWriter writer = new PrintWriter(csvOutputFileAll)) {
                 writer.write("apk, package, file, method\n");
-                for (java.util.Map.Entry<String, WakeLockStructure> stringStructureEntry : this.structures.entrySet()) {
+                for (java.util.Map.Entry<String, WakeLockStructure> stringStructureEntry : selectedMaps.entrySet()) {
                     HashMap.Entry<String, WakeLockStructure> pair = (HashMap.Entry) stringStructureEntry;
                     String fileName = pair.getValue().getLocation().getFileName();
                     String methodName = pair.getValue().getLocation().getMethodName();

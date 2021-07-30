@@ -1,7 +1,7 @@
 package events.hp;
 
 import events.ConcreteEvent;
-import structure.hp.HeavyProcessStructure;
+import structure.HeavyProcessStructure;
 import utils.CodeLocation;
 
 public class HPExit extends ConcreteEvent {

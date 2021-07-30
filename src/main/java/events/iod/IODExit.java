@@ -1,7 +1,7 @@
 package events.iod;
 
 import events.ConcreteEvent;
-import structure.iod.OnDrawStructure;
+import structure.OnDrawStructure;
 import utils.CodeLocation;
 
 public class IODExit extends ConcreteEvent {

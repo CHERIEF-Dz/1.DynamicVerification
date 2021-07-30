@@ -1,7 +1,7 @@
 package events.dw;
 
 import events.ConcreteEvent;
-import structure.dw.WakeLockStructure;
+import structure.WakeLockStructure;
 import utils.CodeLocation;
 
 public class DWAcquire extends ConcreteEvent {

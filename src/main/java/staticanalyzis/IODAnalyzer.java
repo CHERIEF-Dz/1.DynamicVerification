@@ -6,7 +6,7 @@ import events.iod.IODNew;
 import manager.IODManager;
 import manager.ManagerGroup;
 import soot.*;
-import structure.iod.OnDrawStructure;
+import structure.OnDrawStructure;
 import utils.CodeLocation;
 
 import java.util.regex.Matcher;

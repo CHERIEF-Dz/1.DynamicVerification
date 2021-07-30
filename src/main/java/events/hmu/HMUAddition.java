@@ -1,7 +1,7 @@
 package events.hmu;
 
 import events.ConcreteEvent;
-import structure.hmu.MapStructure;
+import structure.MapStructure;
 import utils.CodeLocation;
 
 public class HMUAddition extends ConcreteEvent {
