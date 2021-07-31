@@ -133,11 +133,15 @@ public class NLMRManager implements Manager{
     public void addStructure(String key, NLMRStructure structure) {this.structures.put(key, structure);}
 
     public void executeEnter(String key, String id, long date) {
-        this.enters.get(key).execute(this.structures.get(id), date);
+        if (this.structures.containsKey(id)) {
+            this.enters.get(key).execute(this.structures.get(id), date);
+        }
     }
 
     public void executeExit(String key, String id, long date) {
-        this.exits.get(key).execute(this.structures.get(id), date);
+        if (this.structures.containsKey(id)) {
+            this.exits.get(key).execute(this.structures.get(id), date);
+        }
     }
 
     @Override

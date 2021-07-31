@@ -75,19 +75,27 @@ public class HMUManager implements Manager{
     }
 
     public void executeImplementation(String key, String id) {
-        this.structures.put(id, this.implementations.get(key).execute(id));
+        if (this.structures.containsKey(id)) {
+            this.structures.put(id, this.implementations.get(key).execute(id));
+        }
     }
 
     public void executeAddition(String key, String id) {
-        this.additions.get(key).execute(this.structures.get(id));
+        if (this.structures.containsKey(id)) {
+            this.additions.get(key).execute(this.structures.get(id));
+        }
     }
 
     public void executeDeletion(String key, String id) {
-        this.deletions.get(key).execute(this.structures.get(id));
+        if (this.structures.containsKey(id)) {
+            this.deletions.get(key).execute(this.structures.get(id));
+        }
     }
 
     public void executeClean(String key, String id) {
-        this.cleans.get(key).execute(this.structures.get(id));
+        if (this.structures.containsKey(id)) {
+            this.cleans.get(key).execute(this.structures.get(id));
+        }
     }
 
     public void checkStructures() {

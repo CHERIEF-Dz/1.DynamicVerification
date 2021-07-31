@@ -43,12 +43,14 @@ public class DWManager implements Manager, Cloneable {
     }
 
     public void executeAcquire(String key, String id) {
-        this.structures.put(id, this.acquires.get(key).execute(id));
+        if (this.structures.containsKey(id)) {
+            this.structures.put(id, this.acquires.get(key).execute(id));
+        }
     }
 
     public void executeRelease(String key, String id) {
         // If there is a release without acquire, no need
-        if (this.structures.get(id)!=null) {
+        if (this.structures.containsKey(id)) {
             this.releases.get(key).execute(this.structures.get(id));
         }
     }
