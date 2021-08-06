@@ -75,9 +75,7 @@ public class HMUManager implements Manager{
     }
 
     public void executeImplementation(String key, String id) {
-        if (this.structures.containsKey(id)) {
-            this.structures.put(id, this.implementations.get(key).execute(id));
-        }
+        this.structures.put(id, this.implementations.get(key).execute(id));
     }
 
     public void executeAddition(String key, String id) {
