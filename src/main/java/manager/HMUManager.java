@@ -15,6 +15,7 @@ import events.hmu.HMUClean;
 import events.hmu.HMUDeletion;
 import events.hmu.HMUImplementation;
 import structure.ArrayMapStructure;
+import structure.HashMapStructure;
 import structure.MapStructure;
 import utils.BeepBeepUtils;
 import utils.CodeLocation;
@@ -231,7 +232,7 @@ public class HMUManager implements Manager{
     public void beepBeepBranch(Fork codesmellsFork, int arity) {
 
         Filter filter = BeepBeepUtils.codesmellConditions(codesmellsFork, arity, new String[]{":hmuadd:", ":hmudel:", ":hmucln", ":hmuimpl:"});
-        Fork forkDwDetection = new Fork(3);
+        Fork forkDwDetection = new Fork(4);
         connect(filter, OUTPUT, forkDwDetection, INPUT);
 
         FindPattern getLocationPart = new FindPattern("([^:]*:[^:]*):[^:]*:[^:]*:[^:]*:[^:]*");
@@ -241,13 +242,25 @@ public class HMUManager implements Manager{
         FindPattern getIDPart = new FindPattern("[^:]*:[^:]*:[^:]*:([^:]*):[^:]*:[^:]*");
         connect(forkDwDetection, 2, getIDPart, INPUT);
 
+        Fork forkIdPart = new Fork(2);
+        connect(getIDPart, forkIdPart);
+
+        FindPattern getTypePart = new FindPattern("[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:([^:]*)");
+        connect(forkDwDetection, 3, getTypePart, INPUT);
 
         Maps.PutInto locationMap = new Maps.PutInto();
-        connect(getIDPart, 0, locationMap, 0);
+        connect(forkIdPart, 0, locationMap, 0);
         connect(getLocationPart, OUTPUT, locationMap, 1);
 
         KeepLast lastLocation = new KeepLast();
         connect(locationMap, lastLocation);
+
+        Maps.PutInto typeMap = new Maps.PutInto();
+        connect(forkIdPart, 1, typeMap, 0);
+        connect(getTypePart, OUTPUT, typeMap, 1);
+
+        KeepLast lastType = new KeepLast();
+        connect(typeMap, lastType);
 
 
         GroupProcessor hmuDetector = new GroupProcessor(1, 1);
@@ -363,6 +376,14 @@ public class HMUManager implements Manager{
 
         }
 
+        HashMap<String, String> typeHashMap = null;
+        Pullable p2 = lastType.getPullableOutput();
+        try {
+            typeHashMap = (HashMap) p2.pull();
+        } catch (NullPointerException e) {
+
+        }
+
         HashMap<String, Boolean> slicedHashMap = new HashMap<>();
         Pullable p3 = lastSlice.getPullableOutput();
         try  {
@@ -370,7 +391,6 @@ public class HMUManager implements Manager{
         } catch (NullPointerException e) {
 
         }
-
 
         System.out.println("HMU : ");
         Iterator it2 = slicedHashMap.entrySet().iterator();
@@ -388,7 +408,15 @@ public class HMUManager implements Manager{
                 }
                 int lineNumber = Integer.parseInt(locationSplit[1]);
                 CodeLocation location = new CodeLocation(fileName, methodName, lineNumber);
-                MapStructure structure = new ArrayMapStructure(location, Integer.toString((Integer) pair.getKey()), "", true);
+                String type = typeHashMap.get(Integer.toString((Integer) pair.getKey()));
+                MapStructure structure = null;
+                if (type.equals("HashMap")) {
+                    structure = new HashMapStructure(location, Integer.toString((Integer) pair.getKey()), "");
+                } else if (type.equals("ArrayMap")) {
+                    structure = new ArrayMapStructure(location, Integer.toString((Integer) pair.getKey()), "", false);
+                } else {
+                    structure = new ArrayMapStructure(location, Integer.toString((Integer) pair.getKey()), "", true);
+                }
                 structure.foundCodeSmell();
                 structures.put(Integer.toString((Integer) pair.getKey()), structure);
                 System.out.println(locationHashMap.get(Integer.toString((Integer) pair.getKey())) + " is a code smell");

@@ -5,6 +5,8 @@ import ca.uqac.lif.cep.Pullable;
 import ca.uqac.lif.cep.functions.*;
 import ca.uqac.lif.cep.ltl.Eventually;
 import ca.uqac.lif.cep.ltl.Globally;
+import ca.uqac.lif.cep.ltl.Next;
+import ca.uqac.lif.cep.ltl.Until;
 import ca.uqac.lif.cep.tmf.*;
 import ca.uqac.lif.cep.util.*;
 import events.dw.DWAcquire;
@@ -179,71 +181,95 @@ public class DWManager implements Manager, Cloneable {
             ApplyFunction getEvent = new ApplyFunction(new NthElement(2));
 
 
-            Fork forkLTL = new Fork(3);
+            Fork forkLTL = new Fork(2);
             connect(getEvent, OUTPUT, forkLTL, INPUT);
 
-            ApplyFunction neg = new ApplyFunction(
-                    new FunctionTree(Booleans.not,
-                            new FunctionTree(Equals.instance,
-                                    StreamVariable.X, new Constant("dwrel"))));
-            connect(forkLTL, 0, neg, 0);
-
-            Globally mediumG = new Globally();
-            connect(neg, mediumG);
-
-            ApplyFunctionPartial andFunction = new ApplyFunctionPartial(
-                    new FunctionTree(Booleans.and,
-                            new FunctionTree(Equals.instance,
-                                    StreamVariable.X, new Constant("dwacq")),
-                            StreamVariable.Y));
-            connect(forkLTL, 1, andFunction, 0);
-            connect(mediumG, OUTPUT, andFunction, 1);
-
-            ApplyFunction negAnd = new ApplyFunction(
-                    new FunctionTree(Booleans.not, StreamVariable.X)
-            );
-            connect(andFunction, negAnd);
-
-            Eventually finalEventually = new Eventually();
-            connect(negAnd,finalEventually);
-
-            ApplyFunction negEventually = new ApplyFunction(
-                    new FunctionTree(Booleans.not, StreamVariable.X)
-            );
-            connect(finalEventually, negEventually);
-
-            ApplyFunction acquireTruefier = new ApplyFunction(
+            ApplyFunction equalAcquire = new ApplyFunction(
                     new FunctionTree(Equals.instance,
-                            StreamVariable.X, new Constant("dwacq")));
-            connect(forkLTL, 2, acquireTruefier, 0);
+                                    StreamVariable.X, new Constant("dwacq")));
+            connect(forkLTL, 0, equalAcquire, INPUT);
 
-            Fork forkTruefier = new Fork(2);
-            connect(acquireTruefier, forkTruefier);
-            Filter filterTruefier = new Filter();
-            connect(forkTruefier, 0, filterTruefier, LEFT);
-            connect(forkTruefier, 1, filterTruefier, RIGHT);
+            Fork forkAcquire = new Fork(2);
+            connect(equalAcquire, forkAcquire);
+
+            ApplyFunction equalRelease = new ApplyFunction(
+                    new FunctionTree(Equals.instance,
+                            StreamVariable.X, new Constant("dwrel")));
+            connect(forkLTL, 1, equalRelease, INPUT);
+
+            Fork forkRelease = new Fork(1);
+            connect(equalRelease, forkRelease);
+
+            ApplyFunction neg = new ApplyFunction(new FunctionTree(Booleans.not, StreamVariable.X));
+            connect(forkAcquire, 0, neg, INPUT);
+
+            Until midUntil = new Until();
+            connect(neg, OUTPUT, midUntil, 0);
+            connect(forkRelease, 0, midUntil, 1);
+
+            Next midNext = new Next();
+            connect(midUntil, midNext);
+
+            ApplyFunctionPartial implies = new ApplyFunctionPartial(
+                    new FunctionTree(Booleans.implies, StreamVariable.X, StreamVariable.Y));
+            connect(forkAcquire, 1, implies, 0);
+            connect(midNext, OUTPUT, implies, 1);
+
+            /*
+            ApplyFunction negImplies = new ApplyFunction(
+                    new FunctionTree(Booleans.not, StreamVariable.X)
+            );
+            connect(implies, negImplies);
+            */
+
+
+            Eventually bigF = new Eventually();
+            connect(implies, bigF);
+
+
+            ApplyFunction bigNeg = new ApplyFunction(
+                    new FunctionTree(Booleans.not, StreamVariable.X)
+            );
+            connect(bigF, bigNeg);
+
+
+/*
+            Fork forkTrue = new Fork(2);
+            connect(forkAcquire, 2, forkTrue, INPUT);
+            Filter filterTrue = new Filter();
+            connect(forkTrue, 0, filterTrue, LEFT);
+            connect(forkTrue, 1, filterTrue, RIGHT);
 
             Multiplex outputMultiplex = new Multiplex(2);
-            connect(filterTruefier, OUTPUT, outputMultiplex, 0);
-            connect(negEventually, OUTPUT, outputMultiplex, 1);
+            connect(filterTrue, OUTPUT, outputMultiplex, 0);
+            connect(bigG, OUTPUT, outputMultiplex, 1);
+*/
 
 
             dwDetector.addProcessor(getEvent);
             dwDetector.addProcessor(forkLTL);
             dwDetector.addProcessor(neg);
-            dwDetector.addProcessor(mediumG);
-            dwDetector.addProcessor(andFunction);
-            dwDetector.addProcessor(negAnd);
-            dwDetector.addProcessor(finalEventually);
-            dwDetector.addProcessor(negEventually);
+            dwDetector.addProcessor(equalAcquire);
+            dwDetector.addProcessor(equalRelease);
+            dwDetector.addProcessor(forkAcquire);
+            dwDetector.addProcessor(forkRelease);
+            dwDetector.addProcessor(midUntil);
+            dwDetector.addProcessor(midNext);
+            dwDetector.addProcessor(implies);
 
-            dwDetector.addProcessor(acquireTruefier);
-            dwDetector.addProcessor(forkTruefier);
-            dwDetector.addProcessor(filterTruefier);
+            //dwDetector.addProcessor(negImplies);
+
+            dwDetector.addProcessor(bigF);
+
+            dwDetector.addProcessor(bigNeg);
+
+            /*
+            dwDetector.addProcessor(forkTrue);
+            dwDetector.addProcessor(filterTrue);
             dwDetector.addProcessor(outputMultiplex);
-
+*/
             dwDetector.associateInput(INPUT, getEvent, INPUT);
-            dwDetector.associateOutput(OUTPUT, outputMultiplex, OUTPUT);
+            dwDetector.associateOutput(OUTPUT, bigNeg, OUTPUT);
         }
 
         ApplyFunction splitter = new ApplyFunction(new Strings.SplitString(":"));
@@ -272,10 +298,36 @@ public class DWManager implements Manager, Cloneable {
 
 
         System.out.println("DW : ");
+
+        Iterator it1 = locationHashMap.entrySet().iterator();
+        while (it1.hasNext()) {
+            Map.Entry pair = (Map.Entry)it1.next();
+            if ((slicedHashMap.containsKey(Integer.parseInt((String)pair.getKey())) && (Boolean) slicedHashMap.get(Integer.parseInt((String)pair.getKey())))
+            || !slicedHashMap.containsKey(Integer.parseInt((String)pair.getKey()))) {
+                //String[] locationSplit = locationHashMap.get(Integer.toString((Integer) pair.getKey())).split(":");
+                String[] locationSplit = ((String)pair.getValue()).split(":");
+                Pattern pat = Pattern.compile("(.+\\.java)\\$(.*)");
+                Matcher m = pat.matcher(locationSplit[0]);
+                String fileName="";
+                String methodName="";
+                if (m.find()) {
+                    fileName = m.group(1);
+                    methodName = m.group(2);
+                }
+                int lineNumber = Integer.parseInt(locationSplit[1]);
+                CodeLocation location = new CodeLocation(fileName, methodName, lineNumber);
+                WakeLockStructure structure = new WakeLockStructure(location, (String)pair.getKey());
+                structure.foundCodeSmell();
+                structures.put((String)pair.getKey(), structure);
+                System.out.println(pair.getKey()+ " is a code smell");
+            }
+        }
+
+/*
         Iterator it2 = slicedHashMap.entrySet().iterator();
         while (it2.hasNext()) {
             Map.Entry pair = (Map.Entry)it2.next();
-            //System.out.println(pair.getKey().getClass() + " " + pair.getKey() + " = " + pair.getValue());
+            System.out.println(pair.getKey().getClass() + " " + pair.getKey() + " = " + pair.getValue());
             if ((Boolean)pair.getValue()) {
                 String[] locationSplit = locationHashMap.get(Integer.toString((Integer) pair.getKey())).split(":");
                 Pattern pat = Pattern.compile("(.+\\.java)\\$(.*)");
@@ -294,6 +346,8 @@ public class DWManager implements Manager, Cloneable {
                 System.out.println(locationHashMap.get(Integer.toString((Integer) pair.getKey())) + " is a code smell");
             }
         }
+
+ */
 
     }
 
