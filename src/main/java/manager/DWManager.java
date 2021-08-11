@@ -11,6 +11,7 @@ import ca.uqac.lif.cep.tmf.*;
 import ca.uqac.lif.cep.util.*;
 import events.dw.DWAcquire;
 import events.dw.DWRelease;
+import soot.jimple.infoflow.android.iccta.App;
 import structure.MapStructure;
 import structure.WakeLockStructure;
 import utils.BeepBeepUtils;
@@ -157,39 +158,57 @@ public class DWManager implements Manager, Cloneable {
     public void beepBeepBranch(Fork codesmellsFork, int arity) {
 
         Filter filter = BeepBeepUtils.codesmellConditions(codesmellsFork, arity, new String[]{":dwacq:", ":dwrel:"});
-        Fork forkDwDetection = new Fork(3);
+        Fork forkDwDetection = new Fork(4);
         connect(filter, OUTPUT, forkDwDetection, INPUT);
 
         FindPattern getLocationPart = new FindPattern("([^:]*:[^:]*):[^:]*:[^:]*");
         connect(forkDwDetection, 1, getLocationPart, INPUT);
 
+        Fork locationFork = new Fork(2);
+        connect(getLocationPart, locationFork);
+
 
         FindPattern getIDPart = new FindPattern("[^:]*:[^:]*:[^:]*:([^:]*)");
         connect(forkDwDetection, 2, getIDPart, INPUT);
 
+        Fork idFork = new Fork(2);
+        connect(getIDPart, idFork);
 
         Maps.PutInto locationMap = new Maps.PutInto();
-        connect(getIDPart, 0, locationMap, 0);
-        connect(getLocationPart, OUTPUT, locationMap, 1);
+        connect(idFork, 0, locationMap, 0);
+        connect(locationFork, 0, locationMap, 1);
 
         KeepLast lastLocation = new KeepLast();
         connect(locationMap, lastLocation);
+
+        QueueSource dummyEvent = new QueueSource();
+        dummyEvent.setEvents(":dwend:");
+
+        ApplyFunction concat1 = new ApplyFunction(
+                new FunctionTree(Strings.concat, StreamVariable.X, StreamVariable.Y));
+        connect(locationFork, 1, concat1, 0);
+        connect(dummyEvent, OUTPUT, concat1, 1);
+
+        ApplyFunction concat2 = new ApplyFunction(
+                new FunctionTree(Strings.concat, StreamVariable.X, StreamVariable.Y));
+        connect(concat1, OUTPUT, concat2, 0);
+        connect(idFork, 1, concat2, 1);
 
 
         GroupProcessor dwDetector = new GroupProcessor(1, 1);
         {
             ApplyFunction getEvent = new ApplyFunction(new NthElement(2));
 
-
             Fork forkLTL = new Fork(2);
-            connect(getEvent, OUTPUT, forkLTL, INPUT);
+            connect(getEvent, forkLTL);
+
 
             ApplyFunction equalAcquire = new ApplyFunction(
                     new FunctionTree(Equals.instance,
                                     StreamVariable.X, new Constant("dwacq")));
             connect(forkLTL, 0, equalAcquire, INPUT);
 
-            Fork forkAcquire = new Fork(2);
+            Fork forkAcquire = new Fork(3);
             connect(equalAcquire, forkAcquire);
 
             ApplyFunction equalRelease = new ApplyFunction(
@@ -215,25 +234,25 @@ public class DWManager implements Manager, Cloneable {
             connect(forkAcquire, 1, implies, 0);
             connect(midNext, OUTPUT, implies, 1);
 
-            /*
+
             ApplyFunction negImplies = new ApplyFunction(
                     new FunctionTree(Booleans.not, StreamVariable.X)
             );
             connect(implies, negImplies);
-            */
 
 
-            Eventually bigF = new Eventually();
-            connect(implies, bigF);
 
+            Globally bigG = new Globally();
+            connect(negImplies, bigG);
 
+            /*
             ApplyFunction bigNeg = new ApplyFunction(
                     new FunctionTree(Booleans.not, StreamVariable.X)
             );
-            connect(bigF, bigNeg);
+            connect(bigG, bigNeg);
+            */
 
 
-/*
             Fork forkTrue = new Fork(2);
             connect(forkAcquire, 2, forkTrue, INPUT);
             Filter filterTrue = new Filter();
@@ -243,7 +262,7 @@ public class DWManager implements Manager, Cloneable {
             Multiplex outputMultiplex = new Multiplex(2);
             connect(filterTrue, OUTPUT, outputMultiplex, 0);
             connect(bigG, OUTPUT, outputMultiplex, 1);
-*/
+
 
 
             dwDetector.addProcessor(getEvent);
@@ -257,23 +276,26 @@ public class DWManager implements Manager, Cloneable {
             dwDetector.addProcessor(midNext);
             dwDetector.addProcessor(implies);
 
-            //dwDetector.addProcessor(negImplies);
+            dwDetector.addProcessor(negImplies);
 
-            dwDetector.addProcessor(bigF);
+            dwDetector.addProcessor(bigG);
 
-            dwDetector.addProcessor(bigNeg);
+            //dwDetector.addProcessor(bigNeg);
 
-            /*
             dwDetector.addProcessor(forkTrue);
             dwDetector.addProcessor(filterTrue);
             dwDetector.addProcessor(outputMultiplex);
-*/
+
             dwDetector.associateInput(INPUT, getEvent, INPUT);
-            dwDetector.associateOutput(OUTPUT, bigNeg, OUTPUT);
+            dwDetector.associateOutput(OUTPUT, outputMultiplex, OUTPUT);
         }
 
+        Multiplex splitterPlex = new Multiplex(2);
+        connect(forkDwDetection, 0, splitterPlex, 0);
+        connect(concat2, OUTPUT, splitterPlex, 1);
+
         ApplyFunction splitter = new ApplyFunction(new Strings.SplitString(":"));
-        connect(forkDwDetection, 0, splitter, INPUT);
+        connect(splitterPlex, OUTPUT, splitter, INPUT);
 
         Slice slicer = new Slice(new NthElement(3), dwDetector);
         connect(splitter, OUTPUT, slicer, 0);
@@ -299,6 +321,12 @@ public class DWManager implements Manager, Cloneable {
 
         System.out.println("DW : ");
 
+        Iterator it2 = slicedHashMap.entrySet().iterator();
+        while (it2.hasNext()) {
+            Map.Entry pair = (Map.Entry) it2.next();
+            System.out.println("Sliced " + pair.getKey() + " = " + pair.getValue());
+        }
+
         Iterator it1 = locationHashMap.entrySet().iterator();
         while (it1.hasNext()) {
             Map.Entry pair = (Map.Entry)it1.next();
@@ -318,8 +346,8 @@ public class DWManager implements Manager, Cloneable {
                 CodeLocation location = new CodeLocation(fileName, methodName, lineNumber);
                 WakeLockStructure structure = new WakeLockStructure(location, (String)pair.getKey());
                 structure.foundCodeSmell();
-                structures.put((String)pair.getKey(), structure);
-                System.out.println(pair.getKey()+ " is a code smell");
+                structures.put((String)pair.getValue(), structure);
+                System.out.println(pair.getValue()+ " is a code smell");
             }
         }
 
