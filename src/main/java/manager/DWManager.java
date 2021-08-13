@@ -321,12 +321,6 @@ public class DWManager implements Manager, Cloneable {
 
         System.out.println("DW : ");
 
-        Iterator it2 = slicedHashMap.entrySet().iterator();
-        while (it2.hasNext()) {
-            Map.Entry pair = (Map.Entry) it2.next();
-            System.out.println("Sliced " + pair.getKey() + " = " + pair.getValue());
-        }
-
         Iterator it1 = locationHashMap.entrySet().iterator();
         while (it1.hasNext()) {
             Map.Entry pair = (Map.Entry)it1.next();
