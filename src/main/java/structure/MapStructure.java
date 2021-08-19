@@ -27,6 +27,12 @@ public abstract class MapStructure implements Structure {
             maximumSize=actualSize;
     }
 
+    public void setElements(int size) {
+        actualSize=size;
+        if (actualSize>maximumSize)
+            maximumSize=actualSize;
+    }
+
     public void deleteElement() {actualSize--; }
 
     public void cleanElements() {actualSize=0;}

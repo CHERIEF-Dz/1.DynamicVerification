@@ -1,9 +1,6 @@
 package staticanalyzis;
 
-import events.hmu.HMUAddition;
-import events.hmu.HMUClean;
-import events.hmu.HMUDeletion;
-import events.hmu.HMUImplementation;
+import events.hmu.*;
 import manager.HMUManager;
 import manager.ManagerGroup;
 import soot.*;
@@ -45,6 +42,7 @@ public final class HMUAnalyzer extends CodeSmellAnalyzer {
             checkHMUAdd(line, name, methodName, lineNumber, managerGroup.managerHMU, b, u, b.getUnits(), isInstrumenting, type);
             checkHMUDel(line, name, methodName, lineNumber, managerGroup.managerHMU, b, u, b.getUnits(), isInstrumenting, type);
             checkHMUClean(line, name, methodName, lineNumber, managerGroup.managerHMU, b, u, b.getUnits(), isInstrumenting, type);
+            checkHMUAddAll(line, name, methodName, lineNumber, managerGroup.managerHMU, b, u, b.getUnits(), isInstrumenting, type);
         }
     }
 
@@ -165,6 +163,18 @@ public final class HMUAnalyzer extends CodeSmellAnalyzer {
             if (isInstrumenting) {
                 //System.out.println(b.toString());
                 buildInstrumentation(getStructureCallerLocalName(line), units, u, b, "hmuadd:", type);
+            }
+        }
+    }
+
+    public static void checkHMUAddAll(String line, String name, String methodName, int lineNumber, HMUManager manager, Body b, Unit u, UnitPatchingChain units, boolean isInstrumenting, String type) {
+        Matcher m = findPattern(line, "(?<=(java.util.HashMap|androidx.collection.ArrayMap|androidx.collection.SimpleArrayMap))(.*)(?=putAll\\()");
+        if (m.find()) {
+            String variableName=m.group(0).split("\\.")[0];
+            manager.addAll(generateKey(name, methodName), new HMUAddAll(new CodeLocation(name, methodName, getKey(name, methodName)), variableName));
+            if (isInstrumenting) {
+                System.out.println("A putall !!");
+                buildInstrumentation(getStructureCallerLocalName(line), units, u, b, "hmuall:", type);
             }
         }
     }

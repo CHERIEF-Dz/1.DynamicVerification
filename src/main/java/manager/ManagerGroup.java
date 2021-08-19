@@ -51,9 +51,9 @@ public class ManagerGroup implements Cloneable{
         this.managerNLMR.generateCSV(outputPath, apkName, packageName, returnAllInstances);
     }
 
-    public void execute(String key, String fileName, String lineNumber, String code, String id) {
+    public void execute(String key, String fileName, String lineNumber, String code, String id, String size) {
         managerDW.execute(key, fileName, lineNumber, code, id);
-        managerHMU.execute(key, fileName, lineNumber, code, id);
+        managerHMU.execute(key, fileName, lineNumber, code, id, size);
         managerIOD.execute(key, fileName, lineNumber, code, id);
         managerHP.execute(key, fileName, lineNumber, code, id);
         managerNLMR.execute(key, fileName, lineNumber, code, id);

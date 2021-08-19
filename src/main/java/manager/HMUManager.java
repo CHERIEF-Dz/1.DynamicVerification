@@ -14,6 +14,7 @@ import events.hmu.HMUAddition;
 import events.hmu.HMUClean;
 import events.hmu.HMUDeletion;
 import events.hmu.HMUImplementation;
+import events.hmu.HMUAddAll;
 import structure.ArrayMapStructure;
 import structure.HashMapStructure;
 import structure.MapStructure;
@@ -35,6 +36,7 @@ public class HMUManager implements Manager{
     private HashMap<String, HMUDeletion> deletions; // Key = CodeLocation
     private HashMap<String, HMUClean> cleans; // Key = CodeLocation
     private HashMap<String, MapStructure> structures; // Key = unique id
+    private HashMap<String, HMUAddAll> addAlls; // key = CodeLocation
 
     public HMUManager() {
         this.implementations = new HashMap<String, HMUImplementation>();
@@ -42,6 +44,7 @@ public class HMUManager implements Manager{
         this.deletions = new HashMap<String, HMUDeletion>();
         this.cleans = new HashMap<String, HMUClean>();
         this.structures = new HashMap<String, MapStructure>();
+        this.addAlls = new HashMap<String, HMUAddAll>();
     }
 
     public void addImplementation(String key, HMUImplementation implementation) {
@@ -52,6 +55,11 @@ public class HMUManager implements Manager{
     public void addAddition(String key, HMUAddition addition) {
         //System.out.println(addition.generateBreakPoint());
         this.additions.put(key, addition);
+    }
+
+    public void addAll(String key, HMUAddAll addAll) {
+        //System.out.println(addition.generateBreakPoint());
+        this.addAlls.put(key, addAll);
     }
 
     @Override
@@ -67,6 +75,20 @@ public class HMUManager implements Manager{
         }
     }
 
+    public void execute(String key, String fileName, String lineNumber, String code, String id, String size) {
+        if ("hmuimpl".equals(code)) {
+            executeImplementation(key, id);
+        } else if ("hmuadd".equals(code)) {
+            executeAddition(key, id);
+        } else if ("hmudel".equals(code)) {
+            executeDeletion(key, id);
+        } else if ("hmucln".equals(code)) {
+            executeClean(key, id);
+        } else if ("hmuall".equals(code)) {
+            executeAll(key, id, Integer.parseInt(size));
+        }
+    }
+
     public void addDeletion(String key, HMUDeletion deletion) {
         this.deletions.put(key, deletion);
     }
@@ -76,24 +98,32 @@ public class HMUManager implements Manager{
     }
 
     public void executeImplementation(String key, String id) {
-        this.structures.put(id, this.implementations.get(key).execute(id));
+        if (this.implementations.containsKey(key)) {
+            this.structures.put(id, this.implementations.get(key).execute(id));
+        }
     }
 
     public void executeAddition(String key, String id) {
-        if (this.structures.containsKey(id)) {
+        if (this.additions.containsKey(key) && this.structures.containsKey(id)) {
             this.additions.get(key).execute(this.structures.get(id));
         }
     }
 
     public void executeDeletion(String key, String id) {
-        if (this.structures.containsKey(id)) {
+        if (this.deletions.containsKey(key) && this.structures.containsKey(id)) {
             this.deletions.get(key).execute(this.structures.get(id));
         }
     }
 
     public void executeClean(String key, String id) {
-        if (this.structures.containsKey(id)) {
+        if (this.cleans.containsKey(key) && this.structures.containsKey(id)) {
             this.cleans.get(key).execute(this.structures.get(id));
+        }
+    }
+
+    public void executeAll(String key, String id, int size) {
+        if (this.addAlls.containsKey(key) && this.structures.containsKey(id)) {
+            this.addAlls.get(key).execute(this.structures.get(id), size);
         }
     }
 

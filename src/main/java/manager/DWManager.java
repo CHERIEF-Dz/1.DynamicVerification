@@ -303,7 +303,7 @@ public class DWManager implements Manager, Cloneable {
         KeepLast lastSlice = new KeepLast();
         connect(slicer, lastSlice);
 
-        HashMap<String, String> locationHashMap = null;
+        HashMap<String, String> locationHashMap = new HashMap<>();
         Pullable p1 = lastLocation.getPullableOutput();
         try {
             locationHashMap = (HashMap) p1.pull();

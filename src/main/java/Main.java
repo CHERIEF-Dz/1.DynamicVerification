@@ -2,7 +2,9 @@ import ca.uqac.lif.cep.Connector;
 import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.functions.ApplyFunction;
 import ca.uqac.lif.cep.io.ReadLines;
+import ca.uqac.lif.cep.tmf.Filter;
 import ca.uqac.lif.cep.tmf.Fork;
+import ca.uqac.lif.cep.tmf.QueueSource;
 import ca.uqac.lif.cep.util.FindPattern;
 import ca.uqac.lif.cep.util.Strings;
 import net.sourceforge.argparse4j.ArgumentParsers;
@@ -18,6 +20,9 @@ import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
+
+import static ca.uqac.lif.cep.Connector.OUTPUT;
+import static ca.uqac.lif.cep.Connector.connect;
 
 
 public class Main {
@@ -66,7 +71,7 @@ public class Main {
                     try {
                         if (res.getBoolean("beepbeep")) {
                             managerGroup = baseManagerGroup.clone();
-                            beepBeepAnalyzeTrace(managerGroup, tracePath);
+                            beepBeepAnalyzeTrace(managerGroup, tracePath, apkName);
                         } else {
                             managerGroup = baseManagerGroup.clone();
                             sootanalyzeTrace(managerGroup, tracePath);
@@ -111,7 +116,11 @@ public class Main {
                         String code = result[3];
                         String id = result[4];
                         String key = fileName + ":" + lineNumber;
-                        managerGroup.execute(key, fileName, lineNumber, code, id);
+                        String size= "0";
+                        if (result.length >= 7) {
+                            size = result[6];
+                        }
+                        managerGroup.execute(key, fileName, lineNumber, code, id, size);
                     }
                 }
                 else {
@@ -125,15 +134,31 @@ public class Main {
         managerGroup.checkStructures();
     }
 
-    public static void beepBeepAnalyzeTrace(ManagerGroup managerGroup, String tracePath) throws XmlPullParserException, FileNotFoundException {
+    public static void beepBeepAnalyzeTrace(ManagerGroup managerGroup, String tracePath, String apkPath) throws XmlPullParserException, IOException {
+        final ProcessManifest processManifest = new ProcessManifest(apkPath);
+        String packageName = processManifest.getPackageName();
+
         InputStream is = new FileInputStream(tracePath);
         ReadLines reader = new ReadLines(is);
         ApplyFunction cast = new ApplyFunction(Strings.toString);
         Connector.connect(reader, cast);
         FindPattern removeDynver = new FindPattern("dynver:([^:]*:[^:]*:[^:]*:[^:]*.*)");
         Connector.connect(cast, removeDynver);
+
+        Fork dynverFork = new Fork(2);
+        connect(removeDynver, dynverFork);
+        ApplyFunction condition = new ApplyFunction(Strings.contains);
+        connect(dynverFork, 0, condition, 0);
+        QueueSource conditionString = new QueueSource();
+        conditionString.setEvents(packageName);
+        connect(conditionString, OUTPUT, condition, 1);
+
+        Filter packageFilter = new Filter();
+        connect(dynverFork, 1, packageFilter, 0);
+        connect(condition, OUTPUT, packageFilter, 1);
+
         Fork codesmellsFork = new Fork(7);
-        Connector.connect(removeDynver, codesmellsFork);
+        Connector.connect(packageFilter, codesmellsFork);
         managerGroup.beepBeep(codesmellsFork);
     }
 
