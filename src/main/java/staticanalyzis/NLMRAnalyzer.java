@@ -6,21 +6,37 @@ import manager.ManagerGroup;
 import manager.NLMRManager;
 import soot.*;
 import soot.jimple.*;
+import soot.util.ArraySet;
 import structure.NLMRStructure;
+import structure.WakeLockStructure;
 import utils.CodeLocation;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class NLMRAnalyzer extends CodeSmellAnalyzer{
 
     private static SootClass runnerClass;
     public static String runnerSuffix = "$RunnerTMP";
+    public static Set<String> alreadyDone = new ArraySet<>();
 
     public static void methodsToCheck(String name, String methodName, int lineNumber, ManagerGroup managerGroup, Body b, UnitPatchingChain units, boolean isInstrumenting) {
         checkNLMR(name, methodName, "onTrimMemory", lineNumber, managerGroup.managerNLMR, b, b.getUnits(),"nlmrenter", "nlmrexit", isInstrumenting);
         checkNLMR(name, methodName, "onLowMemory", lineNumber, managerGroup.managerNLMR, b, b.getUnits(),"nlmrenter", "nlmrexit", isInstrumenting);
+
+        if (!alreadyDone.contains(b.getMethod().getDeclaringClass().getName())) {
+            SootClass test = b.getMethod().getDeclaringClass();
+            while (!test.getSuperclass().getName().equals("java.lang.Object") && !test.getName().equals("android.app.Activity")) {
+                test = test.getSuperclass();
+            }
+            if (test.getName().equals("android.app.Activity")) {
+                alreadyDone.add(b.getMethod().getDeclaringClass().getName());
+                // Add Code Smell
+                NLMRStructure structure = new NLMRStructure(new CodeLocation(name, methodName, lineNumber), name.replace("$onLowMemory", "").replace("$onTrimMemory", ""));
+                structure.foundCodeSmell();
+                managerGroup.managerNLMR.addStructure(name.replace("$onLowMemory", "").replace("$onTrimMemory", ""), structure);
+                //structures.put((String)pair.getValue(), structure)
+            }
+        }
     }
 
     protected static void checkNLMR(String name, String methodName, String methodNameNeeded, int lineNumber, NLMRManager manager, Body b, UnitPatchingChain units, String prefix, String suffix, boolean isInstrumenting) {
