@@ -45,7 +45,6 @@ public class NLMRAnalyzer extends CodeSmellAnalyzer{
                     structure.foundCodeSmell();
                     managerGroup.managerNLMR.addStructure(name.replace("$onLowMemory", "").replace("$onTrimMemory", ""), structure);
                     //structures.put((String)pair.getValue(), structure)
-                    System.out.println(checkingClass.getName() + " do not have onLowMemory.");
                 }
 
             }
