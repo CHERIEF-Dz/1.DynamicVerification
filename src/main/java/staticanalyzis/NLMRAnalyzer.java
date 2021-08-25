@@ -29,12 +29,25 @@ public class NLMRAnalyzer extends CodeSmellAnalyzer{
                 test = test.getSuperclass();
             }
             if (test.getName().equals("android.app.Activity")) {
-                alreadyDone.add(b.getMethod().getDeclaringClass().getName());
-                // Add Code Smell
-                NLMRStructure structure = new NLMRStructure(new CodeLocation(name, methodName, lineNumber), name.replace("$onLowMemory", "").replace("$onTrimMemory", ""));
-                structure.foundCodeSmell();
-                managerGroup.managerNLMR.addStructure(name.replace("$onLowMemory", "").replace("$onTrimMemory", ""), structure);
-                //structures.put((String)pair.getValue(), structure)
+                SootClass checkingClass = b.getMethod().getDeclaringClass();
+                Iterator it = checkingClass.getMethods().iterator();
+                boolean hasMemoryMethod = false;
+                while (it.hasNext()) {
+                    SootMethod methodEntry = (SootMethod) it.next();
+                    if (methodEntry.getName().equals("onLowMemory") ||methodEntry.getName().equals("onTrimMemory")) {
+                        hasMemoryMethod = true;
+                    }
+                }
+                if (!hasMemoryMethod) {
+                    alreadyDone.add(b.getMethod().getDeclaringClass().getName());
+                    // Add Code Smell
+                    NLMRStructure structure = new NLMRStructure(new CodeLocation(name, methodName, lineNumber), name.replace("$onLowMemory", "").replace("$onTrimMemory", ""));
+                    structure.foundCodeSmell();
+                    managerGroup.managerNLMR.addStructure(name.replace("$onLowMemory", "").replace("$onTrimMemory", ""), structure);
+                    //structures.put((String)pair.getValue(), structure)
+                    System.out.println(checkingClass.getName() + " do not have onLowMemory.");
+                }
+
             }
         }
     }
