@@ -82,7 +82,9 @@ public class IODManager implements Manager{
 
     public void executeNew(String key, String id) {
         if (this.structures.containsKey(id)) {
-            this.news.get(key).execute(this.structures.get(id));
+            if (this.news.containsKey(key)) {
+                this.news.get(key).execute(this.structures.get(id));
+            }
         }
     }
 

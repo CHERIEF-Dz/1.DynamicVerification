@@ -25,7 +25,7 @@ public class NLMRAnalyzer extends CodeSmellAnalyzer{
 
         if (!alreadyDone.contains(b.getMethod().getDeclaringClass().getName())) {
             SootClass test = b.getMethod().getDeclaringClass();
-            while (!test.getSuperclass().getName().equals("java.lang.Object") && !test.getName().equals("android.app.Activity")) {
+            while (test != null && test.getSuperclass() != null && !test.getSuperclass().getName().equals("java.lang.Object") && !test.getName().equals("android.app.Activity")) {
                 test = test.getSuperclass();
             }
             if (test.getName().equals("android.app.Activity")) {
