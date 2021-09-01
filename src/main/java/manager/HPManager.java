@@ -57,23 +57,55 @@ public class HPManager implements Manager{
 
         //Print for coverage
         if (returnAllInstances) {
+            int countHAS=0;
+            int countHSS=0;
+            int countHBR=0;
+            int countHASexecuted=0;
+            int countHSSexecuted=0;
+            int countHBRexecuted=0;
+            for (java.util.Map.Entry<String, HeavyProcessStructure> stringStructureEntry : this.structures.entrySet()) {
+                HashMap.Entry<String, HeavyProcessStructure> pair = (HashMap.Entry) stringStructureEntry;
+                System.out.println(pair.getValue().getLocation().getMethodName());
+                String methodName = pair.getValue().getLocation().getMethodName();
+                if (methodName.equals("onReceive")) {
+                    countHBR++;
+                }
+                else if (methodName.equals("onStartCommand")) {
+                    countHSS++;
+                }
+                else if (methodName.equals("onPreExecute") || methodName.equals("onProgressUpdate") || methodName.equals("onPostExecute")){
+                    countHAS++;
+                }
+            }
+
             File coverageOutputfile = new File(outputPath + "coverage.csv");
             try (PrintWriter writer = new PrintWriter(new FileWriter(coverageOutputfile, true))) {
-                writer.write("Number of HP methods," + this.enters.size() + "\n");
+                writer.write("Number of HBR methods," + countHBR + "\n");
+                writer.write("Number of HAS methods," + countHAS + "\n");
+                writer.write("Number of HSS methods," + countHSS + "\n");
             } catch (FileNotFoundException e) {
                 // Do something
             }
 
             File executionOutputFile = new File(outputPath + "execution.csv");
             try (PrintWriter writer = new PrintWriter(new FileWriter(executionOutputFile, true))) {
-                int executionSumMethod=0;
                 for (Map.Entry<String, HPEnter> executioncountEntry : this.enters.entrySet()) {
-                    if (executioncountEntry.getValue().isExecuted) {
-                        executionSumMethod++;
+
+                    String methodName = executioncountEntry.getValue().location.getMethodName();
+                    if (methodName.equals("onReceive")) {
+                        countHBR++;
+                    }
+                    else if (methodName.equals("onStartCommand")) {
+                        countHSS++;
+                    }
+                    else if (methodName.equals("onPreExecute") || methodName.equals("onProgressUpdate") || methodName.equals("onPostExecute")){
+                        countHAS++;
                     }
                 }
 
-                writer.write("Number of HP methods," + executionSumMethod + "\n");
+                writer.write("Number of HBR methods," + countHBRexecuted + "\n");
+                writer.write("Number of HAS methods," + countHASexecuted + "\n");
+                writer.write("Number of HSS methods," + countHSSexecuted + "\n");
             } catch (FileNotFoundException e) {
                 // Do something
             }
