@@ -58,6 +58,10 @@ public class HeavyProcessStructure implements Structure {
         this.hasBeenExecuted=true;
     }
 
+    public boolean hasBeenExecuted() {
+        return hasBeenExecuted;
+    }
+
     public void end(long date) {
         this.lastEnd = date;
         long elapsedTime = (long) ((this.lastEnd -this.lastBegin)/1000000.0);

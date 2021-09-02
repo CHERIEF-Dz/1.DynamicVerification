@@ -132,9 +132,11 @@ public class HPManager implements Manager{
                 writer.write("apk,package,file,method,average executing time,worst executing time,code smell\n");
                 for (java.util.Map.Entry<String, HeavyProcessStructure> stringStructureEntry : this.structures.entrySet()) {
                     HashMap.Entry<String, HeavyProcessStructure> pair = (HashMap.Entry) stringStructureEntry;
-                    String fileName = pair.getValue().getLocation().getFileName();
-                    String methodName = pair.getValue().getLocation().getMethodName();
-                    writer.write(apkName + "," + packageName + "," + fileName + "," + methodName + "," + pair.getValue().getAverageTime() + "," + pair.getValue().getWorstTime() + "," + pair.getValue().hasCodeSmell() + "\n");
+                    if (pair.getValue().hasBeenExecuted()) {
+                        String fileName = pair.getValue().getLocation().getFileName();
+                        String methodName = pair.getValue().getLocation().getMethodName();
+                        writer.write(apkName + "," + packageName + "," + fileName + "," + methodName + "," + pair.getValue().getAverageTime() + "," + pair.getValue().getWorstTime() + "," + pair.getValue().hasCodeSmell() + "\n");
+                    }
                 }
             } catch (FileNotFoundException e) {
                 // Do something
