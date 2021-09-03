@@ -90,16 +90,15 @@ public class HPManager implements Manager{
             File executionOutputFile = new File(outputPath + "execution.csv");
             try (PrintWriter writer = new PrintWriter(new FileWriter(executionOutputFile, true))) {
                 for (Map.Entry<String, HPEnter> executioncountEntry : this.enters.entrySet()) {
-
-                    String methodName = executioncountEntry.getValue().location.getMethodName();
-                    if (methodName.equals("onReceive")) {
-                        countHBR++;
-                    }
-                    else if (methodName.equals("onStartCommand")) {
-                        countHSS++;
-                    }
-                    else if (methodName.equals("onPreExecute") || methodName.equals("onProgressUpdate") || methodName.equals("onPostExecute")){
-                        countHAS++;
+                    if (executioncountEntry.getValue().isExecuted) {
+                        String methodName = executioncountEntry.getValue().location.getMethodName();
+                        if (methodName.equals("onReceive")) {
+                            countHBRexecuted++;
+                        } else if (methodName.equals("onStartCommand")) {
+                            countHSSexecuted++;
+                        } else if (methodName.equals("onPreExecute") || methodName.equals("onProgressUpdate") || methodName.equals("onPostExecute")) {
+                            countHASexecuted++;
+                        }
                     }
                 }
 
