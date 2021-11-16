@@ -90,7 +90,6 @@ public final class HMUAnalyzer extends CodeSmellAnalyzer {
         }
 
         SootMethod sizeMethod = null;
-        System.out.println("Type : " + type);
         //if HashMap
         if (type.equals("HashMap")) {
             sizeMethod = Scene.v().getSootClass("java.util.HashMap").getMethod("int size()");
