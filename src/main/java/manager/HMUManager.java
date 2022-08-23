@@ -10,6 +10,8 @@ import ca.uqac.lif.cep.ltl.Eventually;
 import ca.uqac.lif.cep.ltl.Globally;
 import ca.uqac.lif.cep.tmf.*;
 import ca.uqac.lif.cep.util.*;
+import events.dw.DWAcquire;
+import events.dw.DWRelease;
 import events.hmu.HMUAddition;
 import events.hmu.HMUClean;
 import events.hmu.HMUDeletion;
@@ -149,6 +151,53 @@ public class HMUManager implements Manager{
                 writer.write("Number of HMU Additions," + this.additions.size() + "\n");
                 writer.write("Number of HMU Deletions," + this.deletions.size() + "\n");
                 writer.write("Number of HMU Cleans," + this.cleans.size() + "\n");
+            } catch (FileNotFoundException e) {
+                // Do something
+            }
+            File coverageOutputfile2 = new File(outputPath + "HMU_implementation.csv");
+            try (PrintWriter writer = new PrintWriter(new FileWriter(coverageOutputfile2, true))) {
+                //Print all the associated methods
+                for (Map.Entry<String, HMUImplementation> coverageEntry : this.implementations.entrySet()) {
+                    String fileName = coverageEntry.getValue().location.getFileName();
+                    String methodName = coverageEntry.getValue().location.getMethodName();
+                    writer.write(apkName + "," + packageName + "," + fileName + "," + methodName + "," + coverageEntry.getValue().isExecuted + "\n");
+                }
+            } catch (FileNotFoundException e) {
+                // Do something
+            }
+
+            File coverageOutputfile3 = new File(outputPath + "HMU_addition.csv");
+            try (PrintWriter writer = new PrintWriter(new FileWriter(coverageOutputfile3, true))) {
+                //Print all the associated methods
+                for (Map.Entry<String, HMUAddition> coverageEntry : this.additions.entrySet()) {
+                    String fileName = coverageEntry.getValue().location.getFileName();
+                    String methodName = coverageEntry.getValue().location.getMethodName();
+                    writer.write(apkName + "," + packageName + "," + fileName + "," + methodName + "," + coverageEntry.getValue().isExecuted + "\n");
+                }
+            } catch (FileNotFoundException e) {
+                // Do something
+            }
+
+            File coverageOutputfile4 = new File(outputPath + "HMU_deletion.csv");
+            try (PrintWriter writer = new PrintWriter(new FileWriter(coverageOutputfile4, true))) {
+                //Print all the associated methods
+                for (Map.Entry<String, HMUDeletion> coverageEntry : this.deletions.entrySet()) {
+                    String fileName = coverageEntry.getValue().location.getFileName();
+                    String methodName = coverageEntry.getValue().location.getMethodName();
+                    writer.write(apkName + "," + packageName + "," + fileName + "," + methodName + "," + coverageEntry.getValue().isExecuted + "\n");
+                }
+            } catch (FileNotFoundException e) {
+                // Do something
+            }
+
+            File coverageOutputfile5 = new File(outputPath + "HMU_clean.csv");
+            try (PrintWriter writer = new PrintWriter(new FileWriter(coverageOutputfile5, true))) {
+                //Print all the associated methods
+                for (Map.Entry<String, HMUClean> coverageEntry : this.cleans.entrySet()) {
+                    String fileName = coverageEntry.getValue().location.getFileName();
+                    String methodName = coverageEntry.getValue().location.getMethodName();
+                    writer.write(apkName + "," + packageName + "," + fileName + "," + methodName + "," + coverageEntry.getValue().isExecuted + "\n");
+                }
             } catch (FileNotFoundException e) {
                 // Do something
             }

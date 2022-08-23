@@ -12,6 +12,7 @@ import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Slice;
 import ca.uqac.lif.cep.util.*;
+import events.iod.IODEnter;
 import events.nlmr.NLMREnter;
 import events.nlmr.NLMRExit;
 import staticanalyzis.NLMRAnalyzer;
@@ -60,6 +61,19 @@ public class NLMRManager implements Manager{
             File coverageOutputfile = new File(outputPath + "coverage.csv");
             try (PrintWriter writer = new PrintWriter(new FileWriter(coverageOutputfile, true))) {
                 writer.write("Number of NLMR methods," + this.enters.size() + "\n");
+            } catch (FileNotFoundException e) {
+                // Do something
+            }
+            File coverageOutputfile2 = new File(outputPath + "NLMR_notcovered.csv");
+            try (PrintWriter writer = new PrintWriter(new FileWriter(coverageOutputfile2, true))) {
+                //Print all the associated methods
+                for (Map.Entry<String, NLMREnter> coverageEntry : this.enters.entrySet()) {
+                    if (!coverageEntry.getValue().isExecuted) {
+                        String fileName = coverageEntry.getValue().location.getFileName();
+                        String methodName = coverageEntry.getValue().location.getMethodName();
+                        writer.write(apkName + "," + packageName + "," + fileName + "," + methodName + "\n");
+                    }
+                }
             } catch (FileNotFoundException e) {
                 // Do something
             }

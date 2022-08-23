@@ -12,6 +12,7 @@ import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Slice;
 import ca.uqac.lif.cep.util.*;
+import events.hmu.HMUImplementation;
 import events.hp.HPEnter;
 import events.hp.HPExit;
 import structure.HeavyProcessStructure;
@@ -83,6 +84,20 @@ public class HPManager implements Manager{
                 writer.write("Number of HBR methods," + countHBR + "\n");
                 writer.write("Number of HAS methods," + countHAS + "\n");
                 writer.write("Number of HSS methods," + countHSS + "\n");
+            } catch (FileNotFoundException e) {
+                // Do something
+            }
+            File coverageOutputfile2 = new File(outputPath + "HP_notcovered.csv");
+            try (PrintWriter writer = new PrintWriter(new FileWriter(coverageOutputfile2, true))) {
+                //Print all the associated methods
+                for (Map.Entry<String, HPEnter> coverageEntry : this.enters.entrySet()) {
+                    if (!coverageEntry.getValue().isExecuted) {
+                        String fileName = coverageEntry.getValue().location.getFileName();
+                        String methodName = coverageEntry.getValue().location.getMethodName();
+                        writer.write(apkName + "," + packageName + "," + fileName + "," + methodName + "\n");
+                    }
+
+                }
             } catch (FileNotFoundException e) {
                 // Do something
             }

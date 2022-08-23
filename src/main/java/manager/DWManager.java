@@ -79,6 +79,29 @@ public class DWManager implements Manager, Cloneable {
             } catch (FileNotFoundException e) {
                 // Do something
             }
+            File coverageOutputfile2 = new File(outputPath + "DW_acquire.csv");
+            try (PrintWriter writer = new PrintWriter(new FileWriter(coverageOutputfile2, true))) {
+                //Print all the associated methods
+                for (Map.Entry<String, DWAcquire> coverageEntry : this.acquires.entrySet()) {
+                    String fileName = coverageEntry.getValue().location.getFileName();
+                    String methodName = coverageEntry.getValue().location.getMethodName();
+                    writer.write(apkName + "," + packageName + "," + fileName + "," + methodName + "," + coverageEntry.getValue().isExecuted + "\n");
+                }
+            } catch (FileNotFoundException e) {
+                // Do something
+            }
+
+            File coverageOutputfile3 = new File(outputPath + "DW_release.csv");
+            try (PrintWriter writer = new PrintWriter(new FileWriter(coverageOutputfile3, true))) {
+                //Print all the associated methods
+                for (Map.Entry<String, DWRelease> coverageEntry : this.releases.entrySet()) {
+                    String fileName = coverageEntry.getValue().location.getFileName();
+                    String methodName = coverageEntry.getValue().location.getMethodName();
+                    writer.write(apkName + "," + packageName + "," + fileName + "," + methodName + "," + coverageEntry.getValue().isExecuted + "\n");
+                }
+            } catch (FileNotFoundException e) {
+                // Do something
+            }
 
             File executionOutputFile = new File(outputPath + "execution.csv");
             try (PrintWriter writer = new PrintWriter(new FileWriter(executionOutputFile, true))) {
