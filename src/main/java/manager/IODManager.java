@@ -101,6 +101,7 @@ public class IODManager implements Manager{
             File coverageOutputfile = new File(outputPath + "coverage.csv");
             try (PrintWriter writer = new PrintWriter(new FileWriter(coverageOutputfile, true))) {
                 writer.write("Number of IOD methods," + this.enters.size() + "\n");
+                writer.write("Number of IOD news," + this.news.size() + "\n");
             } catch (FileNotFoundException e) {
                 // Do something
             }
@@ -121,13 +122,20 @@ public class IODManager implements Manager{
             File executionOutputFile = new File(outputPath + "execution.csv");
             try (PrintWriter writer = new PrintWriter(new FileWriter(executionOutputFile, true))) {
                 int executionSumMethod=0;
-                for (Map.Entry<String, IODEnter> executioncountEntry : this.enters.entrySet()) {
-                    if (executioncountEntry.getValue().isExecuted) {
+                for (Map.Entry<String, IODEnter> executionCountEntry : this.enters.entrySet()) {
+                    if (executionCountEntry.getValue().isExecuted) {
                         executionSumMethod++;
+                    }
+                }
+                int executionSumNew=0;
+                for (Map.Entry<String, IODNew> executionCountNew : this.news.entrySet()) {
+                    if (executionCountNew.getValue().isExecuted) {
+                        executionSumNew++;
                     }
                 }
 
                 writer.write("Number of IOD methods," + executionSumMethod + "\n");
+                writer.write("Number of IOD news," + executionSumNew + "\n");
             } catch (FileNotFoundException e) {
                 // Do something
             }
