@@ -2,7 +2,10 @@ package manager;
 
 import ca.uqac.lif.cep.tmf.Fork;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 public class ManagerGroup implements Cloneable{
     public HMUManager managerHMU;

@@ -2,16 +2,15 @@ package staticanalyzis;
 
 import manager.ManagerGroup;
 import org.xmlpull.v1.XmlPullParserException;
-import ppg.code.Code;
 import soot.*;
-import soot.javaToJimple.AnonClassInitMethodSource;
-import soot.jimple.*;
 import soot.jimple.infoflow.android.manifest.ProcessManifest;
 import soot.options.Options;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.*;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map;
 
 public class SootAnalyzer {
 

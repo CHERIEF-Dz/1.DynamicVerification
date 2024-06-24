@@ -8,7 +8,6 @@ import soot.*;
 import soot.jimple.*;
 import soot.util.ArraySet;
 import structure.NLMRStructure;
-import structure.WakeLockStructure;
 import utils.CodeLocation;
 
 import java.util.*;

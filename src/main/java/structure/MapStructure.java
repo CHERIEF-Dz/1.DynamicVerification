@@ -1,6 +1,5 @@
 package structure;
 
-import structure.Structure;
 import utils.CodeLocation;
 
 public abstract class MapStructure implements Structure {

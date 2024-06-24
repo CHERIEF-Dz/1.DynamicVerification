@@ -1,5 +1,4 @@
 import ca.uqac.lif.cep.Connector;
-import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.functions.ApplyFunction;
 import ca.uqac.lif.cep.io.ReadLines;
 import ca.uqac.lif.cep.tmf.Filter;
@@ -7,18 +6,14 @@ import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.QueueSource;
 import ca.uqac.lif.cep.util.FindPattern;
 import ca.uqac.lif.cep.util.Strings;
+import manager.ManagerGroup;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.*;
 import org.xmlpull.v1.XmlPullParserException;
-import soot.SootMethod;
 import soot.jimple.infoflow.android.manifest.ProcessManifest;
 import staticanalyzis.SootAnalyzer;
-import manager.HMUManager;
-import manager.ManagerGroup;
 
 import java.io.*;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.List;
 
 import static ca.uqac.lif.cep.Connector.OUTPUT;

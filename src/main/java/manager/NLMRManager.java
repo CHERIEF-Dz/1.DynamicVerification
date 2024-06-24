@@ -12,7 +12,6 @@ import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Slice;
 import ca.uqac.lif.cep.util.*;
-import events.iod.IODEnter;
 import events.nlmr.NLMREnter;
 import events.nlmr.NLMRExit;
 import staticanalyzis.NLMRAnalyzer;
@@ -28,7 +27,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static ca.uqac.lif.cep.Connector.*;
-import static ca.uqac.lif.cep.Connector.connect;
 
 public class NLMRManager implements Manager{
     private HashMap<String, NLMREnter> enters; // Key = CodeLocation

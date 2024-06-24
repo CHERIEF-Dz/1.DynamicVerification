@@ -11,7 +11,6 @@ import ca.uqac.lif.cep.util.Booleans;
 import ca.uqac.lif.cep.util.Strings;
 
 import static ca.uqac.lif.cep.Connector.*;
-import static ca.uqac.lif.cep.Connector.RIGHT;
 
 public final class BeepBeepUtils {
 

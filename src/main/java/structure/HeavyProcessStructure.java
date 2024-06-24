@@ -1,6 +1,5 @@
 package structure;
 
-import structure.Structure;
 import utils.CodeLocation;
 
 public class HeavyProcessStructure implements Structure {

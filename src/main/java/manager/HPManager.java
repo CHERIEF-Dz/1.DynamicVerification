@@ -12,7 +12,6 @@ import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Slice;
 import ca.uqac.lif.cep.util.*;
-import events.hmu.HMUImplementation;
 import events.hp.HPEnter;
 import events.hp.HPExit;
 import structure.HeavyProcessStructure;
@@ -27,7 +26,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static ca.uqac.lif.cep.Connector.*;
-import static ca.uqac.lif.cep.Connector.connect;
 
 public class HPManager implements Manager{
 

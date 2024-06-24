@@ -10,7 +10,6 @@ import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Slice;
 import ca.uqac.lif.cep.util.*;
-import events.hp.HPEnter;
 import events.iod.IODEnter;
 import events.iod.IODExit;
 import events.iod.IODNew;
@@ -26,7 +25,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static ca.uqac.lif.cep.Connector.*;
-import static ca.uqac.lif.cep.Connector.connect;
 
 public class IODManager implements Manager{
     private HashMap<String, IODEnter> enters; // Key = CodeLocation
