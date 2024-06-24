@@ -1,6 +1,8 @@
 ## 1. Instrumentation of the application mobile
+```
 java -jar DynamicVerification.jar instrumentation -a G:/Sdk/platforms/ -o test app-debug.apk
- 
+ ```
+
 ## 2. Run the application
 ### 2.1. Sign the application
 jarsigner -keystore testkey.jks -storepass testtest test/app-debug.apk client
