@@ -1,0 +1,7 @@
+apk,package,file,method,average Memory released,maximum memory released
+app-debug.apk,cherief.houcine.myapplication,cherief.houcine.myapplication.Outils.EditActivity.java,<init>,0,0
+app-debug.apk,cherief.houcine.myapplication,cherief.houcine.myapplication.Vue.All.ConnecterActivity.java,<init>,0,0
+app-debug.apk,cherief.houcine.myapplication,cherief.houcine.myapplication.Vue.All.InscriptionActivity.java,<init>,0,0
+app-debug.apk,cherief.houcine.myapplication,cherief.houcine.myapplication.Vue.us__doctor_RDV.java,<init>,0,0
+app-debug.apk,cherief.houcine.myapplication,cherief.houcine.myapplication.Outils.MapsActivity.java,<init>,0,0
+app-debug.apk,cherief.houcine.myapplication,cherief.houcine.myapplication.Controlleur.MedecinDrawerActivityActivity.java,<init>,0,0
