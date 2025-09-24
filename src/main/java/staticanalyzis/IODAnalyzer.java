@@ -36,7 +36,6 @@ public class IODAnalyzer extends CodeSmellAnalyzer {
     public static void methodsToCheck(String name, String methodName, int lineNumber, ManagerGroup managerGroup, Body b, UnitPatchingChain units, boolean isInstrumenting) {
         checkIOD(name, methodName, "onDraw", lineNumber, managerGroup.managerIOD, b, b.getUnits(),isInstrumenting);
     }
-
     protected static void checkIOD(String name, String methodName, String methodNameNeeded, int lineNumber, IODManager manager, Body b, UnitPatchingChain units, boolean isInstrumenting) {
         if (checkMethodName(methodName, methodNameNeeded)) {
             String key=generateKey(name, methodName);

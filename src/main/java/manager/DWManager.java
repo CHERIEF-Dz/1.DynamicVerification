@@ -415,4 +415,18 @@ public class DWManager implements Manager, Cloneable {
         newManager.structures = (HashMap<String, WakeLockStructure>) this.structures.clone();
         return newManager;
     }
+
+    public void generateEventsCSV(PrintWriter writer) {
+            for (DWAcquire acquire : acquires.values()) {
+                String result= acquire.location.getFileName()+","+acquire.location.getMethodName()+","+acquire.location.getLine()+",dwacq";
+                writer.println(result);
+                System.out.println(result);
+            }
+
+            for (DWRelease release : releases.values()) {
+                String result= release.location.getFileName()+","+release.location.getMethodName()+","+release.location.getLine()+",dwrel";
+                writer.println(result);
+                System.out.println(result);
+            }
+    }
 }

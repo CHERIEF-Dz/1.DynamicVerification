@@ -358,4 +358,24 @@ public class HPManager implements Manager{
         newManager.structures = (HashMap<String, HeavyProcessStructure>) this.structures.clone();
         return newManager;
     }
+
+    public void generateEventsCSV(PrintWriter writer) {
+//            for (HPEnter enter : enters.values()) {
+//                String result= enter.location.getFileName()+","+enter.location.getMethodName()+","+enter.location.getLine()+",hpenter";
+//                writer.println(result);
+//                System.out.println(result);
+//            }
+//
+//            for (HPExit exit : exits.values()) {
+//                String result= exit.location.getFileName()+","+exit.location.getMethodName()+","+exit.location.getLine()+",hpexit";
+//                writer.println(result);
+//                System.out.println(result);
+//            }
+
+            for (HeavyProcessStructure structure : structures.values()) {
+                String result= structure.getLocation().getFileName()+","+structure.getLocation().getMethodName()+","+structure.getLocation().getLine()+",hp";
+                writer.println(result);
+                System.out.println(result);
+            }
+    }
 }

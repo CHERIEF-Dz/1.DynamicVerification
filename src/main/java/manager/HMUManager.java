@@ -522,4 +522,27 @@ public class HMUManager implements Manager{
         newManager.structures = (HashMap<String, MapStructure>) this.structures.clone();
         return newManager;
     }
+
+    public void generateEventsCSV(PrintWriter writer) {
+            for (HMUImplementation implementation : implementations.values()) {
+                String result= implementation.location.getFileName()+","+implementation.location.getMethodName()+","+implementation.location.getLine()+",hmuimpl";
+                writer.println(result);
+            }
+            for (HMUAddition addition : additions.values()) {
+                String result= addition.location.getFileName()+","+addition.location.getMethodName()+","+addition.location.getLine()+",hmuadd";
+                writer.println(result);
+            }
+            for (HMUDeletion deletion : deletions.values()) {
+                String result= deletion.location.getFileName()+","+deletion.location.getMethodName()+","+deletion.location.getLine()+",hmudel";
+                writer.println(result);
+            }
+            for (HMUClean clean : cleans.values()) {
+                String result= clean.location.getFileName()+","+clean.location.getMethodName()+","+clean.location.getLine()+",hmucln";
+                writer.println(result);
+            }
+            for (HMUAddAll addAll : addAlls.values()) {
+                String result= addAll.location.getFileName()+","+addAll.location.getMethodName()+","+addAll.location.getLine()+",hmuall";
+                writer.println(result);
+            }
+    }
 }

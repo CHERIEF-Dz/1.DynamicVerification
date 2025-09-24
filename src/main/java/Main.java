@@ -93,6 +93,8 @@ public class Main {
         ManagerGroup managerGroup = new ManagerGroup();
         SootAnalyzer test = new SootAnalyzer(platformPath, apkPath, outputPath);
         test.analyze(managerGroup, isInstrumenting);
+
+        managerGroup.generateEventsCSV(outputPath);
         return managerGroup;
     }
 

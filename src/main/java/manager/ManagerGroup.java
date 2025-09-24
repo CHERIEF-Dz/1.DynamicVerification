@@ -88,4 +88,18 @@ public class ManagerGroup implements Cloneable{
         return newManagerGroup;
     }
 
+    public void generateEventsCSV(String output) {
+        File csvOutputFileAll = new File(output+ "/results_instrumentating_all.csv");
+        try (PrintWriter writer = new PrintWriter(csvOutputFileAll)) {
+            writer.write("FileName,MethodName,Line,Event type\n");
+
+            this.managerDW.generateEventsCSV(writer);
+            this.managerHP.generateEventsCSV(writer);
+            this.managerHMU.generateEventsCSV(writer);
+            this.managerNLMR.generateEventsCSV(writer);
+            this.managerIOD.generateEventsCSV(writer);
+        } catch (FileNotFoundException e) {
+            // Do something
+        }
+    }
 }

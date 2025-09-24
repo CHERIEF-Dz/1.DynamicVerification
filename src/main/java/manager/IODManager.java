@@ -10,6 +10,8 @@ import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Slice;
 import ca.uqac.lif.cep.util.*;
+import events.hmu.HMUAddition;
+import events.hmu.HMUImplementation;
 import events.iod.IODEnter;
 import events.iod.IODExit;
 import events.iod.IODNew;
@@ -370,5 +372,20 @@ public class IODManager implements Manager{
         newManager.news = (HashMap<String, IODNew>) this.news.clone();
         newManager.structures = (HashMap<String, OnDrawStructure>) this.structures.clone();
         return newManager;
+    }
+
+    public void generateEventsCSV(PrintWriter writer) {
+        for (IODEnter enter : enters.values()) {
+            String result= enter.location.getFileName()+","+enter.location.getMethodName()+","+enter.location.getLine()+",iodenter";
+            writer.println(result);
+        }
+        for (IODExit exit : exits.values()) {
+            String result= exit.location.getFileName()+","+exit.location.getMethodName()+","+exit.location.getLine()+",iodexit";
+            writer.println(result);
+        }
+//        for (IODNew new_element : news.values()) {
+//            String result= new_element.location.getFileName()+","+new_element.location.getMethodName()+","+new_element.location.getLine()+",iodnew";
+//            writer.println(result);
+//        }
     }
 }

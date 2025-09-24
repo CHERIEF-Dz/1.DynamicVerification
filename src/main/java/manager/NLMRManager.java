@@ -20,6 +20,7 @@ import utils.BeepBeepUtils;
 import utils.CodeLocation;
 
 import java.io.*;
+import java.sql.DriverManager;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -298,5 +299,17 @@ public class NLMRManager implements Manager{
         newManager.structures = (HashMap<String, NLMRStructure>) this.structures.clone();
         return newManager;
 
+    }
+
+    public void generateEventsCSV(PrintWriter writer) {
+        for (NLMREnter enter : enters.values()) {
+            String result= enter.location.getFileName()+","+enter.location.getMethodName()+","+enter.location.getLine()+",nlmrenter";
+            writer.println(result);
+        }
+
+        for (NLMRExit exit : exits.values()) {
+            String result= exit.location.getFileName()+","+exit.location.getMethodName()+","+exit.location.getLine()+",nlmrexit";
+            writer.println(result);
+        }
     }
 }
